@@ -2276,6 +2276,7 @@ a {
   --gradient-accent: linear-gradient(135deg, #FF9E9E, #FFC4C4);
 }
 
+/* ─── Global ──────────────────────────────────────────────────────────────── */
 body {
   background-color: var(--color-bg) !important;
   color: var(--color-text) !important;
@@ -2287,41 +2288,62 @@ body {
   border-bottom: 3px solid var(--color-dark) !important;
 }
 
-/* Typography — only override on light sections, not inside dark/dark-card contexts */
 .brand-text { color: var(--color-dark) !important; }
 .hero-title  { color: var(--color-dark) !important; }
 
-/* Light-section headings only */
-:not(.timeline-section):not(.dark-section):not(.dark-card) > .section-title,
-:not(.timeline-section):not(.dark-section):not(.dark-card) > * > .section-title {
-  color: var(--color-dark) !important;
+/* countdown-badge in header */
+.countdown-badge {
+  color: var(--color-primary) !important;
+  background-color: rgba(45, 140, 255, 0.1) !important;
 }
-:not(.timeline-section):not(.dark-section):not(.dark-card) > .step-title,
-:not(.timeline-section):not(.dark-section):not(.dark-card) > * > .step-title,
-:not(.timeline-section):not(.dark-section):not(.dark-card) > * > * > .step-title {
+
+/* ─── Light sections — explicit IDs (ไม่ครอบ dark section) ─────────────────── */
+#sec-overview .section-title,
+#sec-eligible .section-title,
+#sec-howto .section-title,
+#sec-policy .section-title,
+#sec-results .section-title {
   color: var(--color-dark) !important;
 }
 
-/* Restore light text in dark sections */
-.timeline-section .section-title,
-.timeline-section .section-lead,
-.timeline-section .timeline-label,
-.dark-section .section-title,
-.dark-section .section-lead,
-.dark-card .card-title {
-  color: var(--text-light) !important;
-}
-
-/* Muted text contrast boost on light bg */
-.section-lead, .meta-label, .stat-label, .step-desc, .check-desc {
+#sec-overview .section-lead,
+#sec-eligible .section-lead,
+#sec-howto .section-lead,
+#sec-policy .section-lead,
+#sec-results .section-lead {
   color: #475569 !important;
 }
 
-/* Override สี accent ในบริบท light เท่านั้น */
-:not(.timeline-section):not(.dark-section) .text-red { color: var(--color-primary) !important; }
-:not(.timeline-section):not(.dark-section) .text-yellow { color: #16A34A !important; }
+/* text-red / text-yellow ใน light sections เท่านั้น */
+#sec-overview .text-red,
+#sec-eligible .text-red,
+#sec-howto .text-red,
+#sec-policy .text-red,
+#sec-results .text-red,
+.hero-section .text-red {
+  color: var(--color-primary) !important;
+}
 
-/* Cards — hard shadow vector art style */
+#sec-overview .text-yellow,
+#sec-eligible .text-yellow,
+#sec-howto .text-yellow,
+#sec-policy .text-yellow,
+#sec-results .text-yellow {
+  color: #16A34A !important;
+}
+
+/* ─── Dark sections — คงสีขาวไว้ ─────────────────────────────────────────── */
+.timeline-section .section-title,
+.timeline-section .section-lead,
+.timeline-section .timeline-label,
+.timeline-section .timeline-desc,
+.timeline-section .timeline-time,
+.dark-section .section-title,
+.dark-section .section-lead {
+  color: var(--text-light) !important;
+}
+
+/* ─── Cards — hard shadow vector art style ───────────────────────────────── */
 .meta-card, .stat-card, .step-card, .countdown-card, .doc-category-item {
   background: var(--color-card) !important;
   border: 3px solid var(--color-dark) !important;
@@ -2335,12 +2357,15 @@ body {
   box-shadow: 9px 9px 0px var(--color-primary) !important;
 }
 
-/* ข้อความใน meta-card ให้มองเห็นชัด */
-.meta-card .meta-label { color: #64748B !important; }
-.meta-card .meta-value { color: var(--color-dark) !important; }
-
+/* dark-card & red-card — ข้อความต้องเป็นขาว */
 .dark-card {
   background: var(--color-dark) !important;
+  color: #FFFFFF !important;
+}
+.dark-card .meta-label,
+.dark-card .meta-value,
+.dark-card .meta-sub,
+.dark-card .meta-unit {
   color: #FFFFFF !important;
 }
 
@@ -2349,25 +2374,40 @@ body {
   color: #FFFFFF !important;
   border-color: var(--color-dark) !important;
 }
-
-.stat-card.highlight-red { background: var(--color-accent) !important; }
-.stat-card.highlight-teal { background: var(--color-secondary) !important; }
-
-/* stat-card ข้อความ */
-.stat-card .stat-number { color: var(--color-dark) !important; }
-.stat-card .stat-label  { color: #475569 !important; }
-.stat-card.highlight-red .stat-number,
-.stat-card.highlight-red .stat-label,
-.stat-card.highlight-teal .stat-number,
-.stat-card.highlight-teal .stat-label {
-  color: var(--color-dark) !important;
+.red-card .meta-label,
+.red-card .meta-value,
+.red-card .meta-sub,
+.red-card .meta-unit {
+  color: #FFFFFF !important;
 }
 
-/* countdown-card ข้อความ */
+/* meta-card ปกติ (ไม่ใช่ dark/red) */
+.meta-card:not(.dark-card):not(.red-card) .meta-label { color: #64748B !important; }
+.meta-card:not(.dark-card):not(.red-card) .meta-value { color: var(--color-dark) !important; }
+.meta-card:not(.dark-card):not(.red-card) .meta-sub   { color: #64748B !important; }
+
+/* stat-card */
+.stat-card .stat-number { color: var(--color-dark) !important; }
+.stat-card .stat-label  { color: #475569 !important; }
+.stat-card.highlight-red  { background: var(--color-accent) !important; }
+.stat-card.highlight-teal { background: var(--color-secondary) !important; }
+.stat-card.highlight-red .stat-number,
+.stat-card.highlight-teal .stat-number { color: var(--color-dark) !important; }
+.stat-card.highlight-red .stat-label,
+.stat-card.highlight-teal .stat-label  { color: #1E293B !important; }
+
+/* step-card */
+#sec-howto .step-title { color: var(--color-dark) !important; }
+#sec-howto .step-desc  { color: #475569 !important; }
+#sec-howto .step-num   { color: var(--color-primary) !important; }
+
+/* countdown-card */
 .countdown-card .countdown-big-val   { color: var(--color-dark) !important; }
 .countdown-card .countdown-big-label { color: #475569 !important; }
+.countdown-card.highlight-red .countdown-big-val,
+.countdown-card.highlight-red .countdown-big-label { color: var(--color-dark) !important; }
 
-/* Buttons & Badges */
+/* ─── Buttons & Badges ───────────────────────────────────────────────────── */
 .badge-accent {
   background: var(--gradient-accent) !important;
   color: var(--color-dark) !important;
@@ -2397,12 +2437,13 @@ body {
   color: var(--color-dark) !important;
 }
 
-/* Timeline & Visuals */
+/* ─── Timeline visuals ───────────────────────────────────────────────────── */
 .timeline-dot { border: 3px solid rgba(255,255,255,0.4) !important; }
-.dot-red { background: var(--color-primary) !important; }
+.dot-red    { background: var(--color-primary) !important; }
 .dot-yellow { background: var(--color-accent) !important; }
-.dot-teal { background: var(--color-secondary) !important; }
+.dot-teal   { background: var(--color-secondary) !important; }
 
+/* ─── Ballot ─────────────────────────────────────────────────────────────── */
 .ballot-paper {
   background: #FFFFFF !important;
   border: 3px solid var(--color-dark) !important;
@@ -2416,13 +2457,7 @@ body {
 
 .warning-title { color: #DC2626 !important; }
 
-/* countdown-badge in header */
-.countdown-badge {
-  color: var(--color-primary) !important;
-  background-color: rgba(45, 140, 255, 0.1) !important;
-}
-
-/* Selection highlight update */
+/* ─── Selection ──────────────────────────────────────────────────────────── */
 ::selection {
   background-color: var(--color-primary);
   color: #fff;

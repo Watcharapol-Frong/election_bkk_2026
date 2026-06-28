@@ -1,0 +1,5 @@
+# Reference/research files — not served by the web app
+uploads/
+
+# Dev tooling
+.claude/

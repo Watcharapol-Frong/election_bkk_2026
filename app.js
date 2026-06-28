@@ -372,7 +372,7 @@ function renderCandidates(lang) {
         <span class="candidate-number-badge badge-${c.color}">${c.no}</span>
         <img
           class="candidate-photo"
-          src="candidates/no-${c.no}.jpg"
+          src="candidates/no-${c.no}.webp"
           alt="${name}"
           onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';"
         />

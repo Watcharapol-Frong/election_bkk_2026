@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html>
+<head>
+<style data-omelette-print-defaults>
+@media print {
+  @page { margin: 0.5in; }
+  h1, h2, h3, h4, h5, h6 { break-after: avoid; }
+  figure, table, pre, blockquote, img, svg, tr, [class~="card" i] { break-inside: avoid; }
+  img, svg { max-width: 100%; }
+  p { orphans: 3; widows: 3; }
+}
+</style>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anuphan:wght@400;500;600;700&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *{ box-sizing:border-box; }
+  html{ scroll-behavior:smooth; }
+  body{ margin:0; background:#F4EEE2; }
+  ::selection{ background:#C8102E; color:#fff; }
+</style>
+</helmet>
+
+<div style="background:#F4EEE2; color:#17171F; font-family:'IBM Plex Sans Thai',sans-serif; -webkit-font-smoothing:antialiased; line-height:1.6;">
+
+  <!-- STICKY HEADER (single unit: brand row + tab row) -->
+  <header style="position:sticky; top:0; z-index:50; background:rgba(244,238,226,0.92); backdrop-filter:blur(8px); border-bottom:1px solid #E0D8C8;">
+    <div style="display:flex; align-items:center; justify-content:space-between; gap:16px; padding:13px 24px;">
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="width:26px; height:26px; border:2.5px solid #17171F; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:16px; line-height:1; font-weight:700;">✕</div>
+        <span data-i18n="brand" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:15px; letter-spacing:.02em;">เลือกตั้งผู้ว่าฯ กทม. 2569</span>
+      </div>
+      <div style="display:flex; align-items:center; gap:14px;">
+        <span id="cdTimer" style="font-size:13px; font-weight:700; color:#C8102E; letter-spacing:.02em; font-variant-numeric:tabular-nums;">เหลืออีก …</span>
+        <button id="langToggleBtn" type="button" onClick="{{ toggleLang }}" style="cursor:pointer; border:1.5px solid #17171F; background:transparent; color:#17171F; border-radius:100px; padding:5px 13px; font-family:'Anuphan',sans-serif; font-size:12.5px; font-weight:700; letter-spacing:.04em;" style-hover="background:#17171F; color:#F4EEE2;">EN</button>
+      </div>
+    </div>
+    <nav id="sectionTabs" style="border-top:1px solid #E8E1D2; overflow-x:auto; -webkit-overflow-scrolling:touch;">
+      <div style="display:flex; gap:4px; max-width:1120px; margin:0 auto; padding:8px 16px; white-space:nowrap;">
+        <a href="#sec-overview" data-tab="sec-overview" data-i18n="tabOverview" style="flex:none; padding:7px 14px; border-radius:100px; font-size:13.5px; font-weight:600; color:#4A4A57; text-decoration:none; transition:background .15s,color .15s;" style-hover="background:#E8E1D2;">ภาพรวม</a>
+        <a href="#sec-timeline" data-tab="sec-timeline" data-i18n="tabTimeline" style="flex:none; padding:7px 14px; border-radius:100px; font-size:13.5px; font-weight:600; color:#4A4A57; text-decoration:none; transition:background .15s,color .15s;" style-hover="background:#E8E1D2;">ไทม์ไลน์</a>
+        <a href="#sec-eligible" data-tab="sec-eligible" data-i18n="tabEligible" style="flex:none; padding:7px 14px; border-radius:100px; font-size:13.5px; font-weight:600; color:#4A4A57; text-decoration:none; transition:background .15s,color .15s;" style-hover="background:#E8E1D2;">ผู้มีสิทธิ</a>
+        <a href="#sec-howto" data-tab="sec-howto" data-i18n="tabHowto" style="flex:none; padding:7px 14px; border-radius:100px; font-size:13.5px; font-weight:600; color:#4A4A57; text-decoration:none; transition:background .15s,color .15s;" style-hover="background:#E8E1D2;">วิธีลงคะแนน</a>
+        <a href="#sec-candidates" data-tab="sec-candidates" data-i18n="tabCandidates" style="flex:none; padding:7px 14px; border-radius:100px; font-size:13.5px; font-weight:600; color:#4A4A57; text-decoration:none; transition:background .15s,color .15s;" style-hover="background:#E8E1D2;">ผู้สมัคร</a>
+        <a href="#sec-policy" data-tab="sec-policy" data-i18n="tabPolicy" style="flex:none; padding:7px 14px; border-radius:100px; font-size:13.5px; font-weight:600; color:#4A4A57; text-decoration:none; transition:background .15s,color .15s;" style-hover="background:#E8E1D2;">นโยบาย</a>
+        <a href="#sec-results" data-tab="sec-results" data-i18n="tabResults" style="flex:none; padding:7px 14px; border-radius:100px; font-size:13.5px; font-weight:600; color:#4A4A57; text-decoration:none; transition:background .15s,color .15s;" style-hover="background:#E8E1D2;">นับคะแนน</a>
+        <a href="#sec-follow" data-tab="sec-follow" data-i18n="tabFollow" style="flex:none; padding:7px 14px; border-radius:100px; font-size:13.5px; font-weight:600; color:#4A4A57; text-decoration:none; transition:background .15s,color .15s;" style-hover="background:#E8E1D2;">ติดตามผล</a>
+      </div>
+    </nav>
+  </header>
+
+  <!-- HERO -->
+  <section style="max-width:1120px; margin:0 auto; padding:88px 24px 72px;">
+    <div style="display:inline-flex; align-items:center; gap:8px; padding:7px 14px; background:#17171F; color:#F4EEE2; border-radius:100px; font-size:12.5px; font-weight:600; letter-spacing:.14em;">
+      <span style="width:7px; height:7px; background:#C8102E; border-radius:50%;"></span>
+      <span data-i18n="kicker">ELECTION · เลือกตั้งท้องถิ่น</span>
+    </div>
+    <h1 style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:clamp(44px,8vw,108px); line-height:0.98; letter-spacing:-0.01em; margin:26px 0 0;">
+      <span data-i18n="heroL1">เลือกตั้งผู้ว่าราชการ</span><br><span style="color:#C8102E;" data-i18n="heroL2">กรุงเทพมหานคร</span>
+    </h1>
+    <div style="display:flex; flex-wrap:wrap; align-items:flex-end; gap:40px; margin-top:38px;">
+      <div style="flex:1 1 360px; min-width:280px;">
+        <p data-i18n="heroPara" style="font-size:19px; color:#3A3A45; max-width:560px; margin:0; text-wrap:pretty;">ในวันอาทิตย์ที่ 28 มิถุนายน 2569 ชาวกรุงเทพฯ กว่า 4.4 ล้านคนจะออกไปใช้สิทธิเลือกผู้นำของเมืองหลวงคนใหม่ คู่มือฉบับนี้สรุปทุกเรื่องที่ต้องรู้ ตั้งแต่การเตรียมตัว วิธีลงคะแนน ไปจนถึงผู้สมัครและนโยบาย</p>
+      </div>
+      <div style="display:flex; gap:14px;">
+        <div style="background:#17171F; color:#F4EEE2; padding:18px 22px; border-radius:14px; min-width:130px;">
+          <div data-i18n="dateLabel" style="font-size:12px; letter-spacing:.1em; opacity:.7; font-weight:600;">วันเลือกตั้ง</div>
+          <div style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:30px; line-height:1.1; margin-top:4px;">28<span data-i18n="dateUnit" style="font-size:16px; font-weight:500;"> มิ.ย.</span></div>
+          <div data-i18n="dateYear" style="font-size:13px; opacity:.7;">พ.ศ. 2569</div>
+        </div>
+        <div style="background:#C8102E; color:#fff; padding:18px 22px; border-radius:14px; min-width:130px;">
+          <div data-i18n="timeLabel" style="font-size:12px; letter-spacing:.1em; opacity:.85; font-weight:600;">เวลาลงคะแนน</div>
+          <div style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:30px; line-height:1.1; margin-top:4px;">08–17<span data-i18n="timeUnit" style="font-size:16px; font-weight:500;"> น.</span></div>
+          <div data-i18n="timeSub" style="font-size:13px; opacity:.85;">ณ หน่วยเลือกตั้ง</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SAMPLE NOTE -->
+  <sc-if value="{{ showSampleNote }}" hint-placeholder-val="{{ true }}">
+    <div style="max-width:1120px; margin:0 auto; padding:0 24px;">
+      <div style="display:flex; gap:12px; align-items:flex-start; background:#FBF7EE; border:1px solid #E0D8C8; border-left:4px solid #E2A03F; border-radius:10px; padding:14px 18px; font-size:13.5px; color:#5A5A66;">
+        <span style="font-weight:700; color:#E2A03F;">ℹ︎</span>
+        <span data-i18n="sampleNote" data-i18n-html>ตัวเลขสถิติอ้างอิงข้อมูลการเลือกตั้งผู้ว่าฯ กทม. โดยประมาณ ส่วนรายชื่อผู้สมัคร ผลคะแนน และนโยบายเป็น<strong>ข้อมูลตัวอย่างสำหรับออกแบบ</strong> โปรดแทนที่ด้วยข้อมูลจริงจาก กกต.</span>
+      </div>
+    </div>
+  </sc-if>
+
+  <!-- SECTION 01 — OVERVIEW STATS -->
+  <section id="sec-overview" style="scroll-margin-top:112px; max-width:1120px; margin:0 auto; padding:80px 24px 40px;">
+    <div style="display:flex; align-items:center; gap:14px; margin-bottom:30px;">
+      <span style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:15px; color:#C8102E;">01</span>
+      <h2 data-i18n="s01title" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:clamp(28px,4vw,42px); margin:0; letter-spacing:-0.01em;">ภาพรวมการเลือกตั้ง</h2>
+    </div>
+    <p data-i18n="s01para" style="font-size:18px; color:#3A3A45; max-width:680px; margin:0 0 38px;">ผู้ว่าราชการกรุงเทพมหานครมาจากการเลือกตั้งโดยตรงของประชาชน มีวาระดำรงตำแหน่ง 4 ปี ทำหน้าที่บริหารงบประมาณและบริการสาธารณะของเมืองหลวง</p>
+    <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:1px; background:#E0D8C8; border:1px solid #E0D8C8; border-radius:16px; overflow:hidden;">
+      <div style="background:#FBF7EE; padding:28px 24px;">
+        <div style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:46px; line-height:1; color:#17171F;">4.4<span data-i18n="stat1unit" style="font-size:20px;"> ล้าน</span></div>
+        <div data-i18n="stat1label" style="font-size:14px; color:#5A5A66; margin-top:8px;">ผู้มีสิทธิเลือกตั้งโดยประมาณ</div>
+      </div>
+      <div style="background:#FBF7EE; padding:28px 24px;">
+        <div style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:46px; line-height:1; color:#C8102E;">50</div>
+        <div data-i18n="stat2label" style="font-size:14px; color:#5A5A66; margin-top:8px;">เขตเลือกตั้งทั่ว กทม.</div>
+      </div>
+      <div style="background:#FBF7EE; padding:28px 24px;">
+        <div style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:46px; line-height:1; color:#17171F;">~6,800</div>
+        <div data-i18n="stat3label" style="font-size:14px; color:#5A5A66; margin-top:8px;">หน่วยเลือกตั้ง</div>
+      </div>
+      <div style="background:#FBF7EE; padding:28px 24px;">
+        <div style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:46px; line-height:1; color:#2A9D8F;">4<span data-i18n="stat4unit" style="font-size:20px;"> ปี</span></div>
+        <div data-i18n="stat4label" style="font-size:14px; color:#5A5A66; margin-top:8px;">วาระการดำรงตำแหน่ง</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 02 — TIMELINE OF THE DAY -->
+  <section id="sec-timeline" style="scroll-margin-top:104px; background:#17171F; color:#F4EEE2; margin-top:48px;">
+    <div style="max-width:1120px; margin:0 auto; padding:80px 24px;">
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
+        <span style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:15px; color:#E2A03F;">02</span>
+        <h2 data-i18n="s02title" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:clamp(28px,4vw,42px); margin:0; letter-spacing:-0.01em;">ไทม์ไลน์วันเลือกตั้ง</h2>
+      </div>
+      <p data-i18n="s02para" style="font-size:18px; color:#B9B4A8; max-width:620px; margin:0 0 48px;">สิ่งที่จะเกิดขึ้นในวันอาทิตย์ที่ 28 มิถุนายน 2569 ตั้งแต่เปิดหีบจนถึงรายงานผล</p>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(200px,1fr)); gap:0;">
+        <div style="position:relative; padding:0 20px 0 0;">
+          <div style="display:flex; align-items:center; gap:0;">
+            <span style="width:16px; height:16px; border-radius:50%; background:#E2A03F; flex:none;"></span>
+            <span style="flex:1; height:2px; background:#3A3A45;"></span>
+          </div>
+          <div style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:26px; margin-top:18px;">08:00</div>
+          <div data-i18n="t1label" style="font-size:14.5px; color:#B9B4A8; margin-top:4px;">เปิดหีบ เริ่มลงคะแนน</div>
+        </div>
+        <div style="position:relative; padding:0 20px 0 0;">
+          <div style="display:flex; align-items:center; gap:0;">
+            <span style="width:16px; height:16px; border-radius:50%; background:#F4EEE2; flex:none;"></span>
+            <span style="flex:1; height:2px; background:#3A3A45;"></span>
+          </div>
+          <div style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:26px; margin-top:18px;">17:00</div>
+          <div data-i18n="t2label" style="font-size:14.5px; color:#B9B4A8; margin-top:4px;">ปิดหีบ สิ้นสุดการลงคะแนน</div>
+        </div>
+        <div style="position:relative; padding:0 20px 0 0;">
+          <div style="display:flex; align-items:center; gap:0;">
+            <span style="width:16px; height:16px; border-radius:50%; background:#C8102E; flex:none;"></span>
+            <span style="flex:1; height:2px; background:#3A3A45;"></span>
+          </div>
+          <div style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:26px; margin-top:18px;">17:00+</div>
+          <div data-i18n="t3label" style="font-size:14.5px; color:#B9B4A8; margin-top:4px;">นับคะแนน ณ หน่วยเลือกตั้งทันที</div>
+        </div>
+        <div style="position:relative;">
+          <div style="display:flex; align-items:center; gap:0;">
+            <span style="width:16px; height:16px; border-radius:50%; background:#2A9D8F; flex:none;"></span>
+          </div>
+          <div data-i18n="t4time" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:26px; margin-top:18px;">ค่ำ</div>
+          <div data-i18n="t4label" style="font-size:14.5px; color:#B9B4A8; margin-top:4px;">รายงานผลอย่างไม่เป็นทางการ</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 03 — WHO CAN VOTE -->
+  <section id="sec-eligible" style="scroll-margin-top:104px; max-width:1120px; margin:0 auto; padding:80px 24px;">
+    <div style="display:flex; align-items:center; gap:14px; margin-bottom:30px;">
+      <span style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:15px; color:#C8102E;">03</span>
+      <h2 data-i18n="s03title" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:clamp(28px,4vw,42px); margin:0; letter-spacing:-0.01em;">ใครมีสิทธิเลือกตั้ง?</h2>
+    </div>
+    <div style="display:grid; grid-template-columns:1.1fr 0.9fr; gap:24px;">
+      <div style="display:flex; flex-direction:column; gap:14px;">
+        <div style="display:flex; gap:14px; align-items:flex-start; background:#FBF7EE; border:1px solid #E0D8C8; border-radius:14px; padding:20px 22px;">
+          <span style="font-family:'Anuphan',sans-serif; font-weight:700; color:#2A9D8F; font-size:22px;">✓</span>
+          <div><div data-i18n="e1t" style="font-weight:600; font-size:17px;">มีสัญชาติไทย</div><div data-i18n="e1d" style="font-size:14.5px; color:#5A5A66;">หรือแปลงสัญชาติมาแล้วไม่น้อยกว่า 5 ปี</div></div>
+        </div>
+        <div style="display:flex; gap:14px; align-items:flex-start; background:#FBF7EE; border:1px solid #E0D8C8; border-radius:14px; padding:20px 22px;">
+          <span style="font-family:'Anuphan',sans-serif; font-weight:700; color:#2A9D8F; font-size:22px;">✓</span>
+          <div><div data-i18n="e2t" style="font-weight:600; font-size:17px;">อายุไม่ต่ำกว่า 18 ปี</div><div data-i18n="e2d" style="font-size:14.5px; color:#5A5A66;">นับถึงวันเลือกตั้ง 28 มิถุนายน 2569</div></div>
+        </div>
+        <div style="display:flex; gap:14px; align-items:flex-start; background:#FBF7EE; border:1px solid #E0D8C8; border-radius:14px; padding:20px 22px;">
+          <span style="font-family:'Anuphan',sans-serif; font-weight:700; color:#2A9D8F; font-size:22px;">✓</span>
+          <div><div data-i18n="e3t" style="font-weight:600; font-size:17px;">มีชื่อในทะเบียนบ้าน กทม.</div><div data-i18n="e3d" style="font-size:14.5px; color:#5A5A66;">ติดต่อกันไม่น้อยกว่า 1 ปีก่อนวันเลือกตั้ง</div></div>
+        </div>
+      </div>
+      <div style="background:#C8102E; color:#fff; border-radius:14px; padding:26px 24px; display:flex; flex-direction:column; justify-content:center;">
+        <div data-i18n="docTitle" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:20px;">เอกสารที่ต้องเตรียม</div>
+        <p data-i18n="docPara" style="font-size:14.5px; opacity:.9; margin:10px 0 18px;">นำหลักฐานแสดงตนอย่างใดอย่างหนึ่งไปที่หน่วย</p>
+        <ul style="margin:0; padding-left:18px; font-size:15.5px; line-height:2;">
+          <li data-i18n="docLi1">บัตรประจำตัวประชาชน (แม้หมดอายุ)</li>
+          <li data-i18n="docLi2">บัตร/หลักฐานที่ราชการออกให้ พร้อมรูปถ่ายและเลขบัตร ปชช.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 04 — HOW TO VOTE -->
+  <section id="sec-howto" style="scroll-margin-top:104px; background:#FBF7EE; border-top:1px solid #E0D8C8; border-bottom:1px solid #E0D8C8;">
+    <div style="max-width:1120px; margin:0 auto; padding:80px 24px;">
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:30px;">
+        <span style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:15px; color:#C8102E;">04</span>
+        <h2 data-i18n="s04title" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:clamp(28px,4vw,42px); margin:0; letter-spacing:-0.01em;">วิธีลงคะแนน 4 ขั้นตอน</h2>
+      </div>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:18px;">
+        <div style="background:#F4EEE2; border:1px solid #E0D8C8; border-radius:14px; padding:24px;">
+          <div style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:40px; color:#C8102E; line-height:1;">1</div>
+          <div data-i18n="st1t" style="font-weight:600; font-size:17px; margin-top:12px;">ตรวจสอบรายชื่อ</div>
+          <div data-i18n="st1d" style="font-size:14px; color:#5A5A66; margin-top:6px;">ยื่นบัตรประชาชน แจ้งเจ้าหน้าที่เพื่อตรวจสอบรายชื่อและลงลายมือชื่อ</div>
+        </div>
+        <div style="background:#F4EEE2; border:1px solid #E0D8C8; border-radius:14px; padding:24px;">
+          <div style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:40px; color:#C8102E; line-height:1;">2</div>
+          <div data-i18n="st2t" style="font-weight:600; font-size:17px; margin-top:12px;">รับบัตรเลือกตั้ง</div>
+          <div data-i18n="st2d" style="font-size:14px; color:#5A5A66; margin-top:6px;">รับบัตรเลือกตั้งผู้ว่าฯ กทม. และตรวจดูความเรียบร้อยของบัตร</div>
+        </div>
+        <div style="background:#F4EEE2; border:1px solid #E0D8C8; border-radius:14px; padding:24px;">
+          <div style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:40px; color:#C8102E; line-height:1;">3</div>
+          <div data-i18n="st3t" style="font-weight:600; font-size:17px; margin-top:12px;">กากบาทในคูหา</div>
+          <div data-i18n="st3d" style="font-size:14px; color:#5A5A66; margin-top:6px;">เข้าคูหา ทำเครื่องหมาย ✕ ในช่องเดียวที่ต้องการ หรือเลือก “ไม่เลือกผู้ใด”</div>
+        </div>
+        <div style="background:#F4EEE2; border:1px solid #E0D8C8; border-radius:14px; padding:24px;">
+          <div style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:40px; color:#C8102E; line-height:1;">4</div>
+          <div data-i18n="st4t" style="font-weight:600; font-size:17px; margin-top:12px;">หย่อนบัตรลงหีบ</div>
+          <div data-i18n="st4d" style="font-size:14px; color:#5A5A66; margin-top:6px;">พับบัตรตามรอย แล้วหย่อนลงหีบบัตรเลือกตั้งด้วยตนเอง</div>
+        </div>
+      </div>
+
+      <!-- BALLOT VISUAL -->
+      <div style="margin-top:30px; display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:14px;">
+        <div style="background:#fff; border:2px solid #17171F; border-radius:12px; overflow:hidden;">
+          <div data-i18n="ballotHead" style="background:#17171F; color:#F4EEE2; padding:10px 16px; font-size:13px; font-weight:600; letter-spacing:.04em;">บัตรเลือกตั้งผู้ว่าฯ กทม.</div>
+          <div style="display:flex; align-items:center; gap:14px; padding:14px 16px; border-bottom:1px solid #E0D8C8;">
+            <span style="width:34px; height:34px; border:2px solid #17171F; border-radius:6px; flex:none;"></span>
+            <span data-i18n="ballotN1" style="font-weight:600;">เบอร์ 1</span>
+            <span data-i18n="ballotN1r" style="color:#9a9a9a; margin-left:auto; font-size:13px;">ผู้สมัคร</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:14px; padding:14px 16px;">
+            <span style="width:34px; height:34px; border:2.5px solid #C8102E; border-radius:6px; flex:none; display:flex; align-items:center; justify-content:center; font-size:24px; font-weight:700; color:#C8102E; line-height:1;">✕</span>
+            <span data-i18n="ballotN2" style="font-weight:600;">เบอร์ 2</span>
+            <span data-i18n="ballotN2r" style="color:#C8102E; margin-left:auto; font-size:13px; font-weight:600;">เลือก 1 เบอร์</span>
+          </div>
+        </div>
+        <div style="display:flex; flex-direction:column; justify-content:center; gap:8px; padding:6px 4px;">
+          <div data-i18n="ballotWarnTitle" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:18px;">กากบาทเพียง “1 ช่อง” เท่านั้น</div>
+          <div data-i18n="ballotWarnBody" data-i18n-html style="font-size:14.5px; color:#5A5A66;">ทำเครื่องหมายเกินหนึ่งช่อง ขีดฆ่า หรือเขียนข้อความอื่น จะถือเป็น <strong style="color:#C8102E;">บัตรเสีย</strong> และไม่ถูกนับคะแนน</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 05 — CANDIDATES -->
+  <section id="sec-candidates" style="scroll-margin-top:104px; background:#17171F; color:#F4EEE2;">
+    <div style="max-width:1120px; margin:0 auto; padding:80px 24px;">
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
+        <span style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:15px; color:#E2A03F;">05</span>
+        <h2 data-i18n="s06title" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:clamp(28px,4vw,42px); margin:0; letter-spacing:-0.01em;">ผู้สมัครและกลุ่มการเมือง</h2>
+      </div>
+      <p data-i18n="s06para" style="font-size:18px; color:#B9B4A8; max-width:620px; margin:0 0 42px;">รู้จักผู้สมัครชิงตำแหน่งผู้ว่าฯ กทม. (รายชื่อตัวอย่าง) พร้อมจุดยืนหลักของแต่ละคน</p>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:18px;">
+        <div style="background:#21212C; border-radius:16px; overflow:hidden; border-top:5px solid #2A9D8F;">
+          <div style="padding:24px;">
+            <div style="display:flex; align-items:center; gap:12px;"><span style="width:46px; height:46px; border-radius:50%; background:#2A9D8F; color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Anuphan',sans-serif; font-weight:700; font-size:22px;">1</span><div><div data-i18n="c1name" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:19px;">สมชาย ใจดี</div><div data-i18n="c1party" style="font-size:13px; color:#9a958a;">กลุ่มเมืองยั่งยืน</div></div></div>
+            <p data-i18n="c1desc" style="font-size:14px; color:#B9B4A8; margin:16px 0 0;">ชูนโยบายเมืองสีเขียวและขนส่งสาธารณะราคาเข้าถึงได้</p>
+          </div>
+        </div>
+        <div style="background:#21212C; border-radius:16px; overflow:hidden; border-top:5px solid #C8102E;">
+          <div style="padding:24px;">
+            <div style="display:flex; align-items:center; gap:12px;"><span style="width:46px; height:46px; border-radius:50%; background:#C8102E; color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Anuphan',sans-serif; font-weight:700; font-size:22px;">2</span><div><div data-i18n="c2name" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:19px;">สุนิสา ทองคำ</div><div data-i18n="c2party" style="font-size:13px; color:#9a958a;">พรรคพัฒนาเมือง</div></div></div>
+            <p data-i18n="c2desc" style="font-size:14px; color:#B9B4A8; margin:16px 0 0;">เน้นแก้น้ำท่วมและยกระดับเศรษฐกิจระดับย่าน</p>
+          </div>
+        </div>
+        <div style="background:#21212C; border-radius:16px; overflow:hidden; border-top:5px solid #E2A03F;">
+          <div style="padding:24px;">
+            <div style="display:flex; align-items:center; gap:12px;"><span style="width:46px; height:46px; border-radius:50%; background:#E2A03F; color:#17171F; display:flex; align-items:center; justify-content:center; font-family:'Anuphan',sans-serif; font-weight:700; font-size:22px;">3</span><div><div data-i18n="c3name" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:19px;">อิสระ มั่นคง</div><div data-i18n="c3party" style="font-size:13px; color:#9a958a;">ผู้สมัครอิสระ</div></div></div>
+            <p data-i18n="c3desc" style="font-size:14px; color:#B9B4A8; margin:16px 0 0;">โปร่งใส ตรวจสอบได้ ดันงบประมาณแบบมีส่วนร่วม</p>
+          </div>
+        </div>
+        <div style="background:#21212C; border-radius:16px; overflow:hidden; border-top:5px solid #2D5A7B;">
+          <div style="padding:24px;">
+            <div style="display:flex; align-items:center; gap:12px;"><span style="width:46px; height:46px; border-radius:50%; background:#2D5A7B; color:#fff; display:flex; align-items:center; justify-content:center; font-family:'Anuphan',sans-serif; font-weight:700; font-size:22px;">4</span><div><div data-i18n="c4name" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:19px;">วิชัย รุ่งเรือง</div><div data-i18n="c4party" style="font-size:13px; color:#9a958a;">กลุ่มกรุงเทพใหม่</div></div></div>
+            <p data-i18n="c4desc" style="font-size:14px; color:#B9B4A8; margin:16px 0 0;">ปั้นเมืองดิจิทัล บริการภาครัฐครบจบในแอปเดียว</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 06 — POLICY COMPARISON -->
+  <section id="sec-policy" style="scroll-margin-top:104px; max-width:1120px; margin:0 auto; padding:80px 24px;">
+    <div style="display:flex; align-items:center; gap:14px; margin-bottom:30px;">
+      <span style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:15px; color:#C8102E;">06</span>
+      <h2 data-i18n="s07title" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:clamp(28px,4vw,42px); margin:0; letter-spacing:-0.01em;">เปรียบเทียบนโยบายเด่น</h2>
+    </div>
+    <div style="border:1px solid #E0D8C8; border-radius:16px; overflow:hidden;">
+      <div style="display:grid; grid-template-columns:1.1fr 1fr 1fr 1fr 1fr; background:#17171F; color:#F4EEE2; font-size:13.5px; font-weight:600;">
+        <div data-i18n="ph0" style="padding:14px 18px;">ด้านนโยบาย</div>
+        <div data-i18n="ph1" style="padding:14px 14px; color:#2A9D8F;">เบอร์ 1</div>
+        <div data-i18n="ph2" style="padding:14px 14px; color:#ff6b6b;">เบอร์ 2</div>
+        <div data-i18n="ph3" style="padding:14px 14px; color:#E2A03F;">เบอร์ 3</div>
+        <div data-i18n="ph4" style="padding:14px 14px; color:#7ba6c9;">เบอร์ 4</div>
+      </div>
+      <div style="display:grid; grid-template-columns:1.1fr 1fr 1fr 1fr 1fr; background:#FBF7EE; border-bottom:1px solid #E0D8C8; font-size:14px;">
+        <div data-i18n="r1label" style="padding:16px 18px; font-weight:600;">🚇 คมนาคม</div>
+        <div data-i18n="r1c1" style="padding:16px 14px; color:#4A4A57;">ตั๋วร่ว​ม 20 บาทตลอดสาย</div>
+        <div data-i18n="r1c2" style="padding:16px 14px; color:#4A4A57;">เพิ่มรถเมล์ไฟฟ้า 1,000 คัน</div>
+        <div data-i18n="r1c3" style="padding:16px 14px; color:#4A4A57;">ปรับสัญญาณไฟอัจฉริยะ</div>
+        <div data-i18n="r1c4" style="padding:16px 14px; color:#4A4A57;">แอปเดียวจ่ายทุกระบบ</div>
+      </div>
+      <div style="display:grid; grid-template-columns:1.1fr 1fr 1fr 1fr 1fr; background:#F4EEE2; border-bottom:1px solid #E0D8C8; font-size:14px;">
+        <div data-i18n="r2label" style="padding:16px 18px; font-weight:600;">🌧️ น้ำท่วม</div>
+        <div data-i18n="r2c1" style="padding:16px 14px; color:#4A4A57;">เพิ่มพื้นที่รับน้ำสีเขียว</div>
+        <div data-i18n="r2c2" style="padding:16px 14px; color:#4A4A57;">ลอกท่อ-อุโมงค์ยักษ์</div>
+        <div data-i18n="r2c3" style="padding:16px 14px; color:#4A4A57;">เซ็นเซอร์เตือนน้ำเรียลไทม์</div>
+        <div data-i18n="r2c4" style="padding:16px 14px; color:#4A4A57;">แผนที่จุดเสี่ยงออนไลน์</div>
+      </div>
+      <div style="display:grid; grid-template-columns:1.1fr 1fr 1fr 1fr 1fr; background:#FBF7EE; border-bottom:1px solid #E0D8C8; font-size:14px;">
+        <div data-i18n="r3label" style="padding:16px 18px; font-weight:600;">🌳 สิ่งแวดล้อม</div>
+        <div data-i18n="r3c1" style="padding:16px 14px; color:#4A4A57;">สวน 15 นาที ทุกเขต</div>
+        <div data-i18n="r3c2" style="padding:16px 14px; color:#4A4A57;">ปลูกต้นไม้ 1 ล้านต้น</div>
+        <div data-i18n="r3c3" style="padding:16px 14px; color:#4A4A57;">ลดฝุ่น PM2.5 เชิงรุก</div>
+        <div data-i18n="r3c4" style="padding:16px 14px; color:#4A4A57;">คัดแยกขยะอัจฉริยะ</div>
+      </div>
+      <div style="display:grid; grid-template-columns:1.1fr 1fr 1fr 1fr 1fr; background:#F4EEE2; font-size:14px;">
+        <div data-i18n="r4label" style="padding:16px 18px; font-weight:600;">💼 เศรษฐกิจ</div>
+        <div data-i18n="r4c1" style="padding:16px 14px; color:#4A4A57;">ตลาดนัดชุมชนทุกเขต</div>
+        <div data-i18n="r4c2" style="padding:16px 14px; color:#4A4A57;">กองทุนร้านค้ารายย่อย</div>
+        <div data-i18n="r4c3" style="padding:16px 14px; color:#4A4A57;">ลดขั้นตอนขออนุญาต</div>
+        <div data-i18n="r4c4" style="padding:16px 14px; color:#4A4A57;">ศูนย์บริการดิจิทัลครบวงจร</div>
+      </div>
+    </div>
+    <p data-i18n="policyNote" style="font-size:13px; color:#9a9a9a; margin-top:14px;">* ตารางนโยบายเป็นข้อมูลตัวอย่างเพื่อการออกแบบ</p>
+  </section>
+
+  <!-- SECTION 07 — RESULTS / COUNTING -->
+  <section id="sec-results" style="scroll-margin-top:104px; max-width:1120px; margin:0 auto; padding:80px 24px;">
+    <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
+      <span style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:15px; color:#C8102E;">07</span>
+      <h2 data-i18n="s05title" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:clamp(28px,4vw,42px); margin:0; letter-spacing:-0.01em;">การนับคะแนน &amp; แสดงผล</h2>
+    </div>
+    <p data-i18n="s05para" style="font-size:18px; color:#3A3A45; max-width:680px; margin:0 0 36px;">เมื่อปิดหีบเวลา 17:00 น. เจ้าหน้าที่จะนับคะแนนเปิดเผย ณ หน่วยเลือกตั้งทันที แล้วรายงานผลรวมระดับเขตและทั้ง กทม. ตัวอย่างผลคะแนนแสดงดังนี้</p>
+
+    <div style="background:#FBF7EE; border:1px solid #E0D8C8; border-radius:16px; padding:30px 28px;">
+      <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:24px;">
+        <div data-i18n="resHead" style="font-weight:600; font-size:15px; color:#5A5A66;">ผลคะแนน (ตัวอย่าง) · นับแล้ว 100%</div>
+        <div data-i18n="resUnit" style="font-size:13px; color:#9a9a9a;">หน่วย: % ของผู้มาใช้สิทธิ</div>
+      </div>
+
+      <div style="display:flex; flex-direction:column; gap:22px;">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px;">
+            <span style="font-weight:600; font-size:16px;"><span data-i18n="b1num" style="color:#2A9D8F; font-weight:700;">เบอร์ 1</span><span data-i18n="b1name"> · สมชาย ใจดี</span></span>
+            <span style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:20px; color:#2A9D8F;">38.4%</span>
+          </div>
+          <div style="height:18px; background:#EAE3D4; border-radius:100px; overflow:hidden;"><div style="width:38.4%; height:100%; background:#2A9D8F;"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px;">
+            <span style="font-weight:600; font-size:16px;"><span data-i18n="b2num" style="color:#C8102E; font-weight:700;">เบอร์ 2</span><span data-i18n="b2name"> · สุนิสา ทองคำ</span></span>
+            <span style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:20px; color:#C8102E;">29.1%</span>
+          </div>
+          <div style="height:18px; background:#EAE3D4; border-radius:100px; overflow:hidden;"><div style="width:29.1%; height:100%; background:#C8102E;"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px;">
+            <span style="font-weight:600; font-size:16px;"><span data-i18n="b3num" style="color:#E2A03F; font-weight:700;">เบอร์ 3</span><span data-i18n="b3name"> · อิสระ มั่นคง</span></span>
+            <span style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:20px; color:#E2A03F;">19.7%</span>
+          </div>
+          <div style="height:18px; background:#EAE3D4; border-radius:100px; overflow:hidden;"><div style="width:19.7%; height:100%; background:#E2A03F;"></div></div>
+        </div>
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:baseline; margin-bottom:7px;">
+            <span style="font-weight:600; font-size:16px;"><span data-i18n="b4num" style="color:#2D5A7B; font-weight:700;">เบอร์ 4</span><span data-i18n="b4name"> · วิชัย รุ่งเรือง</span></span>
+            <span style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:20px; color:#2D5A7B;">12.8%</span>
+          </div>
+          <div style="height:18px; background:#EAE3D4; border-radius:100px; overflow:hidden;"><div style="width:12.8%; height:100%; background:#2D5A7B;"></div></div>
+        </div>
+      </div>
+
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:1px; background:#E0D8C8; border:1px solid #E0D8C8; border-radius:12px; overflow:hidden; margin-top:30px;">
+        <div style="background:#F4EEE2; padding:18px 20px;"><div style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:30px;">62.3%</div><div data-i18n="statTurnoutLabel" style="font-size:13px; color:#5A5A66; margin-top:2px;">อัตราผู้มาใช้สิทธิ</div></div>
+        <div style="background:#F4EEE2; padding:18px 20px;"><div data-i18n="statVotersNum" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:30px;">~2.7 ล้าน</div><div data-i18n="statVotersLabel" style="font-size:13px; color:#5A5A66; margin-top:2px;">จำนวนผู้มาใช้สิทธิ</div></div>
+        <div style="background:#F4EEE2; padding:18px 20px;"><div style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:30px;">2.4%</div><div data-i18n="statSpoiledLabel" style="font-size:13px; color:#5A5A66; margin-top:2px;">บัตรเสีย</div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 08 — FOLLOW RESULTS -->
+  <section id="sec-follow" style="scroll-margin-top:104px; background:#C8102E; color:#fff;">
+    <div style="max-width:1120px; margin:0 auto; padding:74px 24px;">
+      <div style="display:flex; align-items:center; gap:14px; margin-bottom:14px;">
+        <span style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:15px; opacity:.8;">08</span>
+        <h2 data-i18n="s08title" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:clamp(28px,4vw,42px); margin:0; letter-spacing:-0.01em;">ติดตามผลและเตรียมตัว</h2>
+      </div>
+      <p data-i18n="s08para" style="font-size:18px; opacity:.92; max-width:620px; margin:0 0 38px;">ก่อนถึงวันที่ 28 มิถุนายน 2569 อย่าลืมตรวจสอบสิทธิและหน่วยเลือกตั้งของคุณล่วงหน้า</p>
+      <div style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:16px;">
+        <div style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); border-radius:14px; padding:22px;">
+          <div data-i18n="f1t" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:18px;">ตรวจสอบสิทธิ</div>
+          <div data-i18n="f1d" style="font-size:14.5px; opacity:.9; margin-top:6px;">เช็กรายชื่อและหน่วยเลือกตั้งผ่านแอป/เว็บไซต์ของ กกต. และ กทม.</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); border-radius:14px; padding:22px;">
+          <div data-i18n="f2t" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:18px;">เลือกตั้งล่วงหน้า</div>
+          <div data-i18n="f2d" style="font-size:14.5px; opacity:.9; margin-top:6px;">หากไม่สะดวกวันจริง ตรวจสอบเงื่อนไขและลงทะเบียนตามกำหนด</div>
+        </div>
+        <div style="background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); border-radius:14px; padding:22px;">
+          <div data-i18n="f3t" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:18px;">รายงานผลสด</div>
+          <div data-i18n="f3d" style="font-size:14.5px; opacity:.9; margin-top:6px;">ติดตามผลคะแนนอย่างไม่เป็นทางการในค่ำวันเลือกตั้งผ่านสื่อหลัก</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FOOTER -->
+  <footer style="max-width:1120px; margin:0 auto; padding:48px 24px 64px;">
+    <div style="display:flex; flex-wrap:wrap; gap:16px; justify-content:space-between; align-items:center; border-top:1px solid #E0D8C8; padding-top:26px;">
+      <div style="display:flex; align-items:center; gap:10px;">
+        <div style="width:24px; height:24px; border:2.5px solid #17171F; border-radius:5px; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700;">✕</div>
+        <span data-i18n="footBrand" style="font-family:'Anuphan',sans-serif; font-weight:700; font-size:14px;">เลือกตั้งผู้ว่าฯ กทม. · 28 มิถุนายน 2569</span>
+      </div>
+      <div data-i18n="footDisc" style="font-size:12.5px; color:#9a9a9a; max-width:520px; text-align:right;">อินโฟกราฟิกเพื่อการศึกษา · สถิติอ้างอิงโดยประมาณจากการเลือกตั้งผู้ว่าฯ กทม. · รายชื่อผู้สมัคร ผลคะแนน และนโยบายเป็นข้อมูลตัวอย่าง โปรดยึดข้อมูลจริงจาก กกต. เป็นหลัก</div>
+    </div>
+  </footer>
+
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props="{&quot;$preview&quot;:{&quot;width&quot;:1120,&quot;height&quot;:900},&quot;showSampleNote&quot;:{&quot;editor&quot;:&quot;boolean&quot;,&quot;default&quot;:true,&quot;tsType&quot;:&quot;boolean&quot;,&quot;section&quot;:&quot;เนื้อหา&quot;}}">
+class Component extends DCLogic {
+  renderVals() {
+    return {
+      showSampleNote: this.props.showSampleNote ?? true,
+      toggleLang: () => this.toggleLang(),
+    };
+  }
+  componentDidMount() {
+    this.lang = 'th';
+    this._orig = new WeakMap();
+    this.target = new Date('2026-06-28T08:00:00+07:00').getTime();
+    this.renderCountdown();
+    this._cd = setInterval(() => this.renderCountdown(), 1000);
+    this.setupScrollSpy();
+  }
+  componentWillUnmount() {
+    if (this._cd) clearInterval(this._cd);
+    if (this._spy) document.removeEventListener('scroll', this._spy);
+  }
+  setupScrollSpy() {
+    const ids = ['sec-overview','sec-timeline','sec-eligible','sec-howto','sec-candidates','sec-policy','sec-results','sec-follow'];
+    const setActive = (id) => {
+      if (id === this._activeTab) return;
+      this._activeTab = id;
+      document.querySelectorAll('#sectionTabs a[data-tab]').forEach((a) => {
+        const on = a.getAttribute('data-tab') === id;
+        a.style.background = on ? '#17171F' : 'transparent';
+        a.style.color = on ? '#F4EEE2' : '#4A4A57';
+        if (on) {
+          const nav = document.getElementById('sectionTabs');
+          if (nav) {
+            const al = a.offsetLeft, ar = al + a.offsetWidth;
+            if (al < nav.scrollLeft || ar > nav.scrollLeft + nav.clientWidth) {
+              nav.scrollTo({ left: al - 16, behavior: 'smooth' });
+            }
+          }
+        }
+      });
+    };
+    const onScroll = () => {
+      const line = 130; // just below the sticky header
+      let current = ids[0];
+      for (const id of ids) {
+        const el = document.getElementById(id);
+        if (el && el.getBoundingClientRect().top <= line) current = id;
+      }
+      setActive(current);
+    };
+    this._spy = onScroll;
+    document.addEventListener('scroll', onScroll, { passive: true });
+    onScroll();
+  }
+  componentDidUpdate() {
+    if (this.lang === 'en') this.applyLang('en');
+    this.renderCountdown();
+  }
+  applyLang(lang) {
+    this.lang = lang;
+    const EN = Component.EN;
+    document.querySelectorAll('[data-i18n]').forEach((el) => {
+      const html = el.hasAttribute('data-i18n-html');
+      if (!this._orig.has(el)) this._orig.set(el, html ? el.innerHTML : el.textContent);
+      const key = el.getAttribute('data-i18n');
+      const en = EN[key];
+      const val = (lang === 'en' && en != null) ? en : this._orig.get(el);
+      if (html) el.innerHTML = val; else el.textContent = val;
+    });
+    const btn = document.getElementById('langToggleBtn');
+    if (btn) btn.textContent = lang === 'en' ? 'ไทย' : 'EN';
+  }
+  toggleLang() {
+    this.applyLang(this.lang === 'en' ? 'th' : 'en');
+    this.renderCountdown();
+  }
+  renderCountdown() {
+    const el = document.getElementById('cdTimer');
+    if (!el) return;
+    const en = this.lang === 'en';
+    let diff = this.target - Date.now();
+    if (diff <= 0) { el.textContent = en ? 'Polls are open' : 'เปิดให้ลงคะแนนแล้ว'; return; }
+    const d = Math.floor(diff / 86400000); diff -= d * 86400000;
+    const h = Math.floor(diff / 3600000); diff -= h * 3600000;
+    const m = Math.floor(diff / 60000); diff -= m * 60000;
+    const s = Math.floor(diff / 1000);
+    const p = (n) => String(n).padStart(2, '0');
+    el.textContent = en
+      ? `${d}d ${p(h)}:${p(m)}:${p(s)} left`
+      : `เหลืออีก ${d} วัน ${p(h)}:${p(m)}:${p(s)}`;
+  }
+}
+Component.EN = {
+  brand: 'BKK Governor Election 2026',
+  tabOverview: 'Overview', tabTimeline: 'Timeline', tabEligible: 'Eligibility',
+  tabHowto: 'How to vote', tabCandidates: 'Candidates', tabPolicy: 'Policies',
+  tabResults: 'Results', tabFollow: 'Follow',
+  kicker: 'ELECTION · LOCAL VOTE',
+  heroL1: 'Governor Election', heroL2: 'of Bangkok',
+  heroPara: "On Sunday 28 June 2026, over 4.4 million Bangkokians will head to the polls to choose the capital's new leader. This guide covers everything you need to know — from preparation and how to vote, to the candidates and their policies.",
+  dateLabel: 'Election day', dateUnit: ' Jun', dateYear: 'B.E. 2569',
+  timeLabel: 'Voting hours', timeUnit: ' hrs', timeSub: 'at polling stations',
+  sampleNote: 'Statistics are approximate, based on past Bangkok governor elections. Candidate names, results and policies are <strong>sample data for design</strong> — please replace with official data from the EC.',
+  s01title: 'Election Overview',
+  s01para: "The Governor of Bangkok is directly elected by the people for a four-year term, managing the capital's budget and public services.",
+  stat1unit: ' M', stat1label: 'Eligible voters (approx.)',
+  stat2label: 'Districts across Bangkok', stat3label: 'Polling stations',
+  stat4unit: ' yrs', stat4label: 'Term length',
+  s02title: 'Election Day Timeline',
+  s02para: 'What happens on Sunday 28 June 2026, from opening the ballot boxes to reporting results.',
+  t1label: 'Polls open, voting begins',
+  t2label: 'Polls close, voting ends',
+  t3label: 'Counting begins at each station',
+  t4time: 'Evening', t4label: 'Unofficial results reported',
+  s03title: 'Who Can Vote?',
+  e1t: 'Thai nationality', e1d: 'Or naturalized for at least 5 years',
+  e2t: 'At least 18 years old', e2d: 'Counting up to election day, 28 June 2026',
+  e3t: 'Registered in a Bangkok household', e3d: 'For at least 1 continuous year before the vote',
+  docTitle: 'Documents to bring',
+  docPara: 'Bring one form of valid photo ID to your station',
+  docLi1: 'National ID card (even if expired)',
+  docLi2: 'Government-issued ID with photo and ID number',
+  s04title: 'How to Vote — 4 Steps',
+  st1t: 'Check the roll', st1d: 'Show your ID; staff verify your name and you sign in',
+  st2t: 'Receive ballot', st2d: 'Take the Bangkok governor ballot and check it is in order',
+  st3t: 'Mark in the booth', st3d: 'Mark ✕ in a single box, or choose "None of the above"',
+  st4t: 'Drop in the box', st4d: 'Fold along the line and drop it into the ballot box yourself',
+  ballotHead: 'Bangkok Governor Ballot',
+  ballotN1: 'No. 1', ballotN1r: 'Candidate',
+  ballotN2: 'No. 2', ballotN2r: 'Pick one',
+  ballotWarnTitle: 'Mark only "one" box',
+  ballotWarnBody: 'Marking more than one box, crossing out, or writing anything else makes it a <strong style="color:#C8102E;">spoiled ballot</strong> that will not be counted.',
+  s06title: 'Candidates & Political Groups',
+  s06para: "Meet the candidates for Bangkok governor (sample list) and each one's core stance.",
+  c1name: 'Somchai Jaidee', c1party: 'Sustainable City Group', c1desc: 'Champions a green city and affordable public transport',
+  c2name: 'Sunisa Thongkham', c2party: 'City Development Party', c2desc: 'Focuses on flood fixes and neighborhood economies',
+  c3name: 'Itsara Mankong', c3party: 'Independent', c3desc: 'Transparent, accountable, participatory budgeting',
+  c4name: 'Wichai Rungrueang', c4party: 'New Bangkok Group', c4desc: 'Builds a digital city — public services in one app',
+  s07title: 'Compare Key Policies',
+  ph0: 'Policy area', ph1: 'No. 1', ph2: 'No. 2', ph3: 'No. 3', ph4: 'No. 4',
+  r1label: '🚇 Transport', r1c1: 'Flat 20-baht fare', r1c2: '1,000 more e-buses', r1c3: 'Smart traffic signals', r1c4: 'One app, all fares',
+  r2label: '🌧️ Flooding', r2c1: 'More green retention areas', r2c2: 'Dredge drains & mega-tunnels', r2c3: 'Real-time flood sensors', r2c4: 'Online risk maps',
+  r3label: '🌳 Environment', r3c1: '15-min park in every district', r3c2: 'Plant 1 million trees', r3c3: 'Proactive PM2.5 cuts', r3c4: 'Smart waste sorting',
+  r4label: '💼 Economy', r4c1: 'Community markets everywhere', r4c2: 'Micro-vendor fund', r4c3: 'Fewer permit steps', r4c4: 'One-stop digital services',
+  policyNote: '* Policy table is sample data for design purposes',
+  s05title: 'Counting & Results',
+  s05para: 'When polls close at 17:00, officials count openly at each station, then report district and citywide totals. A sample result is shown below.',
+  resHead: 'Results (sample) · 100% counted', resUnit: 'Unit: % of votes cast',
+  b1num: 'No. 1', b1name: ' · Somchai Jaidee',
+  b2num: 'No. 2', b2name: ' · Sunisa Thongkham',
+  b3num: 'No. 3', b3name: ' · Itsara Mankong',
+  b4num: 'No. 4', b4name: ' · Wichai Rungrueang',
+  statTurnoutLabel: 'Turnout rate',
+  statVotersNum: '~2.7 M', statVotersLabel: 'Votes cast',
+  statSpoiledLabel: 'Spoiled ballots',
+  s08title: 'Follow & Prepare',
+  s08para: "Before 28 June 2026, don't forget to check your eligibility and polling station in advance.",
+  f1t: 'Check eligibility', f1d: 'Check your name and station via the EC and Bangkok apps/websites',
+  f2t: 'Advance voting', f2d: 'If unavailable on the day, check the rules and register on time',
+  f3t: 'Live results', f3d: 'Follow unofficial results on election night via major media',
+  footBrand: 'BKK Governor Election · 28 June 2026',
+  footDisc: 'Educational infographic · Statistics approximate from past Bangkok governor elections · Candidate names, results and policies are sample data; rely on official EC data.',
+};
+</script>
+<script>
+(async () => {
+  if (!document.title || !document.title.trim()) document.title = "Election BKK 2569";
+  // Prepend so page-supplied @page / break rules (deck-stage's margin:0,
+  // author CSS) keep source-order precedence over the baseline.
+  const baseCss = document.createElement('style');
+  baseCss.textContent = "@media print {\n  figure, table { break-inside: avoid; }\n  *, *::before, *::after {\n    print-color-adjust: exact; -webkit-print-color-adjust: exact;\n    backdrop-filter: none !important; -webkit-backdrop-filter: none !important;\n    animation-delay: -99s !important; animation-duration: .001s !important;\n    animation-iteration-count: 1 !important; animation-fill-mode: both !important;\n    animation-play-state: running !important; transition-duration: 0s !important;\n  }\n}";
+  document.head.prepend(baseCss);
+  if (document.readyState === 'loading') {
+    await new Promise((r) => document.addEventListener('DOMContentLoaded', r, { once: true }));
+  }
+  let ds = document.querySelector('deck-stage');
+  // whenDefined never resolves when nothing registers the element, so only
+  // await it when a <deck-stage> tag exists (and race a timeout regardless).
+  if (ds && !customElements.get('deck-stage')) {
+    try {
+      await Promise.race([
+        customElements.whenDefined('deck-stage'),
+        new Promise((r) => setTimeout(r, 3000)),
+      ]);
+    } catch (e) {}
+    ds = document.querySelector('deck-stage');
+  }
+  // dc-runtime assigns window.DCLogic at init and mounts into #dc-root on
+  // DOMContentLoaded; settle on that subtree so React has rendered before
+  // print(). Non-DC pages fall through to weighing body.
+  const isDc = !ds && 'DCLogic' in window;
+  const settleRoot = ds || (isDc ? document.getElementById('dc-root') : null) || document.body;
+  if (settleRoot) {
+    // Weigh only content children — skip script/style/template so inline
+    // Babel/CSS doesn't register as stable "content" before the framework
+    // has mounted anything.
+    const MEDIA = 'img,svg,canvas,video,picture,iframe,embed,object';
+    const weigh = () => {
+      let text = 0, media = 0;
+      for (const c of settleRoot.children) {
+        const t = c.tagName;
+        if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+        text += (c.textContent || '').trim().length;
+        media += c.querySelectorAll(MEDIA).length + (c.matches(MEDIA) ? 1 : 0);
+      }
+      return text + media * 100;
+    };
+    // "Non-zero and stable" alone is not sufficient to mean rendered: generic
+    // body can carry a static shell while async main content is pending, and
+    // #dc-root can carry the root DC's static text while child refs are still
+    // .sc-placeholder boxes. Gate generic on readyState 'complete', and never
+    // accept stability while a dc-runtime placeholder is present.
+    const isGeneric = settleRoot === document.body;
+    const deadline = Date.now() + 15000;
+    let last = -1, stable = 0;
+    while (Date.now() < deadline) {
+      const n = weigh();
+      const ready =
+        (!isGeneric || document.readyState === 'complete') &&
+        !settleRoot.querySelector('.sc-placeholder');
+      if (n > 0 && n === last && ready) { if (++stable >= 2) break; } else { stable = 0; }
+      last = n;
+      await new Promise((r) => setTimeout(r, 250));
+    }
+  }
+  // Project support.js may predate runtime default-seeding; push via bridge.
+  if (isDc && window.__dcSetProps && window.__dcRootName) {
+    try {
+      const dpEl = document.querySelector('script[data-dc-script]');
+      const meta = JSON.parse((dpEl && dpEl.getAttribute('data-props')) || '{}');
+      const bag = {};
+      for (const k in meta)
+        if (k[0] !== '$' && meta[k] && meta[k].default !== undefined)
+          bag[k] = meta[k].default;
+      if (Object.keys(bag).length) {
+        window.__dcSetProps(window.__dcRootName(), bag);
+        await new Promise((r) => setTimeout(r, 50));
+      }
+    } catch (e) {}
+  }
+  // Reveal content gated on scroll or visibility before printing. Lazy <img>,
+  // IntersectionObserver fade-ins, and collapsed <details> don't render while
+  // off-screen, so a long page would print with them blank or closed. Open
+  // every <details>, force native-lazy images eager, and scroll the document
+  // through its full height to trip lazy-load + IO; then wait (bounded) for the
+  // newly-triggered images. Inert for deck-stage (slides aren't scroll-gated).
+  try {
+    for (const d of document.querySelectorAll('details')) d.open = true;
+    for (const img of document.querySelectorAll('img[loading="lazy"]'))
+      img.loading = 'eager';
+    const scroller = document.scrollingElement || document.documentElement;
+    const full = Math.max(scroller.scrollHeight, document.body.scrollHeight);
+    const step = window.innerHeight || 800;
+    for (let y = 0; y <= full; y += step) {
+      window.scrollTo(0, y);
+      await new Promise((r) => requestAnimationFrame(r));
+    }
+    window.scrollTo(0, 0);
+    await Promise.race([
+      Promise.all(
+        [...document.images].map((img) =>
+          img.complete
+            ? null
+            : new Promise((res) => {
+                img.addEventListener('load', res, { once: true });
+                img.addEventListener('error', res, { once: true });
+              })
+        )
+      ),
+      new Promise((r) => setTimeout(r, 4000)),
+    ]);
+  } catch (e) {}
+  try { await document.fonts.ready; } catch (e) {}
+  // Jump every animation to its end state so print() never captures a slide
+  // mid-entrance. Ordering matters: the 0s-transition style must be live
+  // BEFORE data-deck-active is set so attribute-keyed transitions don't
+  // start a (now-0s) run from the pre-active base.
+  const st = document.createElement('style');
+  st.textContent = '*,*::before,*::after{animation-delay:-99s !important;animation-duration:.001s !important;animation-iteration-count:1 !important;animation-fill-mode:both !important;animation-play-state:running !important;transition-duration:0s !important}';
+  document.head.appendChild(st);
+  for (const d of document.querySelectorAll('deck-stage')) {
+    for (const c of d.children) {
+      const t = c.tagName;
+      if (t === 'SCRIPT' || t === 'STYLE' || t === 'TEMPLATE') continue;
+      c.setAttribute('data-deck-active', '');
+    }
+  }
+  // Re-append deck-stage's @page last so no author @page can add a margin and
+  // spill each full-bleed slide onto two sheets. Backstop for old copies.
+  if (ds) {
+    let pg = document.getElementById('deck-stage-print-page');
+    if (!pg) {
+      pg = document.createElement('style');
+      pg.textContent = '@page{size:' + (+ds.getAttribute('width') || 1920) +
+        'px ' + (+ds.getAttribute('height') || 1080) + 'px;margin:0}';
+    }
+    document.body.appendChild(pg);
+  }
+  try {
+    const sweep = () => {
+      for (const a of document.getAnimations()) {
+        try { a.finish(); } catch (e) {
+          try { a.currentTime = (a.effect && a.effect.getComputedTiming().duration) || 0; a.pause(); } catch (e2) {}
+        }
+      }
+    };
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+    sweep();
+    await new Promise((r) => requestAnimationFrame(r));
+  } catch (e) {}
+  // Size the PDF page to the rendered design unless the file opted into
+  // standard paper via @page{size:letter|A4|…}. Decks own their own @page.
+  // Wrappers (body, …) lose padding+margin so the frame sits at (0,0); the
+  // frame itself loses only margin — its padding is INSIDE the measured
+  // rect and must stay, or content shifts and leaves a gap at bottom/right.
+  var __m = null;
+  try { __m = (() => {
+  var docEl = document.documentElement;
+  var doc = { width: docEl.scrollWidth, height: docEl.scrollHeight };
+
+  var ds = document.querySelector('deck-stage');
+  if (ds) {
+    var dw = Number(ds.getAttribute('width')) || 1920;
+    var dh = Number(ds.getAttribute('height')) || 1080;
+    var n = typeof ds.length === 'number' ? ds.length : ds.children.length;
+    var idx = typeof ds.index === 'number' ? ds.index : 0;
+    var frames = [];
+    for (var i = 0; i < n; i++) frames.push({ left: 0, top: 0, width: dw, height: dh });
+    return { kind: 'deck', doc: doc, frames: frames,
+      authored: frames.map(function(){return{width:true,height:true}}),
+      deck: { width: dw, height: dh, slideCount: n, index: idx },
+      signals: { paperPage: false, pxPage: false } };
+  }
+
+  var paperPage = false, pxPage = false;
+  var eachRule = function (fn) {
+    for (var s = 0; s < document.styleSheets.length; s++) {
+      var rs; try { rs = document.styleSheets[s].cssRules; } catch (e) { continue; }
+      for (var r = 0; r < rs.length; r++) {
+        fn(rs[r]);
+        if (rs[r].cssRules) for (var n = 0; n < rs[r].cssRules.length; n++) fn(rs[r].cssRules[n]);
+      }
+    }
+  };
+  eachRule(function (r) {
+    if (r.type !== 6) return;
+    var m = /\bsize\s*:\s*([^;}]+)/i.exec(r.cssText || '');
+    if (!m) return;
+    if (/\b(letter|a[3-5]|legal|ledger)\b/i.test(m[1])) paperPage = true;
+    if (/\d+(?:\.\d+)?px\b/i.test(m[1])) pxPage = true;
+  });
+  var signals = { paperPage: paperPage, pxPage: pxPage };
+
+  var pxVal = function (v) {
+    var m = /^(\d+(?:\.\d+)?)px$/.exec(v || ''); return m ? +m[1] : 0;
+  };
+  var authoredPx = function (el, prop) {
+    if (pxVal(el.style[prop])) return true;
+    var attr = el.getAttribute(prop);
+    if (attr && /^\d+$/.test(attr)) return true;
+    var hit = false;
+    eachRule(function (r) {
+      if (hit || r.type !== 1 || !r.style) return;
+      try { if (el.matches(r.selectorText) && pxVal(r.style[prop])) hit = true; } catch (e) {}
+    });
+    return hit;
+  };
+
+  var el = document.body, rootPxW = false;
+  for (;;) {
+    var kids = [];
+    for (var c = 0; c < el.children.length; c++) {
+      var t = el.children[c].tagName;
+      if (t !== 'SCRIPT' && t !== 'STYLE' && t !== 'TEMPLATE') kids.push(el.children[c]);
+    }
+    if (kids.length !== 1 || !(kids[0] instanceof HTMLElement)) break;
+    el.setAttribute('data-om-frame-wrap', '');
+    el = kids[0];
+    rootPxW = authoredPx(el, 'width');
+    if (rootPxW) break;
+  }
+  if (!rootPxW) rootPxW = authoredPx(el, 'width');
+
+  // @page{size:letter} alone is a flowing doc; with a px-width root it's a
+  // fixed sheet pretending to be paper — fall through and size to render.
+  if (paperPage && !rootPxW) {
+    return { kind: 'paper-doc', doc: doc, signals: signals,
+      frames: [{ left: 0, top: 0, width: doc.width, height: doc.height }],
+      authored: [{ width: false, height: false }] };
+  }
+
+  var sx = window.scrollX || 0, sy = window.scrollY || 0;
+  var rectOf = function (e) {
+    var r = e.getBoundingClientRect();
+    var oy; try { oy = getComputedStyle(e).overflowY; } catch (err) {}
+    var h = oy === 'visible' ? Math.max(r.height, e.scrollHeight || 0) : r.height;
+    return { left: r.left + sx, top: r.top + sy, width: r.width, height: h };
+  };
+
+  // Multi-frame: ≥2 visible non-fixed children, each with authored px width
+  // AND height, all within ±2px of each other. Off unless the page opts in
+  // via data-om-multi-frame on the stop element — guards against card grids
+  // and pricing tables that match the geometry but aren't separate canvases.
+  if (el.hasAttribute('data-om-multi-frame')) {
+    var cands = [];
+    for (var k = 0; k < el.children.length; k++) {
+      var ch = el.children[k];
+      var cs; try { cs = getComputedStyle(ch); } catch (e) { continue; }
+      if (cs.display === 'none' || cs.visibility === 'hidden' || cs.position === 'fixed') continue;
+      var rc = rectOf(ch);
+      if (rc.width < 2 || rc.height < 2) continue;
+      if (!authoredPx(ch, 'width') || !authoredPx(ch, 'height')) continue;
+      cands.push(rc);
+    }
+    if (cands.length >= 2) {
+      var w0 = cands[0].width, h0 = cands[0].height, ok = true;
+      for (var q = 1; q < cands.length; q++)
+        if (Math.abs(cands[q].width - w0) > 2 || Math.abs(cands[q].height - h0) > 2) ok = false;
+      if (ok) return { kind: 'multi-frame', doc: doc, signals: signals,
+        frames: cands, authored: cands.map(function(){return{width:true,height:true}}) };
+    }
+  }
+
+  el.setAttribute('data-om-frame', '');
+  return { kind: 'single-canvas', doc: doc, signals: signals,
+    frames: [rectOf(el)],
+    authored: [{ width: rootPxW, height: authoredPx(el, 'height') }] };
+})(); } catch (e) {}
+  var frame = null;
+  if (__m && __m.kind === 'single-canvas') {
+    var f = __m.frames && __m.frames[0];
+    if (f && f.width >= 200 && f.height >= 200) {
+      frame = f;
+      var fst = document.createElement('style');
+      fst.textContent = '@media print{@page{size:' + Math.ceil(f.width) + 'px ' +
+        Math.ceil(f.height) + 'px;margin:0}' +
+        'html,body,[data-om-frame-wrap]{padding:0!important;margin:0!important;background:none!important}' +
+        '[data-om-frame]{margin:0!important}}';
+      document.body.appendChild(fst);
+    }
+  }
+  // Relax break-inside on oversized elements. An element taller than a
+  // printable page can't honor break-inside: avoid — browsers either overflow
+  // it or push it whole to the next page, leaving a blank gap, then break it
+  // anyway at an arbitrary point. After the final layout (content revealed,
+  // animations jumped), find elements taller than a page that still compute
+  // break-inside: avoid and reset them to auto, so the browser breaks them at
+  // their children's boundaries instead (children keep their own avoid). PAGE_PX
+  // is a conservative portrait estimate at 96 CSS px/in — Letter/A4 usable
+  // height minus our 0.5in margins — so only clearly-oversized elements are
+  // touched and under-page elements still stay whole. Skipped for decks (slides
+  // are sized to the page) and for fixed-size canvases (frame set, or an author
+  // px-based @page) — runs as before for flowing docs on letter/A4.
+  try {
+    if (!ds && !frame && !(__m && __m.signals && __m.signals.pxPage)) {
+      const PAGE_PX = 1024;
+      // Our print defaults add a real @page margin only when the source has
+      // no @page of its own; computed style can't tell us (it reports screen
+      // media), so read the injected rule directly.
+      const defaults = document.querySelector('style[data-omelette-print-defaults]');
+      const pageInset = /@page\s*\{[^}]*margin/.test(defaults ? defaults.textContent || '' : '');
+      const SEL = 'section,article,figure,table,pre,blockquote,[class~="card" i],[class~="page" i],[class~="sheet" i]';
+      for (const el of document.body.querySelectorAll(SEL)) {
+        if (el instanceof HTMLElement && el.offsetHeight > PAGE_PX) {
+          el.setAttribute('data-om-oversized', '');
+          // Fake-paged docs simulate sheets with over-tall break-after:page
+          // boxes; honoring the break spills half-blank pages and ends a
+          // colored box mid-sheet. Flow them, and (only when we own the page
+          // inset) drop the redundant padding/background via the rule below.
+          const cs = getComputedStyle(el);
+          if (cs.breakAfter === 'page' || cs.pageBreakAfter === 'always') {
+            el.setAttribute('data-om-fakepage', '');
+          }
+        }
+      }
+      const ost = document.createElement('style');
+      ost.textContent = '@media print{' +
+        '[data-om-oversized]{break-inside:auto !important;page-break-inside:auto !important}' +
+        '[data-om-fakepage]{break-after:auto !important;page-break-after:auto !important}' +
+        (pageInset ? '[data-om-fakepage]{padding:0 !important;background:none !important}' : '') +
+        '}';
+      document.head.appendChild(ost);
+    }
+  } catch (e) {}
+  // macOS Preview renders Skia-PDF Luminosity soft-masks as opaque grey boxes;
+  // swap the CSS that triggers them for Preview-safe forms.
+  try {
+    for (const el of document.body.querySelectorAll('*')) {
+      const cs = getComputedStyle(el);
+
+      if (cs.boxShadow !== 'none' && cs.filter === 'none') {
+        const outs = [], kept = [];
+        for (const s of cs.boxShadow.split(/,(?![^(]*[)])/)) {
+          const t = s.trim();
+          const m = t.match(/^(rgba?[(][^)]+[)]) (-?[0-9.]+px) (-?[0-9.]+px) ([0-9.]+px) -?[0-9.]+px$/);
+          if (m && parseFloat(m[4]) > 0) outs.push('drop-shadow(' + m[2] + ' ' + m[3] + ' ' + m[4] + ' ' + m[1] + ')');
+          else kept.push(t);
+        }
+        if (outs.length) {
+          el.style.setProperty('filter', outs.join(' '), 'important');
+          el.style.setProperty('box-shadow', kept.join(', ') || 'none', 'important');
+        }
+      }
+
+      const mask = cs.maskImage && cs.maskImage !== 'none' ? cs.maskImage : cs.webkitMaskImage;
+      if (mask && mask !== 'none' && cs.filter === 'none') el.style.setProperty('filter', 'opacity(1)', 'important');
+    }
+  } catch (e) {}
+  setTimeout(() => { try { window.print(); } catch (e) {} }, 200);
+})();
+</script>
+</body>
+</html>

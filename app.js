@@ -363,7 +363,8 @@ function renderCandidates(lang) {
     const card = document.createElement('div');
     card.className = 'candidate-card';
 
-    const name = isEn ? c.nameEn : c.nameTh;
+    const thFirstName = c.nameTh.replace(/^(นางสาว|น\.ส\.|นาง|นาย|ม\.ล\.|ม\.ร\.ว\.|ม\.จ\.|พล\.ต\.ท\.|พล\.ต\.ต\.|พล\.ต\.|พล\.อ\.|ร\.ต\.อ\.)\s*/u, '').split(' ')[0];
+    const name = isEn ? c.nameEn : 'คุณ ' + thFirstName;
     const party = isEn ? c.partyEn : c.partyTh;
     const desc = isEn ? c.descEn : c.descTh;
 
@@ -695,8 +696,12 @@ function buildBadgePicker() {
     const label = document.createElement('span');
     label.className = 'badge-btn-name';
     const fullName = isEn ? c.nameEn : c.nameTh;
-    // Show last name only for compactness
-    label.textContent = fullName.split(' ').pop();
+    if (isEn) {
+      label.textContent = fullName.split(' ').pop();
+    } else {
+      const firstName = c.nameTh.replace(/^(นางสาว|น\.ส\.|นาง|นาย|ม\.ล\.|ม\.ร\.ว\.|ม\.จ\.|พล\.ต\.ท\.|พล\.ต\.ต\.|พล\.ต\.|พล\.อ\.|ร\.ต\.อ\.)\s*/u, '').split(' ')[0];
+      label.textContent = 'คุณ ' + firstName;
+    }
 
     btn.appendChild(circle);
     btn.appendChild(label);

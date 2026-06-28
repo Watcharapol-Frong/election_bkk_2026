@@ -2259,3 +2259,120 @@ a {
   .podium-slot.rank-1 .podium-pct { font-size: 1.5rem; }
   .res-vote-item { min-width: 80px; }
 }
+
+/* ==========================================================================
+   VIBRANT GEN Z & ANIMATION STYLE OVERRIDE
+   Inspired by: election_bbk_2026_bg_2.webp
+   ========================================================================== */
+:root {
+  --color-bg: #F0F8FF;
+  --color-text: #0F172A;
+  --color-primary: #2D8CFF;
+  --color-secondary: #4ADE80;
+  --color-accent: #FF9E9E;
+  --color-dark: #1E293B;
+  --color-card: #FFFFFF;
+  --gradient-main: linear-gradient(135deg, #2D8CFF, #4ADE80);
+  --gradient-accent: linear-gradient(135deg, #FF9E9E, #FFC4C4);
+}
+
+body {
+  background-color: var(--color-bg) !important;
+  color: var(--color-text) !important;
+}
+
+.main-header {
+  background: rgba(255, 255, 255, 0.85) !important;
+  backdrop-filter: blur(12px) !important;
+  border-bottom: 3px solid var(--color-dark) !important;
+}
+
+.brand-text, .hero-title, .section-title, .step-title, .card-title {
+  color: var(--color-dark) !important;
+}
+
+.text-red { color: var(--color-primary) !important; }
+.text-yellow { color: var(--color-secondary) !important; }
+
+/* Cards — hard shadow vector art style */
+.meta-card, .stat-card, .step-card, .countdown-card, .doc-category-item {
+  background: var(--color-card) !important;
+  border: 3px solid var(--color-dark) !important;
+  box-shadow: 6px 6px 0px var(--color-dark) !important;
+  border-radius: 16px !important;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.meta-card:hover, .stat-card:hover, .step-card:hover, .countdown-card:hover {
+  transform: translate(-3px, -3px);
+  box-shadow: 9px 9px 0px var(--color-primary) !important;
+}
+
+.dark-card {
+  background: var(--color-dark) !important;
+  color: #FFFFFF !important;
+}
+
+.red-card {
+  background: var(--gradient-main) !important;
+  color: #FFFFFF !important;
+  border-color: var(--color-dark) !important;
+}
+
+.stat-card.highlight-red { background: var(--color-accent) !important; }
+.stat-card.highlight-teal { background: var(--color-secondary) !important; }
+
+/* Buttons & Badges */
+.badge-accent {
+  background: var(--gradient-accent) !important;
+  color: var(--color-dark) !important;
+  border: 2px solid var(--color-dark) !important;
+  font-weight: 800 !important;
+}
+
+.btn-check-portal, .bkk-banner-btn, #langToggleBtn {
+  background: var(--color-primary) !important;
+  color: #FFFFFF !important;
+  border: 3px solid var(--color-dark) !important;
+  border-radius: 50px !important;
+  box-shadow: 4px 4px 0px var(--color-dark) !important;
+  font-weight: 700 !important;
+  text-transform: uppercase;
+}
+
+.btn-check-portal:hover, .bkk-banner-btn:hover, #langToggleBtn:hover {
+  background: var(--color-secondary) !important;
+  color: var(--color-dark) !important;
+  transform: translateY(-2px);
+  box-shadow: 6px 6px 0px var(--color-dark) !important;
+}
+
+.btn-check-portal.secondary {
+  background: var(--color-card) !important;
+  color: var(--color-dark) !important;
+}
+
+/* Timeline & Visuals */
+.timeline-dot { border: 3px solid var(--color-dark) !important; }
+.dot-red { background: var(--color-primary) !important; }
+.dot-yellow { background: var(--color-accent) !important; }
+.dot-teal { background: var(--color-secondary) !important; }
+
+.ballot-paper {
+  background: #FFFFFF !important;
+  border: 3px solid var(--color-dark) !important;
+  box-shadow: 8px 8px 0px rgba(45, 140, 255, 0.2) !important;
+}
+
+.ballot-box.cross {
+  color: var(--color-primary) !important;
+  font-weight: 900 !important;
+}
+
+.warning-title { color: var(--color-accent) !important; }
+
+/* Selection highlight update */
+::selection {
+  background-color: var(--color-primary);
+  color: #fff;
+}

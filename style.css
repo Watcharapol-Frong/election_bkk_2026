@@ -2287,12 +2287,39 @@ body {
   border-bottom: 3px solid var(--color-dark) !important;
 }
 
-.brand-text, .hero-title, .section-title, .step-title, .card-title {
+/* Typography — only override on light sections, not inside dark/dark-card contexts */
+.brand-text { color: var(--color-dark) !important; }
+.hero-title  { color: var(--color-dark) !important; }
+
+/* Light-section headings only */
+:not(.timeline-section):not(.dark-section):not(.dark-card) > .section-title,
+:not(.timeline-section):not(.dark-section):not(.dark-card) > * > .section-title {
+  color: var(--color-dark) !important;
+}
+:not(.timeline-section):not(.dark-section):not(.dark-card) > .step-title,
+:not(.timeline-section):not(.dark-section):not(.dark-card) > * > .step-title,
+:not(.timeline-section):not(.dark-section):not(.dark-card) > * > * > .step-title {
   color: var(--color-dark) !important;
 }
 
-.text-red { color: var(--color-primary) !important; }
-.text-yellow { color: var(--color-secondary) !important; }
+/* Restore light text in dark sections */
+.timeline-section .section-title,
+.timeline-section .section-lead,
+.timeline-section .timeline-label,
+.dark-section .section-title,
+.dark-section .section-lead,
+.dark-card .card-title {
+  color: var(--text-light) !important;
+}
+
+/* Muted text contrast boost on light bg */
+.section-lead, .meta-label, .stat-label, .step-desc, .check-desc {
+  color: #475569 !important;
+}
+
+/* Override สี accent ในบริบท light เท่านั้น */
+:not(.timeline-section):not(.dark-section) .text-red { color: var(--color-primary) !important; }
+:not(.timeline-section):not(.dark-section) .text-yellow { color: #16A34A !important; }
 
 /* Cards — hard shadow vector art style */
 .meta-card, .stat-card, .step-card, .countdown-card, .doc-category-item {
@@ -2308,6 +2335,10 @@ body {
   box-shadow: 9px 9px 0px var(--color-primary) !important;
 }
 
+/* ข้อความใน meta-card ให้มองเห็นชัด */
+.meta-card .meta-label { color: #64748B !important; }
+.meta-card .meta-value { color: var(--color-dark) !important; }
+
 .dark-card {
   background: var(--color-dark) !important;
   color: #FFFFFF !important;
@@ -2321,6 +2352,20 @@ body {
 
 .stat-card.highlight-red { background: var(--color-accent) !important; }
 .stat-card.highlight-teal { background: var(--color-secondary) !important; }
+
+/* stat-card ข้อความ */
+.stat-card .stat-number { color: var(--color-dark) !important; }
+.stat-card .stat-label  { color: #475569 !important; }
+.stat-card.highlight-red .stat-number,
+.stat-card.highlight-red .stat-label,
+.stat-card.highlight-teal .stat-number,
+.stat-card.highlight-teal .stat-label {
+  color: var(--color-dark) !important;
+}
+
+/* countdown-card ข้อความ */
+.countdown-card .countdown-big-val   { color: var(--color-dark) !important; }
+.countdown-card .countdown-big-label { color: #475569 !important; }
 
 /* Buttons & Badges */
 .badge-accent {
@@ -2353,7 +2398,7 @@ body {
 }
 
 /* Timeline & Visuals */
-.timeline-dot { border: 3px solid var(--color-dark) !important; }
+.timeline-dot { border: 3px solid rgba(255,255,255,0.4) !important; }
 .dot-red { background: var(--color-primary) !important; }
 .dot-yellow { background: var(--color-accent) !important; }
 .dot-teal { background: var(--color-secondary) !important; }
@@ -2369,7 +2414,13 @@ body {
   font-weight: 900 !important;
 }
 
-.warning-title { color: var(--color-accent) !important; }
+.warning-title { color: #DC2626 !important; }
+
+/* countdown-badge in header */
+.countdown-badge {
+  color: var(--color-primary) !important;
+  background-color: rgba(45, 140, 255, 0.1) !important;
+}
 
 /* Selection highlight update */
 ::selection {

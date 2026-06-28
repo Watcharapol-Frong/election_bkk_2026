@@ -2272,8 +2272,8 @@ a {
   --color-accent: #FF9E9E;
   --color-dark: #1E293B;
   --color-card: #FFFFFF;
-  --gradient-main: linear-gradient(135deg, #2D8CFF, #4ADE80);
-  --gradient-accent: linear-gradient(135deg, #FF9E9E, #FFC4C4);
+  --gradient-main: #2D8CFF;
+  --gradient-accent: #FF9E9E;
 }
 
 /* ─── Global ──────────────────────────────────────────────────────────────── */
@@ -2357,20 +2357,23 @@ body {
   box-shadow: 9px 9px 0px var(--color-primary) !important;
 }
 
-/* dark-card & red-card — ข้อความต้องเป็นขาว */
+/* dark-card — เหมือน stat-card: ขาว ตัวหนังสือเข้ม */
 .dark-card {
-  background: var(--color-dark) !important;
-  color: #FFFFFF !important;
+  background: var(--color-card) !important;
+  color: var(--color-dark) !important;
 }
 .dark-card .meta-label,
-.dark-card .meta-value,
 .dark-card .meta-sub,
 .dark-card .meta-unit {
-  color: #FFFFFF !important;
+  color: #64748B !important;
+}
+.dark-card .meta-value {
+  color: var(--color-dark) !important;
 }
 
+/* red-card — solid primary blue */
 .red-card {
-  background: var(--gradient-main) !important;
+  background: var(--color-primary) !important;
   color: #FFFFFF !important;
   border-color: var(--color-dark) !important;
 }
@@ -2381,7 +2384,7 @@ body {
   color: #FFFFFF !important;
 }
 
-/* meta-card ปกติ (ไม่ใช่ dark/red) */
+/* meta-card ปกติ */
 .meta-card:not(.dark-card):not(.red-card) .meta-label { color: #64748B !important; }
 .meta-card:not(.dark-card):not(.red-card) .meta-value { color: var(--color-dark) !important; }
 .meta-card:not(.dark-card):not(.red-card) .meta-sub   { color: #64748B !important; }

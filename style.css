@@ -2407,6 +2407,30 @@ body {
 .countdown-card.highlight-red .countdown-big-val,
 .countdown-card.highlight-red .countdown-big-label { color: var(--color-dark) !important; }
 
+/* ─── docs-card & doc-category-item ─────────────────────────────────────── */
+/* docs-card ใช้ gradient แทนสีแดง */
+.docs-card {
+  background: var(--gradient-main) !important;
+  border: 3px solid var(--color-dark) !important;
+  box-shadow: 6px 6px 0px var(--color-dark) !important;
+}
+
+/* doc-category-item อยู่บน gradient — ใช้ semi-transparent white */
+.doc-category-item {
+  background: rgba(255, 255, 255, 0.15) !important;
+  border: 2px solid rgba(255, 255, 255, 0.35) !important;
+  box-shadow: none !important;
+  border-radius: 14px !important;
+}
+.doc-category-item:hover {
+  background: rgba(255, 255, 255, 0.25) !important;
+  box-shadow: none !important;
+}
+
+/* ข้อความใน doc-category-item ต้องขาวเสมอ */
+.doc-cat-title { color: #FFFFFF !important; }
+.doc-cat-desc  { color: rgba(255, 255, 255, 0.85) !important; }
+
 /* ─── Buttons & Badges ───────────────────────────────────────────────────── */
 .badge-accent {
   background: var(--gradient-accent) !important;

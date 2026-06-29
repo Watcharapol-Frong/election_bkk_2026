@@ -609,7 +609,8 @@ const POLICY_COMPARISON_DATA = {
 // ==========================================================================
 // LIVE RESULTS — PPTV API
 // ==========================================================================
-const RESULTS_API = 'https://www-api.pptvhd36.com/%E0%B9%80%E0%B8%A5%E0%B8%B7%E0%B8%AD%E0%B8%81%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%A7%E0%B9%88%E0%B8%B2%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%AF2569/api/rank';
+const RESULTS_API         = 'https://www-api.pptvhd36.com/%E0%B9%80%E0%B8%A5%E0%B8%B7%E0%B8%AD%E0%B8%81%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%A7%E0%B9%88%E0%B8%B2%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%AF2569/api/rank';
+const RESULTS_SUMMARY_API = 'https://www-api.pptvhd36.com/%E0%B9%80%E0%B8%A5%E0%B8%B7%E0%B8%AD%E0%B8%81%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%A7%E0%B9%88%E0%B8%B2%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%AF2569/api/summary/bkk-governor-2026';
 
 const CAND_NAME_EN = {
   1: 'M.L. Kornkasiwat Kasemsri',
@@ -709,13 +710,82 @@ function renderResults(lang) {
   wrap.innerHTML = podiumHTML + listHTML;
 }
 
+function renderTurnoutModal(s) {
+  const box = document.querySelector('.turnout-modal-box');
+  if (!box || !s) return;
+  const lang = currentLang;
+  const pct  = s.progress;
+  const unit = lang === 'en' ? 'persons' : 'คน';
+  const blt  = lang === 'en' ? 'ballots' : 'ใบ';
+
+  box.innerHTML = `
+    <div class="turnout-modal-header">
+      <h3 class="turnout-modal-title">${lang === 'en' ? 'Ballot Statistics' : 'สถิติการนับคะแนน'}</h3>
+      <button class="turnout-modal-close" id="turnoutModalClose" aria-label="ปิด">✕</button>
+    </div>
+    <div class="turnout-modal-counted">
+      <div class="turnout-modal-sub">${lang === 'en' ? 'Ballots counted (unofficial)' : 'นับคะแนนแล้ว (อย่างไม่เป็นทางการ)'}</div>
+      <div class="turnout-modal-big">${s.total_votes}</div>
+      <div class="turnout-modal-bar-wrap"><div class="turnout-modal-bar" style="width:${pct}%"></div></div>
+      <div class="turnout-modal-pct-row">
+        <span class="turnout-modal-pct-val">${pct}%</span>
+        <span class="turnout-modal-pct-note">${lang === 'en' ? '(of estimated turnout)' : '(ของประมาณการผู้มาใช้สิทธิ)'}</span>
+      </div>
+    </div>
+    <div class="turnout-modal-grid">
+      <div class="turnout-stat-card">
+        <div class="turnout-stat-label">${lang === 'en' ? 'Eligible voters' : 'ผู้มีสิทธิ'}</div>
+        <div class="turnout-stat-val">${s.eligible} <span>${unit}</span></div>
+      </div>
+      <div class="turnout-stat-card">
+        <div class="turnout-stat-label">${lang === 'en' ? 'Turnout' : 'มาใช้สิทธิ'}</div>
+        <div class="turnout-stat-val">${s.voter_turnout} <span>${unit}</span></div>
+        <div class="turnout-stat-pct">${s.voter_turnout_percentage}%</div>
+      </div>
+      <div class="turnout-stat-card">
+        <div class="turnout-stat-label">${lang === 'en' ? 'Valid ballots' : 'บัตรดี'}</div>
+        <div class="turnout-stat-val">${s.good_votes} <span>${blt}</span></div>
+        <div class="turnout-stat-pct">${s.percent_good_votes}%</div>
+      </div>
+      <div class="turnout-stat-card">
+        <div class="turnout-stat-label">${lang === 'en' ? 'Spoiled ballots' : 'บัตรเสีย'}</div>
+        <div class="turnout-stat-val">${s.bad_votes} <span>${blt}</span></div>
+        <div class="turnout-stat-pct">${s.percent_bad_votes}%</div>
+      </div>
+      <div class="turnout-stat-card span2">
+        <div class="turnout-stat-label">${lang === 'en' ? 'No vote' : 'ไม่ประสงค์ลงคะแนน'}</div>
+        <div class="turnout-stat-val">${s.no_votes} <span>${unit}</span></div>
+        <div class="turnout-stat-pct">${s.percent_no_votes}%</div>
+      </div>
+    </div>`;
+
+  // Re-bind close button after re-render
+  const closeBtn = box.querySelector('#turnoutModalClose');
+  if (closeBtn) closeBtn.addEventListener('click', () => {
+    document.getElementById('turnoutModal').classList.remove('open');
+  });
+}
+
+let summaryData = null;
+
 async function loadResultsFromAPI() {
   const wrap = document.getElementById('res-dynamic-wrap');
   try {
-    const res = await fetch(RESULTS_API);
-    const data = await res.json();
-    resultsData = data.sort((a, b) => a.rank - b.rank);
+    const [rankRes, summaryRes] = await Promise.all([
+      fetch(RESULTS_API),
+      fetch(RESULTS_SUMMARY_API),
+    ]);
+    const [rankData, summary] = await Promise.all([rankRes.json(), summaryRes.json()]);
+    resultsData = rankData.sort((a, b) => a.rank - b.rank);
+    summaryData = summary;
     renderResults(currentLang);
+    renderTurnoutModal(summaryData);
+
+    // Update turnout bar numbers from API
+    const countedEl = document.querySelector('.res-turnout strong');
+    const pctEl     = document.querySelector('.res-turnout-pct');
+    if (countedEl) countedEl.textContent = summary.total_votes;
+    if (pctEl)     pctEl.textContent     = summary.progress + '%';
   } catch {
     if (wrap) wrap.innerHTML = '<p class="res-error">ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง</p>';
   }
@@ -766,6 +836,7 @@ function applyLanguage(lang) {
 
   // Re-render live results in correct language
   renderResults(lang);
+  renderTurnoutModal(summaryData);
 }
 
 // Language button event listener
@@ -788,9 +859,8 @@ document.addEventListener('DOMContentLoaded', () => {
   function openTurnout()  { turnoutModal.classList.add('open'); turnoutModal.setAttribute('aria-hidden','false'); }
   function closeTurnout() { turnoutModal.classList.remove('open'); turnoutModal.setAttribute('aria-hidden','true'); }
 
-  if (turnoutBtn)   turnoutBtn.addEventListener('click', openTurnout);
-  if (turnoutClose) turnoutClose.addEventListener('click', closeTurnout);
-  if (backdrop)     backdrop.addEventListener('click', closeTurnout);
+  if (turnoutBtn) turnoutBtn.addEventListener('click', openTurnout);
+  if (backdrop)   backdrop.addEventListener('click', closeTurnout);
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTurnout(); });
 });
 

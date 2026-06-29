@@ -2272,6 +2272,7 @@ a {
   gap: 0;
   margin-bottom: 36px;
   position: relative;
+  align-items: start;
 }
 
 /* อันดับ 1 spans top center */

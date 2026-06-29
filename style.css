@@ -2355,7 +2355,7 @@ a {
   color: var(--text-muted);
 }
 
-/* ── Rank 4+ carousel ──────────────────────────────────────────────────── */
+/* ── Rank 4+ vertical list ─────────────────────────────────────────────── */
 .res-others-label {
   font-size: 12px;
   font-weight: 700;
@@ -2365,111 +2365,138 @@ a {
   margin-bottom: 10px;
 }
 
-.res-carousel-wrap {
-  overflow-x: auto;
-  -webkit-overflow-scrolling: touch;
-  scrollbar-width: none;
-  margin-bottom: 28px;
-  /* allow scroll to edge on mobile */
-  margin-left: -24px;
-  margin-right: -24px;
-  padding-left: 24px;
-  padding-right: 24px;
-}
-.res-carousel-wrap::-webkit-scrollbar { display: none; }
-
-.res-carousel {
+/* show 3 rows, scroll for rest */
+.res-list-wrap {
+  max-height: calc(3 * 88px + 2 * 8px);
+  overflow-y: auto;
+  overflow-x: hidden;
   display: flex;
+  flex-direction: column;
   gap: 8px;
-  width: max-content;
-  padding-bottom: 2px;
+  margin-bottom: 28px;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-color) transparent;
 }
+.res-list-wrap::-webkit-scrollbar { width: 4px; }
+.res-list-wrap::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
 
-.res-card {
+.res-row {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   background-color: #ffffff;
   border: 1px solid var(--border-color);
   border-radius: 14px;
-  padding: 16px 14px;
-  width: 260px;
+  padding: 12px 14px 12px 12px;
   flex-shrink: 0;
 }
 
-.res-card-rank {
+.res-row-left {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.res-row-rank {
   font-family: var(--font-numeric);
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 800;
-  color: var(--text-muted);
-  min-width: 20px;
-  text-align: center;
+  color: #ffffff;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
-.res-card-photo {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
+.res-row-photo {
+  width: 56px;
+  height: 64px;
   object-fit: cover;
   object-position: top;
+  border-radius: 10px;
   background-color: var(--border-color);
   display: block;
   flex-shrink: 0;
 }
 
-/* new body wrapper: name on top, tags+score on bottom row */
-.res-card-body {
+.res-row-body {
   flex: 1;
   min-width: 0;
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 5px;
 }
 
-.res-card-name {
-  font-size: 13px;
+.res-row-name {
+  font-family: var(--font-heading);
+  font-size: 14px;
   font-weight: 700;
   color: var(--text-dark);
-  line-height: 1.3;
+  line-height: 1.35;
+}
+
+.res-row-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+}
+
+.res-row-tag-outline {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-dark);
+  border: 1.5px solid var(--border-color);
+  border-radius: 100px;
+  padding: 2px 8px;
   white-space: nowrap;
+}
+
+.res-row-tag-fill {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-muted);
+  background-color: #F1F5F9;
+  border-radius: 100px;
+  padding: 2px 8px;
+  white-space: nowrap;
+}
+
+.res-row-bar-wrap {
+  height: 3px;
+  background-color: var(--border-color);
+  border-radius: 100px;
   overflow: hidden;
-  text-overflow: ellipsis;
 }
 
-.res-card-bottom {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 8px;
+.res-row-bar {
+  height: 100%;
+  background-color: var(--color-teal);
+  border-radius: 100px;
 }
 
-.res-card-tags {
-  display: flex;
-  flex-direction: column;
-  gap: 3px;
-  flex-shrink: 0;
-}
-
-.res-card-score {
+.res-row-score {
   text-align: right;
   flex-shrink: 0;
 }
 
-.res-card-pct {
+.res-row-pct {
   font-family: var(--font-numeric);
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 800;
   color: var(--text-dark);
   white-space: nowrap;
   line-height: 1;
 }
 
-.res-card-votes {
-  font-size: 10px;
+.res-row-votes {
+  font-size: 11px;
   color: var(--text-muted);
   white-space: nowrap;
-  margin-top: 2px;
+  margin-top: 3px;
 }
 
 /* ── Turnout bar ───────────────────────────────────────────────────────── */
@@ -2527,8 +2554,9 @@ a {
   .podium-pct { font-size: 15px; }
   .podium-avatar.rank-1 .podium-pct { font-size: 20px; }
   .podium-votes { font-size: 10px; }
-  .res-card { width: 240px; padding: 14px 12px; }
-  .res-card-pct { font-size: 16px; }
+  .res-row-photo { width: 48px; height: 56px; }
+  .res-row-pct { font-size: 16px; }
+  .res-row-name { font-size: 13px; }
 }
 
 /* ==========================================================================

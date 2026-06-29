@@ -2261,6 +2261,129 @@ a {
 }
 
 /* ==========================================================================
+   ELECTION RESULTS SECTION
+   ========================================================================== */
+.results-winner-banner {
+  background-color: var(--color-red);
+  color: #fff;
+  border-radius: 16px;
+  padding: 28px 32px;
+  text-align: center;
+  margin-bottom: 32px;
+  box-shadow: var(--shadow-md);
+}
+.results-winner-label {
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  opacity: 0.85;
+  margin-bottom: 8px;
+}
+.results-winner-name {
+  font-family: var(--font-heading);
+  font-size: clamp(28px, 5vw, 48px);
+  font-weight: 700;
+  line-height: 1.1;
+}
+.results-winner-score {
+  font-size: 16px;
+  opacity: 0.9;
+  margin-top: 8px;
+  font-weight: 500;
+}
+
+.results-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 32px;
+}
+.results-card {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 14px;
+  padding: 20px 24px;
+  box-shadow: var(--shadow-sm);
+}
+.results-rank-1 { border-left: 4px solid var(--color-red); }
+.results-rank-2 { border-left: 4px solid var(--color-yellow); }
+.results-rank-3 { border-left: 4px solid var(--color-teal); }
+
+.results-rank {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: var(--text-muted);
+  margin-bottom: 4px;
+}
+.results-name {
+  font-family: var(--font-heading);
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--text-dark);
+  margin-bottom: 6px;
+}
+.results-score {
+  font-family: var(--font-numeric);
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--text-dark);
+  line-height: 1;
+}
+.results-pct {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin-bottom: 10px;
+}
+.results-bar-wrap {
+  background-color: var(--border-color);
+  border-radius: 100px;
+  height: 6px;
+  overflow: hidden;
+}
+.results-bar {
+  height: 100%;
+  border-radius: 100px;
+  background-color: var(--color-red);
+}
+.results-rank-2 .results-bar { background-color: var(--color-yellow); }
+.results-rank-3 .results-bar { background-color: var(--color-teal); }
+
+.results-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+.results-stat-item {
+  background-color: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+}
+.results-stat-val {
+  font-family: var(--font-numeric);
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-dark);
+  line-height: 1.1;
+}
+.results-stat-label {
+  font-size: 12px;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+@media (max-width: 600px) {
+  .results-stats-row { grid-template-columns: 1fr 1fr; }
+  .results-winner-banner { padding: 20px 18px; }
+  .results-card { padding: 16px 18px; }
+}
+
+/* ==========================================================================
    VIBRANT GEN Z & ANIMATION STYLE OVERRIDE
    Inspired by: election_bbk_2026_bg_2.webp
    ========================================================================== */

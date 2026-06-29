@@ -2387,28 +2387,29 @@ a {
 
 .res-card {
   display: grid;
-  grid-template-columns: 20px 40px 1fr auto;
+  grid-template-columns: 24px 44px 1fr auto;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   background-color: #ffffff;
   border: 1px solid var(--border-color);
-  border-radius: 12px;
-  padding: 12px 14px;
-  width: 260px;
+  border-radius: 14px;
+  padding: 14px 16px;
+  width: 300px;
   flex-shrink: 0;
 }
 
 .res-card-rank {
   font-family: var(--font-numeric);
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 800;
   color: var(--text-muted);
   text-align: center;
+  line-height: 1;
 }
 
 .res-card-photo {
-  width: 40px;
-  height: 40px;
+  width: 44px;
+  height: 44px;
   border-radius: 50%;
   object-fit: cover;
   object-position: top;
@@ -2421,24 +2422,27 @@ a {
 }
 
 .res-card-name {
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 700;
   color: var(--text-dark);
-  white-space: nowrap;
+  line-height: 1.35;
+  margin-bottom: 4px;
+  /* allow 2 lines, not truncated */
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
   overflow: hidden;
-  text-overflow: ellipsis;
-  margin-bottom: 3px;
-  line-height: 1.3;
 }
 
 .res-card-tags {
   display: flex;
-  gap: 3px;
-  margin-bottom: 5px;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-bottom: 6px;
 }
 
 .res-card-bar-wrap {
-  height: 2px;
+  height: 3px;
   background-color: var(--border-color);
   border-radius: 100px;
   overflow: hidden;
@@ -2457,14 +2461,14 @@ a {
 
 .res-card-pct {
   font-family: var(--font-numeric);
-  font-size: 14px;
+  font-size: 16px;
   font-weight: 800;
   color: var(--text-dark);
   white-space: nowrap;
 }
 
 .res-card-votes {
-  font-size: 10px;
+  font-size: 11px;
   color: var(--text-muted);
   white-space: nowrap;
 }
@@ -2524,7 +2528,9 @@ a {
   .podium-pct { font-size: 15px; }
   .podium-avatar.rank-1 .podium-pct { font-size: 20px; }
   .podium-votes { font-size: 10px; }
-  .res-card { width: 210px; }
+  .res-card { width: 260px; }
+  .res-card-name { font-size: 12px; }
+  .res-card-pct { font-size: 14px; }
 }
 
 /* ==========================================================================

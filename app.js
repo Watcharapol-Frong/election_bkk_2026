@@ -853,6 +853,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadResultsFromAPI();
   renderSKGrid();
   initDistrictTabs();
+  initDistrictModal();
 
   // Turnout popover
   const turnoutBtn     = document.getElementById('turnoutBarBtn');
@@ -969,7 +970,7 @@ function renderSKGrid() {
   });
   const sorted = Object.entries(grouped).sort((a, b) => b[1].length - a[1].length);
 
-  // Render seats (grouped, not by district)
+  // Render seats grouped by party — show candidate เบอร์ on each square
   let seatsHTML = '';
   sorted.forEach(([party, cands]) => {
     const col = PARTY_COLORS[party] || PARTY_COLORS['อิสระ'];
@@ -981,10 +982,9 @@ function renderSKGrid() {
         data-name="${c.name}"
         data-district="${c.district}"
         data-score="${c.score}"
-        title="${c.name} · เขต${c.district}"
         role="button" tabindex="0"
         aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district} ${party}"
-      ></div>`;
+      ><span class="sk-seat-num">${c.no}</span></div>`;
     });
   });
   grid.innerHTML = seatsHTML;
@@ -993,8 +993,7 @@ function renderSKGrid() {
   let legendHTML = '';
   sorted.forEach(([party, cands]) => {
     const col = PARTY_COLORS[party] || PARTY_COLORS['อิสระ'];
-    legendHTML += `<div class="sk-legend-item" data-party="${party}" role="button" tabindex="0"
-      title="กดเพื่อดูรายละเอียด ${party}">
+    legendHTML += `<div class="sk-legend-item" data-party="${party}" role="button" tabindex="0">
       <div class="sk-legend-dot" style="background:${col.bg}"></div>
       <span>${party.replace('พรรค','')}</span>
       <span class="sk-legend-count">${cands.length} ที่นั่ง</span>
@@ -1006,98 +1005,172 @@ function renderSKGrid() {
 }
 
 function bindSKInteractions(sorted) {
-  const grid    = document.getElementById('sk-seat-grid');
-  const legend  = document.getElementById('sk-legend');
-  const tooltip = document.getElementById('sk-tooltip');
-  const closeBtn = document.getElementById('skTooltipClose');
+  const grid         = document.getElementById('sk-seat-grid');
+  const legend       = document.getElementById('sk-legend');
+  const partyTooltip = document.getElementById('sk-party-tooltip');
 
-  function openParty(party) {
+  // ── Legend click → highlight party group + party tooltip ─────────────── //
+  function openPartyGroup(party) {
     skActiveParty = party;
-    // Highlight seats
     grid.querySelectorAll('.sk-seat').forEach(el => {
       el.classList.toggle('highlighted', el.dataset.party === party);
       el.classList.toggle('dimmed',      el.dataset.party !== party);
     });
     legend.querySelectorAll('.sk-legend-item').forEach(el => {
-      el.style.fontWeight = el.dataset.party === party ? '800' : '500';
-      el.style.opacity    = el.dataset.party === party ? '1'   : '0.5';
+      el.classList.toggle('active-legend', el.dataset.party === party);
     });
-    showSKTooltip(party, sorted);
+    showPartyTooltip(party, sorted);
   }
 
-  function closeParty() {
+  function closePartyGroup() {
     skActiveParty = null;
-    grid.querySelectorAll('.sk-seat').forEach(el => {
-      el.classList.remove('highlighted', 'dimmed');
-    });
-    legend.querySelectorAll('.sk-legend-item').forEach(el => {
-      el.style.fontWeight = '';
-      el.style.opacity    = '';
-    });
-    tooltip.classList.remove('open');
-    tooltip.setAttribute('aria-hidden', 'true');
+    grid.querySelectorAll('.sk-seat').forEach(el => el.classList.remove('highlighted', 'dimmed'));
+    legend.querySelectorAll('.sk-legend-item').forEach(el => el.classList.remove('active-legend'));
+    if (partyTooltip) {
+      partyTooltip.classList.remove('open');
+      partyTooltip.setAttribute('aria-hidden', 'true');
+    }
   }
 
+  // ── Seat click → district popup ───────────────────────────────────────── //
   grid.addEventListener('click', e => {
     const seat = e.target.closest('.sk-seat');
     if (!seat) return;
-    const party = seat.dataset.party;
-    if (skActiveParty === party) { closeParty(); return; }
-    openParty(party);
+    showDistrictModal({
+      district: seat.dataset.district,
+      no:       parseInt(seat.dataset.no),
+      name:     seat.dataset.name,
+      party:    seat.dataset.party,
+      score:    parseInt(seat.dataset.score),
+    });
   });
 
   legend.addEventListener('click', e => {
     const item = e.target.closest('.sk-legend-item');
     if (!item) return;
     const party = item.dataset.party;
-    if (skActiveParty === party) { closeParty(); return; }
-    openParty(party);
+    skActiveParty === party ? closePartyGroup() : openPartyGroup(party);
   });
 
-  if (closeBtn) closeBtn.addEventListener('click', closeParty);
-  document.addEventListener('keydown', e => { if (e.key === 'Escape' && skActiveParty) closeParty(); });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      closePartyGroup();
+      closeDistrictModal();
+    }
+  });
 }
 
-function showSKTooltip(party, sorted) {
-  const tooltip = document.getElementById('sk-tooltip');
-  const content = document.getElementById('sk-tooltip-content');
+function showPartyTooltip(party, sorted) {
+  const tooltip = document.getElementById('sk-party-tooltip');
+  const content = document.getElementById('sk-party-tooltip-content');
   if (!tooltip || !content) return;
 
   const entry = sorted.find(([p]) => p === party);
   if (!entry) return;
   const [, cands] = entry;
-  const col   = PARTY_COLORS[party] || PARTY_COLORS['อิสระ'];
-  const top5  = [...cands].sort((a, b) => b.score - a.score).slice(0, 5);
-  const districts = [...new Set(cands.map(c => c.district))];
-
-  const top5HTML = top5.map(c => `
-    <div class="sk-tooltip-cand">
-      <div class="sk-tooltip-cand-no">เบอร์<br>${c.no}</div>
-      <div>
-        <div class="sk-tooltip-cand-name">${c.name}</div>
-        <div class="sk-tooltip-cand-district">เขต${c.district}</div>
-      </div>
-      <div class="sk-tooltip-cand-score">${c.score.toLocaleString()}</div>
-    </div>`).join('');
+  const col      = PARTY_COLORS[party] || PARTY_COLORS['อิสระ'];
+  const top5     = [...cands].sort((a, b) => b.score - a.score).slice(0, 5);
+  const districtCount = new Set(cands.map(c => c.district)).size;
 
   content.innerHTML = `
-    <div class="sk-tooltip-party-header">
-      <div class="sk-tooltip-party-bar" style="background:${col.bg}"></div>
+    <div class="sk-party-tooltip-header">
+      <div class="sk-party-tooltip-bar" style="background:${col.bg}"></div>
       <div>
-        <div class="sk-tooltip-party-name">${party}</div>
-        <div class="sk-tooltip-party-stats">${cands.length} ที่นั่ง · ${districts.length} เขต</div>
+        <div class="sk-party-tooltip-name">${party}</div>
+        <div class="sk-party-tooltip-stats">${cands.length} ที่นั่ง · ${districtCount} เขต</div>
       </div>
     </div>
-    <hr class="sk-tooltip-divider">
-    <div class="sk-tooltip-top5-title">Top 5 คะแนนสูงสุด</div>
-    <div class="sk-tooltip-cand-list">${top5HTML}</div>
-    <button class="sk-tooltip-detail-btn" onclick="alert('ฟีเจอร์นี้จะเปิดหน้ารายละเอียดพรรค')">
-      ดูรายละเอียดทั้งหมด ›
-    </button>`;
+    <div class="sk-party-top5-label">Top 5 คะแนนสูงสุดในพรรค</div>
+    ${top5.map(c => `
+      <div class="sk-party-cand-row">
+        <div class="sk-party-cand-no">เบอร์<br>${c.no}</div>
+        <div class="sk-party-cand-info">
+          <div class="sk-party-cand-name">${c.name}</div>
+          <div class="sk-party-cand-dist">เขต${c.district}</div>
+        </div>
+        <div class="sk-party-cand-score">${c.score.toLocaleString()}</div>
+      </div>`).join('')}`;
 
   tooltip.classList.add('open');
   tooltip.setAttribute('aria-hidden', 'false');
   tooltip.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// ── District popup modal ──────────────────────────────────────────────────── //
+function showDistrictModal(winner) {
+  const overlay   = document.getElementById('skDistrictOverlay');
+  const nameEl    = document.getElementById('skSheetName');
+  const labelEl   = document.getElementById('skSheetLabel');
+  const totalEl   = document.getElementById('skSheetTotal');
+  const candList  = document.getElementById('skSheetCandList');
+  if (!overlay) return;
+
+  // Build mock competitor list (winner + 2 runners-up)
+  const total     = Math.round(winner.score / 0.42);
+  const r1score   = Math.round(winner.score * 0.70);
+  const r2score   = Math.round(winner.score * 0.14);
+  const allParties = Object.keys(PARTY_COLORS).filter(p => p !== winner.party && p !== 'อิสระ');
+  const runnerParty = allParties[winner.no % allParties.length] || 'อิสระ';
+
+  const candidates = [
+    { rank: 1, name: winner.name,        no: winner.no,         party: winner.party,  score: winner.score },
+    { rank: 2, name: 'ผู้สมัครอันดับ 2', no: (winner.no % 9) + 80, party: runnerParty,   score: r1score      },
+    { rank: 3, name: 'ผู้สมัครอันดับ 3', no: (winner.no % 6) + 90, party: 'อิสระ',       score: r2score      },
+  ];
+
+  labelEl.textContent = `เขต${winner.district}`;
+  nameEl.textContent  = winner.district;
+  totalEl.textContent = total.toLocaleString();
+
+  const maxScore = candidates[0].score;
+  candList.innerHTML = candidates.map(c => {
+    const col = PARTY_COLORS[c.party] || PARTY_COLORS['อิสระ'];
+    const pct = (c.score / total * 100).toFixed(2);
+    const barPct = (c.score / maxScore * 100).toFixed(1);
+    const rankClass = c.rank === 1 ? 'rank-1' : c.rank === 2 ? 'rank-2' : 'rank-3';
+    const winnerClass = c.rank === 1 ? 'winner' : '';
+    return `
+      <div class="sk-sheet-cand-card ${winnerClass}">
+        <div class="sk-sheet-rank ${rankClass}">${c.rank}</div>
+        <div class="sk-sheet-avatar" style="background:${col.bg}20;border:1.5px solid ${col.bg}40"></div>
+        <div class="sk-sheet-cand-body">
+          <div class="sk-sheet-party-row">
+            <div class="sk-sheet-party-dot" style="background:${col.bg}"></div>
+            <span class="sk-sheet-party-name">${c.party}</span>
+          </div>
+          <div class="sk-sheet-cand-name">${c.name}</div>
+          <span class="sk-sheet-cand-no">เบอร์ ${c.no}</span>
+        </div>
+        <div class="sk-sheet-score-col">
+          <div class="sk-sheet-score-num">${c.score.toLocaleString()}</div>
+          <div class="sk-sheet-score-pct">${pct}%</div>
+        </div>
+        <div class="sk-sheet-bar-wrap">
+          <div class="sk-sheet-bar" style="width:${barPct}%;background:${col.bg}"></div>
+        </div>
+      </div>`;
+  }).join('');
+
+  overlay.classList.add('open');
+  overlay.setAttribute('aria-hidden', 'false');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeDistrictModal() {
+  const overlay = document.getElementById('skDistrictOverlay');
+  if (!overlay) return;
+  overlay.classList.remove('open');
+  overlay.setAttribute('aria-hidden', 'true');
+  document.body.style.overflow = '';
+}
+
+function initDistrictModal() {
+  const overlay  = document.getElementById('skDistrictOverlay');
+  const closeBtn = document.getElementById('skSheetClose');
+  if (closeBtn) closeBtn.addEventListener('click', closeDistrictModal);
+  if (overlay) overlay.addEventListener('click', e => {
+    if (e.target === overlay) closeDistrictModal();
+  });
 }
 
 // Tab switching
@@ -1113,11 +1186,9 @@ function initDistrictTabs() {
       tab.setAttribute('aria-selected', 'true');
       const target = tab.dataset.dtab;
       document.querySelectorAll('.district-panel').forEach(panel => {
-        if (panel.id === `dtab-${target}`) {
-          panel.classList.remove('district-panel-hidden');
-        } else {
-          panel.classList.add('district-panel-hidden');
-        }
+        panel.id === `dtab-${target}`
+          ? panel.classList.remove('district-panel-hidden')
+          : panel.classList.add('district-panel-hidden');
       });
     });
   });

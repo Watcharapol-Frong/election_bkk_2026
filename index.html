@@ -85,54 +85,136 @@
         <span class="section-num text-red">01</span>
         <h2 class="section-title">ผลการเลือกตั้ง & การนับคะแนน</h2>
       </div>
-      <p class="section-lead">การเลือกตั้งผู้ว่าราชการกรุงเทพมหานคร วันที่ 28 มิถุนายน 2569 สิ้นสุดลงแล้ว ผลการนับคะแนนอย่างไม่เป็นทางการ (นับแล้ว 95%) มีดังนี้:</p>
+      <p class="section-lead">ผลการนับคะแนนอย่างไม่เป็นทางการ (นับแล้ว 95%) · 28 มิถุนายน 2569 เวลา 22:35 น.</p>
 
-      <!-- Winner banner -->
-      <div class="results-winner-banner">
-        <div class="results-winner-label">🏆 ผู้ชนะการเลือกตั้ง (ผลไม่เป็นทางการ)</div>
-        <div class="results-winner-name">ชัชชาติ สิทธิพันธุ์</div>
-        <div class="results-winner-score">1,444,914 คะแนน · สมัยที่ 2</div>
+      <!-- Top 3 Podium -->
+      <div class="res-podium">
+        <!-- อันดับ 2 -->
+        <div class="podium-slot rank-2">
+          <div class="podium-rank-badge">อันดับ 2</div>
+          <div class="podium-photo-wrap" style="background:#9333EA;">
+            <img src="candidates/no-14.webp" alt="มัลลิกา" class="podium-photo" onerror="this.style.display='none'">
+          </div>
+          <div class="podium-info">
+            <div class="podium-name">มัลลิกา<br>บุญมีตระกูล มหาสุข</div>
+            <div class="podium-tags"><span class="podium-tag">เบอร์ 14</span><span class="podium-tag">อิสระ</span></div>
+            <div class="podium-pct" style="color:#9333EA;">13.52%</div>
+            <div class="podium-votes">288,171 คะแนน</div>
+          </div>
+        </div>
+        <!-- อันดับ 1 -->
+        <div class="podium-slot rank-1">
+          <div class="podium-rank-badge">อันดับ 1</div>
+          <div class="podium-photo-wrap" style="background:#16A34A;">
+            <img src="candidates/no-9.webp" alt="ชัชชาติ" class="podium-photo" onerror="this.style.display='none'">
+          </div>
+          <div class="podium-info">
+            <div class="podium-name">ชัชชาติ<br>สิทธิพันธุ์</div>
+            <div class="podium-tags"><span class="podium-tag">เบอร์ 9</span><span class="podium-tag">อิสระ</span></div>
+            <div class="podium-pct" style="color:#16A34A;">67.79%</div>
+            <div class="podium-votes">1,444,914 คะแนน</div>
+          </div>
+        </div>
+        <!-- อันดับ 3 -->
+        <div class="podium-slot rank-3">
+          <div class="podium-rank-badge">อันดับ 3</div>
+          <div class="podium-photo-wrap" style="background:#EA580C;">
+            <img src="candidates/no-10.webp" alt="ชัยวัฒน์" class="podium-photo" onerror="this.style.display='none'">
+          </div>
+          <div class="podium-info">
+            <div class="podium-name">ชัยวัฒน์<br>สถาวรวิจิตร</div>
+            <div class="podium-tags"><span class="podium-tag">เบอร์ 10</span><span class="podium-tag">พรรคประชาชน</span></div>
+            <div class="podium-pct" style="color:#EA580C;">8.30%</div>
+            <div class="podium-votes">176,934 คะแนน</div>
+          </div>
+        </div>
       </div>
 
-      <!-- Results table -->
-      <div class="results-grid">
-        <div class="results-card results-rank-1">
-          <div class="results-rank">อันดับ 1</div>
-          <div class="results-name">ชัชชาติ สิทธิพันธุ์</div>
-          <div class="results-score">1,444,914</div>
-          <div class="results-pct">~65.6%</div>
-          <div class="results-bar-wrap"><div class="results-bar" style="width:100%"></div></div>
-        </div>
-        <div class="results-card results-rank-2">
-          <div class="results-rank">อันดับ 2</div>
-          <div class="results-name">มัลลิกา บุญมีตระกูล มหาสุข</div>
-          <div class="results-score">288,171</div>
-          <div class="results-pct">~13.1%</div>
-          <div class="results-bar-wrap"><div class="results-bar" style="width:20%"></div></div>
-        </div>
-        <div class="results-card results-rank-3">
-          <div class="results-rank">อันดับ 3</div>
-          <div class="results-name">ชัยวัฒน์ สถาวรวิจิตร</div>
-          <div class="results-score">176,934</div>
-          <div class="results-pct">~8.0%</div>
-          <div class="results-bar-wrap"><div class="results-bar" style="width:12%"></div></div>
+      <!-- Rank 4+ Carousel -->
+      <div class="res-others-label">ผู้สมัครลำดับถัดไป</div>
+      <div class="res-carousel-wrap">
+        <div class="res-carousel" id="res-carousel">
+          <!-- อันดับ 4 -->
+          <div class="res-card">
+            <div class="res-card-rank">4</div>
+            <img src="candidates/no-5.webp" class="res-card-photo" onerror="this.style.display='none'">
+            <div class="res-card-info">
+              <div class="res-card-name">อนุชา บูรพชัยศรี</div>
+              <div class="res-card-tags"><span class="podium-tag">เบอร์ 5</span><span class="podium-tag">ประชาธิปัตย์</span></div>
+              <div class="res-card-bar-wrap"><div class="res-card-bar" style="width:71%"></div></div>
+            </div>
+            <div class="res-card-score">
+              <div class="res-card-pct">4.78%</div>
+              <div class="res-card-votes">101,819 คะแนน</div>
+            </div>
+          </div>
+          <!-- อันดับ 5 -->
+          <div class="res-card">
+            <div class="res-card-rank">5</div>
+            <img src="candidates/no-1.webp" class="res-card-photo" onerror="this.style.display='none'">
+            <div class="res-card-info">
+              <div class="res-card-name">ม.ล.กรกสิวัฒน์ เกษมศรี</div>
+              <div class="res-card-tags"><span class="podium-tag">เบอร์ 1</span><span class="podium-tag">อิสระ</span></div>
+              <div class="res-card-bar-wrap"><div class="res-card-bar" style="width:32%"></div></div>
+            </div>
+            <div class="res-card-score">
+              <div class="res-card-pct">2.14%</div>
+              <div class="res-card-votes">45,598 คะแนน</div>
+            </div>
+          </div>
+          <!-- อันดับ 6 -->
+          <div class="res-card">
+            <div class="res-card-rank">6</div>
+            <img src="candidates/no-2.webp" class="res-card-photo" onerror="this.style.display='none'">
+            <div class="res-card-info">
+              <div class="res-card-name">สมัย ละเลิศ</div>
+              <div class="res-card-tags"><span class="podium-tag">เบอร์ 2</span><span class="podium-tag">อิสระ</span></div>
+              <div class="res-card-bar-wrap"><div class="res-card-bar" style="width:12%"></div></div>
+            </div>
+            <div class="res-card-score">
+              <div class="res-card-pct">0.82%</div>
+              <div class="res-card-votes">17,462 คะแนน</div>
+            </div>
+          </div>
+          <!-- อันดับ 7 -->
+          <div class="res-card">
+            <div class="res-card-rank">7</div>
+            <img src="candidates/no-4.webp" class="res-card-photo" onerror="this.style.display='none'">
+            <div class="res-card-info">
+              <div class="res-card-name">ประทีป วัชรโชคเกษม</div>
+              <div class="res-card-tags"><span class="podium-tag">เบอร์ 4</span><span class="podium-tag">อิสระ</span></div>
+              <div class="res-card-bar-wrap"><div class="res-card-bar" style="width:10%"></div></div>
+            </div>
+            <div class="res-card-score">
+              <div class="res-card-pct">0.68%</div>
+              <div class="res-card-votes">14,476 คะแนน</div>
+            </div>
+          </div>
+          <!-- อันดับ 8 -->
+          <div class="res-card">
+            <div class="res-card-rank">8</div>
+            <img src="candidates/no-12.webp" class="res-card-photo" onerror="this.style.display='none'">
+            <div class="res-card-info">
+              <div class="res-card-name">พล.ต.ท.ชาญเทพ เสสะเวช</div>
+              <div class="res-card-tags"><span class="podium-tag">เบอร์ 12</span><span class="podium-tag">พรรคเศรษฐกิจ</span></div>
+              <div class="res-card-bar-wrap"><div class="res-card-bar" style="width:7%"></div></div>
+            </div>
+            <div class="res-card-score">
+              <div class="res-card-pct">0.47%</div>
+              <div class="res-card-votes">10,012 คะแนน</div>
+            </div>
+          </div>
         </div>
       </div>
 
-      <!-- Turnout stats -->
-      <div class="results-stats-row">
-        <div class="results-stat-item">
-          <div class="results-stat-val">2,201,739</div>
-          <div class="results-stat-label">ผู้มาใช้สิทธิ</div>
+      <!-- Turnout bar -->
+      <div class="res-turnout">
+        <div class="res-turnout-label">
+          <span>นับคะแนนแล้ว <strong>2,201,738</strong></span>
+          <span class="res-turnout-pct">95%</span>
         </div>
-        <div class="results-stat-item">
-          <div class="results-stat-val">49.7%</div>
-          <div class="results-stat-label">ผู้ออกมาใช้สิทธิ</div>
-        </div>
-        <div class="results-stat-item">
-          <div class="results-stat-val">4,428,644</div>
-          <div class="results-stat-label">ผู้มีสิทธิทั้งหมด</div>
-        </div>
+        <div class="res-turnout-bar-wrap"><div class="res-turnout-bar" style="width:95%"></div></div>
+        <div class="res-turnout-sub">ผู้มีสิทธิทั้งหมด 4,428,644 คน · ผู้มาใช้สิทธิ 49.7%</div>
       </div>
 
       <p class="policy-note">* ผลคะแนนอย่างไม่เป็นทางการ นับแล้ว 95% ณ วันที่ 28 มิ.ย. 2569 · ที่มา: ไทยรัฐ, Thai PBS · กกต. จะรับรองผลภายใน 30 วัน</p>

@@ -1021,17 +1021,12 @@ function initSKInteractions() {
   function openPartyGroup(party) {
     skActiveParty = party;
     _applyPartyHighlight(party);
-    showPartyTooltip(party);
   }
 
   function closePartyGroup() {
     skActiveParty = null;
     document.querySelectorAll('.sk-seat').forEach(el => el.classList.remove('highlighted', 'dimmed'));
     document.querySelectorAll('.sk-legend-item').forEach(el => el.classList.remove('active-legend'));
-    if (partyTooltip) {
-      partyTooltip.classList.remove('open');
-      partyTooltip.setAttribute('aria-hidden', 'true');
-    }
   }
 
   // Seat click → district modal

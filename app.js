@@ -851,7 +851,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   loadResultsFromAPI();
-  renderSKGrid();
+  renderSKGrid();       // first render (also builds legend)
+  initSKInteractions(); // bind events ONCE
   initDistrictTabs();
   initDistrictModal();
 
@@ -976,12 +977,9 @@ function renderSKGrid(mode) {
   const sorted = _buildSKSorted();
 
   // Choose seat order based on mode
-  let seats;
-  if (skViewMode === 'sort') {
-    seats = [...SK_MOCK_DATA].sort((a, b) => a.no - b.no);
-  } else {
-    seats = sorted.flatMap(([, cands]) => cands);
-  }
+  const seats = skViewMode === 'sort'
+    ? [...SK_MOCK_DATA].sort((a, b) => a.no - b.no)
+    : sorted.flatMap(([, cands]) => cands);
 
   // Render seats
   grid.innerHTML = seats.map(c => {
@@ -998,48 +996,45 @@ function renderSKGrid(mode) {
     ><span class="sk-seat-num">${c.no}</span></div>`;
   }).join('');
 
-  // Render legend
-  legend.innerHTML = sorted.map(([party, cands]) => {
-    const col = PARTY_COLORS[party] || PARTY_COLORS['อิสระ'];
-    return `<div class="sk-legend-item" data-party="${party}" role="button" tabindex="0">
-      <div class="sk-legend-dot" style="background:${col.bg}"></div>
-      <span>${party.replace('พรรค','')}</span>
-      <span class="sk-legend-count">${cands.length} ที่นั่ง</span>
-    </div>`;
-  }).join('');
+  // Render legend (only if first render — legend doesn't change between modes)
+  if (!legend.children.length) {
+    legend.innerHTML = sorted.map(([party, cands]) => {
+      const col = PARTY_COLORS[party] || PARTY_COLORS['อิสระ'];
+      return `<div class="sk-legend-item" data-party="${party}" role="button" tabindex="0">
+        <div class="sk-legend-dot" style="background:${col.bg}"></div>
+        <span>${party.replace('พรรค','')}</span>
+        <span class="sk-legend-count">${cands.length} ที่นั่ง</span>
+      </div>`;
+    }).join('');
+  }
 
-  bindSKInteractions(sorted);
+  // Re-apply highlight if a party is active
+  if (skActiveParty) _applyPartyHighlight(skActiveParty);
 }
 
-function bindSKInteractions(sorted) {
+// Called ONCE — bind all SK interactions
+function initSKInteractions() {
   const grid         = document.getElementById('sk-seat-grid');
   const legend       = document.getElementById('sk-legend');
   const partyTooltip = document.getElementById('sk-party-tooltip');
 
-  // ── Legend click → highlight party group + party tooltip ─────────────── //
   function openPartyGroup(party) {
     skActiveParty = party;
-    grid.querySelectorAll('.sk-seat').forEach(el => {
-      el.classList.toggle('highlighted', el.dataset.party === party);
-      el.classList.toggle('dimmed',      el.dataset.party !== party);
-    });
-    legend.querySelectorAll('.sk-legend-item').forEach(el => {
-      el.classList.toggle('active-legend', el.dataset.party === party);
-    });
-    showPartyTooltip(party, sorted);
+    _applyPartyHighlight(party);
+    showPartyTooltip(party);
   }
 
   function closePartyGroup() {
     skActiveParty = null;
-    grid.querySelectorAll('.sk-seat').forEach(el => el.classList.remove('highlighted', 'dimmed'));
-    legend.querySelectorAll('.sk-legend-item').forEach(el => el.classList.remove('active-legend'));
+    document.querySelectorAll('.sk-seat').forEach(el => el.classList.remove('highlighted', 'dimmed'));
+    document.querySelectorAll('.sk-legend-item').forEach(el => el.classList.remove('active-legend'));
     if (partyTooltip) {
       partyTooltip.classList.remove('open');
       partyTooltip.setAttribute('aria-hidden', 'true');
     }
   }
 
-  // ── Seat click → district popup ───────────────────────────────────────── //
+  // Seat click → district modal
   grid.addEventListener('click', e => {
     const seat = e.target.closest('.sk-seat');
     if (!seat) return;
@@ -1052,6 +1047,7 @@ function bindSKInteractions(sorted) {
     });
   });
 
+  // Legend click → party group highlight + detail card
   legend.addEventListener('click', e => {
     const item = e.target.closest('.sk-legend-item');
     if (!item) return;
@@ -1060,14 +1056,22 @@ function bindSKInteractions(sorted) {
   });
 
   document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') {
-      closePartyGroup();
-      closeDistrictModal();
-    }
+    if (e.key === 'Escape') { closePartyGroup(); closeDistrictModal(); }
   });
 }
 
-function showPartyTooltip(party, sorted) {
+function _applyPartyHighlight(party) {
+  document.querySelectorAll('.sk-seat').forEach(el => {
+    el.classList.toggle('highlighted', el.dataset.party === party);
+    el.classList.toggle('dimmed',      el.dataset.party !== party);
+  });
+  document.querySelectorAll('.sk-legend-item').forEach(el => {
+    el.classList.toggle('active-legend', el.dataset.party === party);
+  });
+}
+
+function showPartyTooltip(party) {
+  const sorted = _buildSKSorted();
   const tooltip = document.getElementById('sk-party-tooltip');
   const content = document.getElementById('sk-party-tooltip-content');
   if (!tooltip || !content) return;

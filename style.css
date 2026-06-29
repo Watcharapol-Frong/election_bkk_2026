@@ -2449,6 +2449,9 @@ a {
   font-weight: 700;
   color: var(--text-dark);
   line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .res-row-tags {
@@ -2718,10 +2721,10 @@ a {
 
 .sk-seat-num {
   font-family: var(--font-numeric);
-  font-size: 0.82rem;
+  font-size: 1.05rem;
   font-weight: 800;
-  color: rgba(255,255,255,0.95);
-  text-shadow: 0 1px 4px rgba(0,0,0,0.35);
+  color: rgba(255,255,255,0.96);
+  text-shadow: 0 1px 4px rgba(0,0,0,0.4);
   line-height: 1;
   pointer-events: none;
   user-select: none;

@@ -956,50 +956,57 @@ const SK_MOCK_DATA = [
 ];
 
 let skActiveParty = null;
+let skViewMode    = 'group'; // 'group' | 'sort'
 
-function renderSKGrid() {
-  const grid   = document.getElementById('sk-seat-grid');
-  const legend = document.getElementById('sk-legend');
-  if (!grid || !legend) return;
-
-  // Group by party, sorted by seat count desc
+function _buildSKSorted() {
   const grouped = {};
   SK_MOCK_DATA.forEach(c => {
     if (!grouped[c.party]) grouped[c.party] = [];
     grouped[c.party].push(c);
   });
-  const sorted = Object.entries(grouped).sort((a, b) => b[1].length - a[1].length);
+  return Object.entries(grouped).sort((a, b) => b[1].length - a[1].length);
+}
 
-  // Render seats grouped by party — show candidate เบอร์ on each square
-  let seatsHTML = '';
-  sorted.forEach(([party, cands]) => {
-    const col = PARTY_COLORS[party] || PARTY_COLORS['อิสระ'];
-    cands.forEach(c => {
-      seatsHTML += `<div class="sk-seat"
-        style="background:${col.bg}"
-        data-party="${party}"
-        data-no="${c.no}"
-        data-name="${c.name}"
-        data-district="${c.district}"
-        data-score="${c.score}"
-        role="button" tabindex="0"
-        aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district} ${party}"
-      ><span class="sk-seat-num">${c.no}</span></div>`;
-    });
-  });
-  grid.innerHTML = seatsHTML;
+function renderSKGrid(mode) {
+  if (mode !== undefined) skViewMode = mode;
+  const grid   = document.getElementById('sk-seat-grid');
+  const legend = document.getElementById('sk-legend');
+  if (!grid || !legend) return;
+
+  const sorted = _buildSKSorted();
+
+  // Choose seat order based on mode
+  let seats;
+  if (skViewMode === 'sort') {
+    seats = [...SK_MOCK_DATA].sort((a, b) => a.no - b.no);
+  } else {
+    seats = sorted.flatMap(([, cands]) => cands);
+  }
+
+  // Render seats
+  grid.innerHTML = seats.map(c => {
+    const col = PARTY_COLORS[c.party] || PARTY_COLORS['อิสระ'];
+    return `<div class="sk-seat"
+      style="background:${col.bg}"
+      data-party="${c.party}"
+      data-no="${c.no}"
+      data-name="${c.name}"
+      data-district="${c.district}"
+      data-score="${c.score}"
+      role="button" tabindex="0"
+      aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district} ${c.party}"
+    ><span class="sk-seat-num">${c.no}</span></div>`;
+  }).join('');
 
   // Render legend
-  let legendHTML = '';
-  sorted.forEach(([party, cands]) => {
+  legend.innerHTML = sorted.map(([party, cands]) => {
     const col = PARTY_COLORS[party] || PARTY_COLORS['อิสระ'];
-    legendHTML += `<div class="sk-legend-item" data-party="${party}" role="button" tabindex="0">
+    return `<div class="sk-legend-item" data-party="${party}" role="button" tabindex="0">
       <div class="sk-legend-dot" style="background:${col.bg}"></div>
       <span>${party.replace('พรรค','')}</span>
       <span class="sk-legend-count">${cands.length} ที่นั่ง</span>
     </div>`;
-  });
-  legend.innerHTML = legendHTML;
+  }).join('');
 
   bindSKInteractions(sorted);
 }
@@ -1173,15 +1180,13 @@ function initDistrictModal() {
   });
 }
 
-// Tab switching
+// Tab switching + Group/Sort toggle
 function initDistrictTabs() {
+  // Main tabs
   const tabs = document.querySelectorAll('.district-tab');
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
-      tabs.forEach(t => {
-        t.classList.remove('active');
-        t.setAttribute('aria-selected', 'false');
-      });
+      tabs.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
       tab.classList.add('active');
       tab.setAttribute('aria-selected', 'true');
       const target = tab.dataset.dtab;
@@ -1190,6 +1195,16 @@ function initDistrictTabs() {
           ? panel.classList.remove('district-panel-hidden')
           : panel.classList.add('district-panel-hidden');
       });
+    });
+  });
+
+  // Group / Sort toggle
+  const toggleBtns = document.querySelectorAll('.sk-toggle-btn');
+  toggleBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      toggleBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderSKGrid(btn.dataset.mode);
     });
   });
 }

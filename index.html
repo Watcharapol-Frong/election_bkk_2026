@@ -104,6 +104,11 @@
 
         <!-- ส.ก. Panel -->
         <div id="dtab-sk" class="district-panel">
+          <!-- Group / Sort toggle -->
+          <div class="sk-view-toggle">
+            <button class="sk-toggle-btn active" data-mode="group" id="skToggleGroup">จัดกลุ่ม</button>
+            <button class="sk-toggle-btn" data-mode="sort" id="skToggleSort">เรียงเบอร์</button>
+          </div>
           <div id="sk-seat-grid" class="sk-seat-grid" role="img" aria-label="50 ที่นั่ง ส.ก. จำแนกตามพรรค"></div>
           <div id="sk-legend" class="sk-legend"></div>
           <!-- Party group tooltip (legend click) -->
@@ -494,19 +499,18 @@
   <!-- District popup modal -->
   <div id="skDistrictOverlay" class="sk-district-overlay" aria-hidden="true" role="dialog" aria-modal="true">
     <div class="sk-district-sheet">
-      <div class="sk-district-sheet-handle"></div>
       <div class="sk-district-sheet-header">
         <div class="sk-sheet-title-group">
           <div class="sk-sheet-district-label" id="skSheetLabel">เขต</div>
           <div class="sk-sheet-district-name" id="skSheetName">—</div>
         </div>
-        <div>
+        <div class="sk-sheet-header-right">
           <div class="sk-sheet-vote-total" id="skSheetTotal">—</div>
           <div class="sk-sheet-vote-label">นับคะแนนแล้ว</div>
         </div>
         <button class="sk-sheet-close" id="skSheetClose" aria-label="ปิด">✕</button>
       </div>
-      <div class="sk-sheet-timestamp" id="skSheetTimestamp">
+      <div class="sk-sheet-timestamp">
         <span>🕐</span><span>อัปเดตล่าสุด ณ วันที่ 29 มิ.ย. 2569 18:25 น.</span>
       </div>
       <div class="sk-sheet-cand-list" id="skSheetCandList"></div>

@@ -152,7 +152,18 @@ const TRANSLATIONS_EN = {
   resWinnerTerm: 'Term 2',
   resScoreUnit: 'votes',
   resCountedLabel: 'Counted so far',
+  resTournoutHint: 'Tap for details ›',
   resTurnoutSub: 'Total eligible voters 4,428,644 · Turnout 49.7%',
+  turnoutModalTitle: 'Ballot Statistics',
+  turnoutModalSub: 'Ballots counted (unofficial)',
+  turnoutModalPctNote: '(of estimated turnout)',
+  turnoutStatEligible: 'Eligible voters',
+  turnoutStatTurnout: 'Turnout',
+  turnoutStatUnit: 'persons',
+  turnoutStatBallot: 'ballots',
+  turnoutStatGood: 'Valid ballots',
+  turnoutStatSpoiled: 'Spoiled ballots',
+  turnoutStatAbstain: 'No vote',
   resOthersLabel: 'Other Candidates',
   resPolicyNote: '* Unofficial results, 95% counted as of 28 Jun 2026 · Source: Thairath, Thai PBS · EC to certify within 30 days',
   resNo: 'No.',
@@ -767,6 +778,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   loadResultsFromAPI();
+
+  // Turnout popup
+  const turnoutBtn   = document.getElementById('turnoutBarBtn');
+  const turnoutModal = document.getElementById('turnoutModal');
+  const turnoutClose = document.getElementById('turnoutModalClose');
+  const backdrop     = turnoutModal && turnoutModal.querySelector('.turnout-modal-backdrop');
+
+  function openTurnout()  { turnoutModal.classList.add('open'); turnoutModal.setAttribute('aria-hidden','false'); }
+  function closeTurnout() { turnoutModal.classList.remove('open'); turnoutModal.setAttribute('aria-hidden','true'); }
+
+  if (turnoutBtn)   turnoutBtn.addEventListener('click', openTurnout);
+  if (turnoutClose) turnoutClose.addEventListener('click', closeTurnout);
+  if (backdrop)     backdrop.addEventListener('click', closeTurnout);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTurnout(); });
 });
 
 

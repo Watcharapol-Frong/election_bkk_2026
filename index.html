@@ -92,14 +92,63 @@
         <div class="res-loading">กำลังโหลดข้อมูล...</div>
       </div>
 
-      <!-- Turnout bar -->
-      <div class="res-turnout">
+      <!-- Turnout bar (clickable → popup) -->
+      <button class="res-turnout" id="turnoutBarBtn" aria-haspopup="dialog">
         <div class="res-turnout-label">
           <span data-i18n="resCountedLabel">นับคะแนนแล้ว</span> <strong>2,201,738</strong>
           <span class="res-turnout-pct">95%</span>
+          <span class="res-turnout-tap-hint" data-i18n="resTournoutHint">กดเพื่อดูรายละเอียด ›</span>
         </div>
         <div class="res-turnout-bar-wrap"><div class="res-turnout-bar" style="width:95%"></div></div>
         <div data-i18n="resTurnoutSub" class="res-turnout-sub">ผู้มีสิทธิทั้งหมด 4,428,644 คน · ผู้มาใช้สิทธิ 49.7%</div>
+      </button>
+
+      <!-- Turnout detail popup -->
+      <div id="turnoutModal" class="turnout-modal" role="dialog" aria-modal="true" aria-hidden="true">
+        <div class="turnout-modal-backdrop"></div>
+        <div class="turnout-modal-box">
+          <div class="turnout-modal-header">
+            <h3 data-i18n="turnoutModalTitle" class="turnout-modal-title">สถิติการนับคะแนน</h3>
+            <button class="turnout-modal-close" id="turnoutModalClose" aria-label="ปิด">✕</button>
+          </div>
+
+          <div class="turnout-modal-counted">
+            <div data-i18n="turnoutModalSub" class="turnout-modal-sub">นับคะแนนแล้ว (อย่างไม่เป็นทางการ)</div>
+            <div class="turnout-modal-big">2,201,738</div>
+            <div class="turnout-modal-bar-wrap"><div class="turnout-modal-bar" style="width:95%"></div></div>
+            <div class="turnout-modal-pct-row">
+              <span class="turnout-modal-pct-val">95%</span>
+              <span data-i18n="turnoutModalPctNote" class="turnout-modal-pct-note">(ของประมาณการผู้มาใช้สิทธิ)</span>
+            </div>
+          </div>
+
+          <div class="turnout-modal-grid">
+            <div class="turnout-stat-card">
+              <div data-i18n="turnoutStatEligible" class="turnout-stat-label">ผู้มีสิทธิ</div>
+              <div class="turnout-stat-val">4,428,646 <span data-i18n="turnoutStatUnit">คน</span></div>
+            </div>
+            <div class="turnout-stat-card">
+              <div data-i18n="turnoutStatTurnout" class="turnout-stat-label">มาใช้สิทธิ</div>
+              <div class="turnout-stat-val">2,201,923 <span data-i18n="turnoutStatUnit">คน</span></div>
+              <div class="turnout-stat-pct">49.72%</div>
+            </div>
+            <div class="turnout-stat-card">
+              <div data-i18n="turnoutStatGood" class="turnout-stat-label">บัตรดี</div>
+              <div class="turnout-stat-val">2,131,340 <span data-i18n="turnoutStatBallot">ใบ</span></div>
+              <div class="turnout-stat-pct">96.80%</div>
+            </div>
+            <div class="turnout-stat-card">
+              <div data-i18n="turnoutStatSpoiled" class="turnout-stat-label">บัตรเสีย</div>
+              <div class="turnout-stat-val">20,784 <span data-i18n="turnoutStatBallot">ใบ</span></div>
+              <div class="turnout-stat-pct">0.94%</div>
+            </div>
+            <div class="turnout-stat-card span2">
+              <div data-i18n="turnoutStatAbstain" class="turnout-stat-label">ไม่ประสงค์ลงคะแนน</div>
+              <div class="turnout-stat-val">49,614 <span data-i18n="turnoutStatUnit">คน</span></div>
+              <div class="turnout-stat-pct">2.25%</div>
+            </div>
+          </div>
+        </div>
       </div>
 
       <p data-i18n="resPolicyNote" class="policy-note">* ผลคะแนนอย่างไม่เป็นทางการ นับแล้ว 95% ณ วันที่ 28 มิ.ย. 2569 · ที่มา: ไทยรัฐ, Thai PBS · กกต. จะรับรองผลภายใน 30 วัน</p>

@@ -963,8 +963,31 @@ const SK_MOCK_DATA = [
   { district:'บางนา',         no:7,  name:'รัชนก ปัญญาดี',          party:'อิสระ',             score:10900 },
 ];
 
-let skActiveParty = null;
-let skViewMode    = 'group'; // 'group' | 'sort'
+let skActiveParty  = null;
+let skViewMode     = 'group'; // 'group' | 'sort'
+let skDisplayMode  = 'grid';  // 'grid'  | 'map'
+
+// Geographic grid positions for Bangkok's 50 districts (col 1-9, row 1-9)
+const BKK_MAP_GRID = {
+  'สายไหม':       { r:1, c:4 }, 'ดอนเมือง':     { r:1, c:5 }, 'หนองจอก':      { r:1, c:9 },
+  'บางเขน':       { r:2, c:3 }, 'หลักสี่':      { r:2, c:4 }, 'มีนบุรี':      { r:2, c:8 },
+  'ตลิ่งชัน':    { r:3, c:1 }, 'บางพลัด':     { r:3, c:2 }, 'บางซื่อ':     { r:3, c:3 },
+  'จตุจักร':     { r:3, c:4 }, 'ลาดพร้าว':    { r:3, c:5 }, 'บึงกุ่ม':     { r:3, c:6 },
+  'คันนายาว':    { r:3, c:7 }, 'ลาดกระบัง':   { r:3, c:8 },
+  'ทวีวัฒนา':    { r:4, c:1 }, 'บางกอกน้อย':  { r:4, c:2 }, 'ดุสิต':       { r:4, c:3 },
+  'พญาไท':       { r:4, c:4 }, 'ดินแดง':      { r:4, c:5 }, 'ห้วยขวาง':    { r:4, c:6 },
+  'วังทองหลาง':  { r:4, c:7 }, 'บางกะปิ':     { r:4, c:8 }, 'สะพานสูง':    { r:4, c:9 },
+  'บางแค':       { r:5, c:1 }, 'บางกอกใหญ่':  { r:5, c:2 }, 'พระนคร':      { r:5, c:3 },
+  'ราชเทวี':     { r:5, c:4 }, 'ป้อมปราบ':    { r:5, c:5 }, 'สัมพันธวงศ์': { r:5, c:6 },
+  'สวนหลวง':     { r:5, c:7 }, 'ประเวศ':      { r:5, c:8 },
+  'ภาษีเจริญ':   { r:6, c:1 }, 'ธนบุรี':      { r:6, c:2 }, 'คลองสาน':     { r:6, c:3 },
+  'ปทุมวัน':     { r:6, c:4 }, 'บางรัก':      { r:6, c:5 }, 'ยานนาวา':     { r:6, c:6 },
+  'คลองเตย':     { r:6, c:7 }, 'พระโขนง':     { r:6, c:8 }, 'บางนา':       { r:6, c:9 },
+  'หนองแขม':     { r:7, c:1 }, 'จอมทอง':      { r:7, c:2 }, 'บางคอแหลม':   { r:7, c:3 },
+  'สาทร':        { r:7, c:4 },
+  'ราษฎร์บูรณะ': { r:8, c:2 }, 'บางบอน':      { r:9, c:1 },
+  'ทุ่งครุ':     { r:9, c:2 }, 'บางขุนเทียน': { r:9, c:3 },
+};
 
 function _buildSKSorted() {
   const grouped = {};
@@ -983,27 +1006,31 @@ function renderSKGrid(mode) {
 
   const sorted = _buildSKSorted();
 
-  // Choose seat order based on mode
-  const seats = skViewMode === 'sort'
-    ? [...SK_MOCK_DATA].sort((a, b) => a.no - b.no)
-    : sorted.flatMap(([, cands]) => cands);
+  if (skDisplayMode === 'map') {
+    _renderSKMap(grid);
+  } else {
+    // Choose seat order based on mode
+    const seats = skViewMode === 'sort'
+      ? [...SK_MOCK_DATA].sort((a, b) => a.no - b.no)
+      : sorted.flatMap(([, cands]) => cands);
 
-  // Render seats
-  grid.innerHTML = seats.map(c => {
-    const col = PARTY_COLORS[c.party] || PARTY_COLORS['อิสระ'];
-    return `<div class="sk-seat"
-      style="background:${col.bg}"
-      data-party="${c.party}"
-      data-no="${c.no}"
-      data-name="${c.name}"
-      data-district="${c.district}"
-      data-score="${c.score}"
-      role="button" tabindex="0"
-      aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district} ${c.party}"
-    ><span class="sk-seat-num">${c.no}</span></div>`;
-  }).join('');
+    grid.classList.remove('sk-seat-grid--map');
+    grid.innerHTML = seats.map(c => {
+      const col = PARTY_COLORS[c.party] || PARTY_COLORS['อิสระ'];
+      return `<div class="sk-seat"
+        style="background:${col.bg}"
+        data-party="${c.party}"
+        data-no="${c.no}"
+        data-name="${c.name}"
+        data-district="${c.district}"
+        data-score="${c.score}"
+        role="button" tabindex="0"
+        aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district} ${c.party}"
+      ><span class="sk-seat-num">${c.no}</span></div>`;
+    }).join('');
+  }
 
-  // Render legend (only if first render — legend doesn't change between modes)
+  // Render legend (only once — doesn't change between modes)
   if (!legend.children.length) {
     legend.innerHTML = sorted.map(([party, cands]) => {
       const col = PARTY_COLORS[party] || PARTY_COLORS['อิสระ'];
@@ -1015,8 +1042,37 @@ function renderSKGrid(mode) {
     }).join('');
   }
 
-  // Re-apply highlight if a party is active
   if (skActiveParty) _applyPartyHighlight(skActiveParty);
+}
+
+function _renderSKMap(grid) {
+  // Build district → winner lookup
+  const winnerMap = {};
+  SK_MOCK_DATA.forEach(c => {
+    if (!winnerMap[c.district] || c.score > winnerMap[c.district].score) {
+      winnerMap[c.district] = c;
+    }
+  });
+
+  grid.classList.add('sk-seat-grid--map');
+  grid.innerHTML = Object.entries(BKK_MAP_GRID).map(([district, pos]) => {
+    const c   = winnerMap[district];
+    const col = c ? (PARTY_COLORS[c.party] || PARTY_COLORS['อิสระ']) : { bg: '#C8C8C8', text: '#888' };
+    const bg  = col.bg;
+    const attrs = c
+      ? `data-party="${c.party}" data-no="${c.no}" data-name="${c.name}" data-district="${c.district}" data-score="${c.score}" role="button" tabindex="0" aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district}"`
+      : `aria-hidden="true"`;
+    const numHtml = c
+      ? `<span class="sk-seat-num sk-seat-num--map">${c.no}</span>`
+      : '';
+    const shortName = district.length > 4 ? district.slice(0, 4) : district;
+    return `<div class="sk-seat sk-seat--map ${c ? '' : 'sk-seat--unknown'}"
+      style="grid-row:${pos.r};grid-column:${pos.c};background:${bg}"
+      ${attrs}>
+      ${numHtml}
+      <span class="sk-seat-district-label">${shortName}</span>
+    </div>`;
+  }).join('');
 }
 
 // Called ONCE — bind all SK interactions
@@ -1204,15 +1260,37 @@ function initDistrictTabs() {
     });
   });
 
-  // Group / Sort toggle
-  const toggleBtns = document.querySelectorAll('.sk-toggle-btn');
-  toggleBtns.forEach(btn => {
+  // Grid / Map display toggle
+  const displayBtns = document.querySelectorAll('.sk-display-btn');
+  const fab         = document.getElementById('skGroupFab');
+  displayBtns.forEach(btn => {
     btn.addEventListener('click', () => {
-      toggleBtns.forEach(b => b.classList.remove('active'));
+      displayBtns.forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
-      renderSKGrid(btn.dataset.mode);
+      skDisplayMode = btn.dataset.display;
+      // FAB only visible in grid mode
+      if (fab) fab.classList.toggle('sk-group-fab--hidden', skDisplayMode === 'map');
+      renderSKGrid();
     });
   });
+
+  // FAB: toggle group / sort
+  function _updateFabLabel() {
+    const label = document.getElementById('skGroupFabLabel');
+    if (!label) return;
+    if (skViewMode === 'group') {
+      label.textContent = currentLang === 'en' ? 'By Party' : 'จัดกลุ่ม';
+    } else {
+      label.textContent = currentLang === 'en' ? 'By Number' : 'เรียงเบอร์';
+    }
+  }
+  if (fab) {
+    fab.addEventListener('click', () => {
+      skViewMode = skViewMode === 'group' ? 'sort' : 'group';
+      _updateFabLabel();
+      renderSKGrid();
+    });
+  }
 }
 
 // ==========================================================================

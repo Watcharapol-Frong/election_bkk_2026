@@ -2649,33 +2649,62 @@ a {
   display: none;
 }
 
-/* ── Group / Sort toggle ────────────────────────────────────────────────── */
-.sk-view-toggle {
+/* ── Grid / Map display toggle ───────────────────────────────────────────── */
+.sk-display-toggle {
   display: flex;
+  align-items: center;
   gap: 6px;
   margin-bottom: 12px;
 }
 
-.sk-toggle-btn {
-  padding: 4px 13px;
-  font-size: 0.76rem;
-  font-weight: 600;
+.sk-display-btn {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: 0.85rem;
+  font-weight: 700;
   font-family: var(--font-heading);
-  border: 1.5px solid var(--border-color);
-  border-radius: 20px;
-  cursor: pointer;
-  background: transparent;
   color: var(--text-muted);
-  transition: all 0.15s;
+  cursor: pointer;
+  letter-spacing: 0.01em;
+  transition: color 0.15s;
 }
 
-.sk-toggle-btn:hover { background: var(--bg-cream); color: var(--text-dark); }
+.sk-display-btn.active { color: var(--text-dark); }
+.sk-display-btn:hover  { color: var(--text-dark); }
 
-.sk-toggle-btn.active {
+.sk-display-sep {
+  font-size: 0.85rem;
+  color: var(--border-color);
+  user-select: none;
+}
+
+/* ── Group FAB ───────────────────────────────────────────────────────────── */
+#dtab-sk { position: relative; }
+
+.sk-group-fab {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 6px 13px 6px 10px;
   background: var(--color-teal);
-  border-color: var(--color-teal);
   color: #fff;
+  border: none;
+  border-radius: 20px;
+  font-size: 0.76rem;
+  font-weight: 700;
+  font-family: var(--font-heading);
+  cursor: pointer;
+  box-shadow: 0 2px 8px rgba(42,157,143,0.30);
+  transition: opacity 0.15s, transform 0.15s;
+  z-index: 2;
 }
+
+.sk-group-fab:hover { filter: brightness(1.08); }
+.sk-group-fab--hidden { opacity: 0; pointer-events: none; }
 
 /* ── Placeholder (ผู้ว่า tab) ────────────────────────────────────────────── */
 .district-placeholder {
@@ -2697,6 +2726,12 @@ a {
   grid-template-columns: repeat(6, 1fr);
   gap: 6px;
   margin-bottom: 14px;
+}
+
+.sk-seat-grid--map {
+  grid-template-columns: repeat(9, 1fr);
+  grid-template-rows: repeat(9, 1fr);
+  gap: 3px;
 }
 
 .sk-seat {
@@ -2740,6 +2775,41 @@ a {
   color: rgba(50,70,80,0.9);
   text-shadow: none;
 }
+
+/* ── Map mode seat ───────────────────────────────────────────────────────── */
+.sk-seat--map {
+  flex-direction: column;
+  gap: 1px;
+  border-radius: 5px;
+  min-height: unset;
+}
+
+.sk-seat--unknown {
+  opacity: 0.35;
+  cursor: default;
+  pointer-events: none;
+}
+
+.sk-seat-num--map {
+  font-size: 0.72rem;
+  line-height: 1;
+}
+
+.sk-seat-district-label {
+  font-size: 0.38rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.88);
+  text-shadow: none;
+  line-height: 1;
+  letter-spacing: -0.01em;
+  overflow: hidden;
+  text-overflow: clip;
+  white-space: nowrap;
+  max-width: 100%;
+  padding: 0 1px;
+}
+
+.sk-seat--unknown .sk-seat-district-label { color: rgba(80,80,80,0.7); }
 
 /* ── Legend ──────────────────────────────────────────────────────────────── */
 .sk-legend {

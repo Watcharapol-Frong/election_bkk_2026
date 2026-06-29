@@ -130,8 +130,11 @@
 
         <button class="res-turnout" id="turnoutBarBtn" aria-haspopup="true" aria-expanded="false">
           <div class="res-turnout-label">
-            <span data-i18n="resCountedLabel">นับคะแนนแล้ว</span> <strong>2,201,738</strong>
-            <span class="res-turnout-pct">95%</span>
+            <div class="res-turnout-left">
+              <span data-i18n="resCountedLabel">นับคะแนนแล้ว</span>
+              <strong id="turnoutCountDisplay">2,201,738</strong>
+              <span class="res-turnout-pct" id="turnoutPctDisplay">95%</span>
+            </div>
             <span class="res-turnout-tap-hint" data-i18n="resTournoutHint">กดเพื่อดูรายละเอียด ›</span>
           </div>
           <div class="res-turnout-bar-wrap"><div class="res-turnout-bar" style="width:95%"></div></div>

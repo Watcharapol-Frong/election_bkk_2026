@@ -2533,6 +2533,12 @@ a {
   margin-bottom: 8px;
 }
 
+.res-turnout-left {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
 .res-turnout-pct {
   font-family: var(--font-numeric);
   font-size: 15px;

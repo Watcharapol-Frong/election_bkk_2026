@@ -595,6 +595,121 @@ const POLICY_COMPARISON_DATA = {
   }
 };
 
+// ==========================================================================
+// LIVE RESULTS — PPTV API
+// ==========================================================================
+const RESULTS_API = 'https://www-api.pptvhd36.com/%E0%B9%80%E0%B8%A5%E0%B8%B7%E0%B8%AD%E0%B8%81%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%A7%E0%B9%88%E0%B8%B2%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%AF2569/api/rank';
+
+const CAND_NAME_EN = {
+  1: 'M.L. Kornkasiwat Kasemsri',
+  2: 'Samai Lalert',
+  3: 'Phongsak Phaewphong',
+  4: 'Prateep Watcharachokekasem',
+  5: 'Anucha Burapachaisri',
+  6: 'Pisal Kittiyaowmaly',
+  7: 'Phaspong Chaiwirinawanich',
+  8: 'Weerapon Lueprasitkul',
+  9: 'Chadchart Sittipunt',
+  10: 'Chaiwat Sathawornwijit',
+  11: 'Prayoon Krongyos',
+  12: 'Pol.Lt.Gen. Chanthep Sesavej',
+  13: 'Komsan Panthuwichitkul',
+  14: 'Mallika Boonmeetrakool Mahasuk',
+  15: 'Oharn Tangtrakul',
+  16: 'Srirat Changphet',
+  17: 'Lana Mongkolhasdinthon',
+  18: 'Somchai Chareonwankieat',
+};
+
+const PARTY_EN = {
+  'อิสระ': 'Independent',
+  'พรรคประชาชน': "People's Party",
+  'พรรคประชาธิปัตย์': 'Democrat Party',
+  'พรรคเศรษฐกิจ': 'Economy Party',
+};
+
+let resultsData = null;
+
+function _candName(c, lang) {
+  return lang === 'en'
+    ? (CAND_NAME_EN[c.no] || `${c.f_name} ${c.l_name}`)
+    : `${c.f_name} ${c.l_name}`;
+}
+
+function _partyName(c, lang) {
+  return lang === 'en' ? (PARTY_EN[c.party_name] || c.party_name) : c.party_name;
+}
+
+function renderResults(lang) {
+  const wrap = document.getElementById('res-dynamic-wrap');
+  if (!wrap || !resultsData) return;
+
+  const top3 = resultsData.filter(c => c.rank <= 3).sort((a, b) => a.rank - b.rank);
+  const rest  = resultsData.filter(c => c.rank >  3);
+  const maxPct = parseFloat(top3[0].score_percent);
+
+  const rankLbl  = r => lang === 'en' ? `Rank ${r}` : `อันดับ ${r}`;
+  const unit     = lang === 'en' ? 'votes' : 'คะแนน';
+  const noLbl    = lang === 'en' ? 'No.' : 'เบอร์';
+  const otherLbl = lang === 'en' ? 'Other Candidates' : 'ผู้สมัครลำดับถัดไป';
+
+  const podiumHTML = `
+    <div class="res-podium">
+      ${top3.map(c => `
+        <div class="podium-avatar rank-${c.rank}">
+          <div class="podium-rank-label">${rankLbl(c.rank)}</div>
+          <img src="${c.photo}" alt="${_candName(c, lang)}" class="podium-circle"
+               style="border-color:${c.color};" onerror="this.style.display='none'">
+          <div class="podium-name">${_candName(c, lang)}</div>
+          <div class="podium-pct" style="color:${c.color}">${c.score_percent}%</div>
+          <div class="podium-votes">${c.score} <span>${unit}</span></div>
+        </div>`).join('')}
+    </div>`;
+
+  const listHTML = `
+    <div class="res-others-label">${otherLbl}</div>
+    <div class="res-list-wrap">
+      ${rest.map(c => {
+        const bar = Math.max(2, Math.round(parseFloat(c.score_percent) / maxPct * 100));
+        return `
+          <div class="res-row">
+            <div class="res-row-left">
+              <div class="res-row-rank" style="background:${c.color};">${c.rank}</div>
+              <img src="${c.photo}" class="res-row-photo" onerror="this.style.display='none'">
+            </div>
+            <div class="res-row-body">
+              <div class="res-row-name">${_candName(c, lang)}</div>
+              <div class="res-row-tags">
+                <span class="res-row-tag-outline">${noLbl} ${c.no}</span>
+                <span class="res-row-tag-fill">${_partyName(c, lang)}</span>
+              </div>
+              <div class="res-row-bar-wrap">
+                <div class="res-row-bar" style="width:${bar}%;background:${c.color}"></div>
+              </div>
+            </div>
+            <div class="res-row-score">
+              <div class="res-row-pct">${c.score_percent}%</div>
+              <div class="res-row-votes">${c.score} ${unit}</div>
+            </div>
+          </div>`;
+      }).join('')}
+    </div>`;
+
+  wrap.innerHTML = podiumHTML + listHTML;
+}
+
+async function loadResultsFromAPI() {
+  const wrap = document.getElementById('res-dynamic-wrap');
+  try {
+    const res = await fetch(RESULTS_API);
+    const data = await res.json();
+    resultsData = data.sort((a, b) => a.rank - b.rank);
+    renderResults(currentLang);
+  } catch {
+    if (wrap) wrap.innerHTML = '<p class="res-error">ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง</p>';
+  }
+}
+
 let currentLang = 'th';
 const originalTexts = new WeakMap();
 
@@ -637,6 +752,9 @@ function applyLanguage(lang) {
 
   // Refresh dynamic logic templates that depend on language
   updateCountdown();
+
+  // Re-render live results in correct language
+  renderResults(lang);
 }
 
 // Language button event listener
@@ -647,6 +765,8 @@ document.addEventListener('DOMContentLoaded', () => {
       applyLanguage(currentLang === 'en' ? 'th' : 'en');
     });
   }
+
+  loadResultsFromAPI();
 });
 
 

@@ -2264,6 +2264,14 @@ a {
    ELECTION RESULTS SECTION
    ========================================================================== */
 
+/* Loading placeholder */
+.res-loading {
+  text-align: center;
+  padding: 48px 0;
+  color: var(--text-muted);
+  font-size: 14px;
+}
+
 /* ── Podium top 3 — triangle layout ───────────────────────────────────── */
 .res-podium {
   display: grid;

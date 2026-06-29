@@ -34,13 +34,13 @@
     </div>
     <nav class="nav-tabs" id="sectionTabs">
       <div class="tabs-container">
-        <a href="#sec-overview" data-tab="sec-overview" data-i18n="tabOverview" class="tab-link active">ภาพรวม</a>
+        <a href="#sec-results" data-tab="sec-results" data-i18n="tabResults" class="tab-link active">นับคะแนน</a>
+        <a href="#sec-overview" data-tab="sec-overview" data-i18n="tabOverview" class="tab-link">ภาพรวม</a>
         <a href="#sec-timeline" data-tab="sec-timeline" data-i18n="tabTimeline" class="tab-link">ไทม์ไลน์</a>
         <a href="#sec-eligible" data-tab="sec-eligible" data-i18n="tabEligible" class="tab-link">ผู้มีสิทธิ</a>
         <a href="#sec-howto" data-tab="sec-howto" data-i18n="tabHowto" class="tab-link">วิธีลงคะแนน</a>
         <a href="#sec-candidates" data-tab="sec-candidates" data-i18n="tabCandidates" class="tab-link">ผู้สมัคร</a>
         <a href="#sec-policy" data-tab="sec-policy" data-i18n="tabPolicy" class="tab-link">นโยบาย</a>
-        <a href="#sec-results" data-tab="sec-results" data-i18n="tabResults" class="tab-link">นับคะแนน</a>
       </div>
     </nav>
   </header>
@@ -78,11 +78,41 @@
 
 
 
-  <!-- SECTION 01 — OVERVIEW -->
-  <section id="sec-overview" class="content-section scroll-spy-section">
+  <!-- SECTION 01 — RESULTS (COUNTDOWN) -->
+  <section id="sec-results" class="content-section scroll-spy-section">
     <div class="container">
       <div class="section-title-group">
         <span class="section-num text-red">01</span>
+        <h2 data-i18n="s05title" class="section-title">การนับคะแนน & แสดงผล</h2>
+      </div>
+      <p data-i18n="s05para" class="section-lead">เมื่อปิดหีบเวลา 17:00 น. เจ้าหน้าที่จะนับคะแนนเปิดเผย ณ หน่วยเลือกตั้งทันที แล้วรายงานผลรวมระดับเขตและทั้ง กทม. ขณะนี้อยู่ระหว่างการนับถอยหลังเข้าสู่วันเลือกตั้ง:</p>
+
+      <div class="countdown-grid">
+        <div class="countdown-card">
+          <div id="bigCd-days" class="countdown-big-val">00</div>
+          <div data-i18n="cdDaysLabel" class="countdown-big-label">วัน</div>
+        </div>
+        <div class="countdown-card">
+          <div id="bigCd-hours" class="countdown-big-val">00</div>
+          <div data-i18n="cdHoursLabel" class="countdown-big-label">ชั่วโมง</div>
+        </div>
+        <div class="countdown-card">
+          <div id="bigCd-minutes" class="countdown-big-val">00</div>
+          <div data-i18n="cdMinutesLabel" class="countdown-big-label">นาที</div>
+        </div>
+        <div class="countdown-card highlight-red">
+          <div id="bigCd-seconds" class="countdown-big-val">00</div>
+          <div data-i18n="cdSecondsLabel" class="countdown-big-label">วินาที</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SECTION 02 — OVERVIEW -->
+  <section id="sec-overview" class="content-section scroll-spy-section">
+    <div class="container">
+      <div class="section-title-group">
+        <span class="section-num text-red">02</span>
         <h2 data-i18n="s01title" class="section-title">ภาพรวมการเลือกตั้ง</h2>
       </div>
       <p data-i18n="s01para" class="section-lead">ผู้ว่าราชการกรุงเทพมหานครมาจากการเลือกตั้งโดยตรงของประชาชน มีวาระดำรงตำแหน่ง 4 ปี ทำหน้าที่บริหารงบประมาณและบริการสาธารณะของเมืองหลวง</p>
@@ -112,7 +142,7 @@
   <section id="sec-timeline" class="content-section timeline-section scroll-spy-section">
     <div class="container">
       <div class="section-title-group">
-        <span class="section-num text-yellow">02</span>
+        <span class="section-num text-yellow">03</span>
         <h2 data-i18n="s02title" class="section-title">ปฏิทินไทม์ไลน์การเลือกตั้ง</h2>
       </div>
       <p data-i18n="s02para" class="section-lead">ขั้นตอนสำคัญสำหรับผู้มีสิทธิเลือกตั้ง ตั้งแต่ตรวจสอบรายชื่อไปจนถึงการแจ้งเหตุจำเป็น</p>
@@ -161,7 +191,7 @@
   <section id="sec-eligible" class="content-section scroll-spy-section">
     <div class="container">
       <div class="section-title-group">
-        <span class="section-num text-red">03</span>
+        <span class="section-num text-red">04</span>
         <h2 data-i18n="s03title" class="section-title">ใครมีสิทธิเลือกตั้ง?</h2>
       </div>
       
@@ -238,7 +268,7 @@
   <section id="sec-howto" class="content-section vote-steps-section scroll-spy-section">
     <div class="container">
       <div class="section-title-group">
-        <span class="section-num text-red">04</span>
+        <span class="section-num text-red">05</span>
         <h2 data-i18n="s04title" class="section-title">วิธีลงคะแนน 5 ขั้นตอน</h2>
       </div>
 
@@ -298,7 +328,7 @@
   <section id="sec-candidates" class="content-section dark-section scroll-spy-section">
     <div class="container">
       <div class="section-title-group">
-        <span class="section-num text-yellow">05</span>
+        <span class="section-num text-yellow">06</span>
         <h2 data-i18n="s06title" class="section-title">ผู้สมัครและกลุ่มการเมือง</h2>
       </div>
       <p data-i18n="s06para" class="section-lead text-white-opacity">รู้จักผู้สมัครชิงตำแหน่งผู้ว่าฯ กทม. พร้อมนโยบายและจุดยืนหลักของแต่ละคน</p>
@@ -331,7 +361,7 @@
   <section id="sec-policy" class="content-section scroll-spy-section">
     <div class="container">
       <div class="section-title-group">
-        <span class="section-num text-red">06</span>
+        <span class="section-num text-red">07</span>
         <h2 data-i18n="s07title" class="section-title">เปรียบเทียบนโยบายเด่น</h2>
       </div>
 
@@ -381,36 +411,6 @@
         </div>
       </div>
       <p data-i18n="policyNote" class="policy-note">* ตารางนโยบายสังเคราะห์จากแผนการรณรงค์และเอกสารหาเสียงอย่างเป็นทางการของผู้สมัคร</p>
-    </div>
-  </section>
-
-  <!-- SECTION 07 — RESULTS (COUNTDOWN) -->
-  <section id="sec-results" class="content-section scroll-spy-section">
-    <div class="container">
-      <div class="section-title-group">
-        <span class="section-num text-red">07</span>
-        <h2 data-i18n="s05title" class="section-title">การนับคะแนน & แสดงผล</h2>
-      </div>
-      <p data-i18n="s05para" class="section-lead">เมื่อปิดหีบเวลา 17:00 น. เจ้าหน้าที่จะนับคะแนนเปิดเผย ณ หน่วยเลือกตั้งทันที แล้วรายงานผลรวมระดับเขตและทั้ง กทม. ขณะนี้อยู่ระหว่างการนับถอยหลังเข้าสู่วันเลือกตั้ง:</p>
-
-      <div class="countdown-grid">
-        <div class="countdown-card">
-          <div id="bigCd-days" class="countdown-big-val">00</div>
-          <div data-i18n="cdDaysLabel" class="countdown-big-label">วัน</div>
-        </div>
-        <div class="countdown-card">
-          <div id="bigCd-hours" class="countdown-big-val">00</div>
-          <div data-i18n="cdHoursLabel" class="countdown-big-label">ชั่วโมง</div>
-        </div>
-        <div class="countdown-card">
-          <div id="bigCd-minutes" class="countdown-big-val">00</div>
-          <div data-i18n="cdMinutesLabel" class="countdown-big-label">นาที</div>
-        </div>
-        <div class="countdown-card highlight-red">
-          <div id="bigCd-seconds" class="countdown-big-val">00</div>
-          <div data-i18n="cdSecondsLabel" class="countdown-big-label">วินาที</div>
-        </div>
-      </div>
     </div>
   </section>
 

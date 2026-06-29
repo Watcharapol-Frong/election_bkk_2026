@@ -2367,7 +2367,7 @@ a {
 
 /* show 3 rows, scroll for rest */
 .res-list-wrap {
-  max-height: calc(3 * 88px + 2 * 8px);
+  max-height: calc(3 * 88px + 2 * 8px + 2px);
   overflow-y: auto;
   overflow-x: hidden;
   display: flex;
@@ -2389,6 +2389,9 @@ a {
   border-radius: 14px;
   padding: 12px 14px 12px 12px;
   flex-shrink: 0;
+  height: 88px;
+  box-sizing: border-box;
+  overflow: hidden;
 }
 
 .res-row-left {
@@ -2441,8 +2444,9 @@ a {
 
 .res-row-tags {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   gap: 5px;
+  overflow: hidden;
 }
 
 .res-row-tag-outline {

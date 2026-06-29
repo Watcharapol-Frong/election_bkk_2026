@@ -95,10 +95,10 @@
       <!-- ══ DISTRICT TAB SECTION ══ -->
       <div class="district-section">
         <div class="district-section-header">
-          <p class="district-subtitle">กรุงเทพมหานคร - 50 เขตเลือกตั้ง</p>
+          <p class="district-subtitle" data-i18n="districtSubtitle">กรุงเทพมหานคร - 50 เขตเลือกตั้ง</p>
           <div class="district-tabs" role="tablist">
-            <button class="district-tab active" data-dtab="sk" role="tab" aria-selected="true">ผลการเลือก ส.ก.</button>
-            <button class="district-tab" data-dtab="gov" role="tab" aria-selected="false">ผลคะแนนผู้ว่า</button>
+            <button class="district-tab active" data-dtab="sk" role="tab" aria-selected="true" data-i18n="districtTabSK">ผลการเลือก ส.ก.</button>
+            <button class="district-tab" data-dtab="gov" role="tab" aria-selected="false" data-i18n="districtTabGov">ผลคะแนนผู้ว่า</button>
           </div>
         </div>
 
@@ -106,8 +106,8 @@
         <div id="dtab-sk" class="district-panel">
           <!-- Group / Sort toggle -->
           <div class="sk-view-toggle">
-            <button class="sk-toggle-btn active" data-mode="group" id="skToggleGroup">จัดกลุ่ม</button>
-            <button class="sk-toggle-btn" data-mode="sort" id="skToggleSort">เรียงเบอร์</button>
+            <button class="sk-toggle-btn active" data-mode="group" id="skToggleGroup" data-i18n="skToggleGroup">จัดกลุ่ม</button>
+            <button class="sk-toggle-btn" data-mode="sort" id="skToggleSort" data-i18n="skToggleSort">เรียงเบอร์</button>
           </div>
           <div id="sk-seat-grid" class="sk-seat-grid" role="img" aria-label="50 ที่นั่ง ส.ก. จำแนกตามพรรค"></div>
           <div id="sk-legend" class="sk-legend"></div>
@@ -117,8 +117,8 @@
         <div id="dtab-gov" class="district-panel district-panel-hidden">
           <div class="district-placeholder">
             <div class="district-placeholder-icon">🗺</div>
-            <p class="district-placeholder-text">อยู่ระหว่างการพัฒนา</p>
-            <p class="district-placeholder-sub">แผนที่ฮีตแมปผลคะแนนผู้ว่าฯ รายเขต</p>
+            <p class="district-placeholder-text" data-i18n="districtPlaceholderText">อยู่ระหว่างการพัฒนา</p>
+            <p class="district-placeholder-sub" data-i18n="districtPlaceholderSub">แผนที่ฮีตแมปผลคะแนนผู้ว่าฯ รายเขต</p>
           </div>
         </div>
       </div>
@@ -505,7 +505,7 @@
         </div>
         <div class="sk-sheet-header-right">
           <div class="sk-sheet-vote-total" id="skSheetTotal">—</div>
-          <div class="sk-sheet-vote-label">นับคะแนนแล้ว</div>
+          <div class="sk-sheet-vote-label" data-i18n="resCountedLabel">นับคะแนนแล้ว</div>
         </div>
         <button class="sk-sheet-close" id="skSheetClose" aria-label="ปิด">✕</button>
       </div>

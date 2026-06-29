@@ -171,6 +171,13 @@ const TRANSLATIONS_EN = {
   resDemocrat: 'Democrat Party',
   resPeoplesParty: "People's Party",
   resEconParty: 'Economy Party',
+  districtSubtitle: 'Bangkok — 50 Electoral Districts',
+  districtTabSK: 'BMA Council (ส.ก.) Results',
+  districtTabGov: 'Governor Score',
+  skToggleGroup: 'By Party',
+  skToggleSort: 'By Number',
+  districtPlaceholderText: 'Under Development',
+  districtPlaceholderSub: 'Governor score heatmap by district',
   cdDaysLabel: 'Days',
   cdHoursLabel: 'Hours',
   cdMinutesLabel: 'Minutes',
@@ -1124,7 +1131,7 @@ function showDistrictModal(winner) {
     { rank: 3, name: 'ผู้สมัครอันดับ 3', no: (winner.no % 6) + 90, party: 'อิสระ',       score: r2score      },
   ];
 
-  labelEl.textContent = `เขต${winner.district}`;
+  labelEl.textContent = currentLang === 'en' ? `District ${winner.district}` : `เขต${winner.district}`;
   nameEl.textContent  = winner.district;
   totalEl.textContent = total.toLocaleString();
 
@@ -1145,7 +1152,7 @@ function showDistrictModal(winner) {
             <span class="sk-sheet-party-name">${c.party}</span>
           </div>
           <div class="sk-sheet-cand-name">${c.name}</div>
-          <span class="sk-sheet-cand-no">เบอร์ ${c.no}</span>
+          <span class="sk-sheet-cand-no">${currentLang === 'en' ? 'No.' : 'เบอร์'} ${c.no}</span>
         </div>
         <div class="sk-sheet-score-col">
           <div class="sk-sheet-score-num">${c.score.toLocaleString()}</div>

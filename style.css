@@ -2577,6 +2577,295 @@ a {
   letter-spacing: 0.02em;
 }
 
+/* ══════════════════════════════════════════════════════════════════════════
+   DISTRICT TAB SECTION — ส.ก. & ผู้ว่า
+   ══════════════════════════════════════════════════════════════════════════ */
+.district-section {
+  margin: 28px 0 24px;
+  border: 3px solid var(--color-dark);
+  border-radius: 20px;
+  box-shadow: 6px 6px 0 var(--color-dark);
+  background: #fff;
+  overflow: hidden;
+}
+
+.district-section-header {
+  padding: 16px 20px 0;
+  border-bottom: 3px solid var(--color-dark);
+}
+
+.district-subtitle {
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #888;
+  margin: 0 0 12px;
+}
+
+/* ── Tab buttons ─────────────────────────────────────────────────────────── */
+.district-tabs {
+  display: flex;
+  gap: 4px;
+}
+
+.district-tab {
+  padding: 10px 20px;
+  font-size: 0.92rem;
+  font-weight: 700;
+  font-family: inherit;
+  border: none;
+  border-radius: 12px 12px 0 0;
+  cursor: pointer;
+  background: transparent;
+  color: #888;
+  transition: background 0.15s, color 0.15s;
+  position: relative;
+  bottom: -3px;
+  border: 3px solid transparent;
+  border-bottom: none;
+}
+
+.district-tab:hover {
+  background: #f5f5f5;
+  color: var(--color-dark);
+}
+
+.district-tab.active {
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-dark);
+  border-bottom: 3px solid #fff;
+}
+
+/* ── Panels ──────────────────────────────────────────────────────────────── */
+.district-panel {
+  padding: 20px;
+}
+
+.district-panel-hidden {
+  display: none;
+}
+
+/* ── Placeholder (ผู้ว่า tab) ────────────────────────────────────────────── */
+.district-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px 20px;
+  gap: 8px;
+  color: #aaa;
+}
+
+.district-placeholder-icon { font-size: 2.5rem; }
+.district-placeholder-text { font-size: 1rem; font-weight: 600; color: #888; margin: 0; }
+.district-placeholder-sub  { font-size: 0.8rem; color: #bbb; margin: 0; }
+
+/* ── Seat Grid ───────────────────────────────────────────────────────────── */
+.sk-seat-grid {
+  display: grid;
+  grid-template-columns: repeat(6, 1fr);
+  gap: 7px;
+  margin-bottom: 16px;
+}
+
+.sk-seat {
+  aspect-ratio: 1;
+  border-radius: 10px;
+  border: 2.5px solid rgba(0,0,0,0.18);
+  cursor: pointer;
+  transition: transform 0.12s, box-shadow 0.12s, opacity 0.15s;
+  position: relative;
+}
+
+.sk-seat:hover {
+  transform: scale(1.12);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.22);
+  z-index: 2;
+}
+
+.sk-seat.dimmed { opacity: 0.28; }
+
+.sk-seat.highlighted {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 3px var(--color-dark), 0 4px 14px rgba(0,0,0,0.28);
+  z-index: 3;
+}
+
+/* ── Legend ──────────────────────────────────────────────────────────────── */
+.sk-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 14px;
+  margin-bottom: 4px;
+}
+
+.sk-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 20px;
+  border: 2px solid transparent;
+  transition: border-color 0.15s;
+}
+
+.sk-legend-item:hover { border-color: var(--color-dark); }
+
+.sk-legend-dot {
+  width: 12px;
+  height: 12px;
+  border-radius: 3px;
+  border: 1.5px solid rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+
+.sk-legend-count {
+  font-size: 0.72rem;
+  opacity: 0.7;
+}
+
+/* ── Tooltip card ────────────────────────────────────────────────────────── */
+.sk-tooltip {
+  display: none;
+  margin-top: 14px;
+  border: 3px solid var(--color-dark);
+  border-radius: 16px;
+  box-shadow: 5px 5px 0 var(--color-dark);
+  background: #fff;
+  padding: 18px 18px 14px;
+  position: relative;
+  animation: skTooltipIn 0.2s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+
+.sk-tooltip.open { display: block; }
+
+@keyframes skTooltipIn {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.sk-tooltip-close {
+  position: absolute;
+  top: 12px;
+  right: 14px;
+  background: #f0f0f0;
+  border: 2px solid var(--color-dark);
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  transition: background 0.12s;
+}
+
+.sk-tooltip-close:hover { background: #e0e0e0; }
+
+.sk-tooltip-party-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-right: 36px;
+}
+
+.sk-tooltip-party-bar {
+  width: 14px;
+  height: 36px;
+  border-radius: 4px;
+  border: 2px solid rgba(0,0,0,0.2);
+  flex-shrink: 0;
+}
+
+.sk-tooltip-party-name {
+  font-size: 1.05rem;
+  font-weight: 800;
+  color: var(--color-dark);
+  line-height: 1.2;
+}
+
+.sk-tooltip-party-stats {
+  font-size: 0.8rem;
+  color: #666;
+  font-weight: 500;
+}
+
+.sk-tooltip-divider {
+  border: none;
+  border-top: 2px solid #eee;
+  margin: 12px 0;
+}
+
+.sk-tooltip-top5-title {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #888;
+  margin-bottom: 10px;
+}
+
+.sk-tooltip-cand-list {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.sk-tooltip-cand {
+  display: grid;
+  grid-template-columns: 24px 1fr auto;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+}
+
+.sk-tooltip-cand-no {
+  font-size: 0.7rem;
+  font-weight: 700;
+  background: var(--color-dark);
+  color: #fff;
+  border-radius: 5px;
+  text-align: center;
+  padding: 2px 0;
+  line-height: 1.4;
+}
+
+.sk-tooltip-cand-name { font-weight: 600; color: var(--color-dark); }
+.sk-tooltip-cand-district { font-size: 0.72rem; color: #888; }
+.sk-tooltip-cand-score { font-weight: 700; color: var(--color-primary); white-space: nowrap; font-size: 0.8rem; }
+
+.sk-tooltip-detail-btn {
+  display: block;
+  width: 100%;
+  margin-top: 14px;
+  padding: 9px;
+  background: var(--color-primary);
+  color: #fff;
+  border: 2.5px solid var(--color-dark);
+  border-radius: 10px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  text-align: center;
+  box-shadow: 3px 3px 0 var(--color-dark);
+  transition: transform 0.1s, box-shadow 0.1s;
+}
+
+.sk-tooltip-detail-btn:active {
+  transform: translate(2px,2px);
+  box-shadow: 1px 1px 0 var(--color-dark);
+}
+
 /* ── Turnout modal ─────────────────────────────────────────────────────── */
 /* ── Turnout popover wrapper ────────────────────────────────────────────── */
 .res-turnout-wrap {

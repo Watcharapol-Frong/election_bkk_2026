@@ -851,6 +851,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   loadResultsFromAPI();
+  renderSKGrid();
+  initDistrictTabs();
 
   // Turnout popover
   const turnoutBtn     = document.getElementById('turnoutBarBtn');
@@ -878,6 +880,248 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTurnout(); });
 });
 
+
+// ==========================================================================
+// DISTRICT TAB — ส.ก. SEAT GRID
+// ==========================================================================
+
+const PARTY_COLORS = {
+  'พรรคประชาชน':         { bg: '#FF6B00', text: '#fff' },
+  'พรรคเพื่อไทย':        { bg: '#E53935', text: '#fff' },
+  'พรรคประชาธิปัตย์':    { bg: '#1565C0', text: '#fff' },
+  'พรรคพลังประชารัฐ':    { bg: '#283593', text: '#fff' },
+  'พรรคภูมิใจไทย':       { bg: '#2E7D32', text: '#fff' },
+  'พรรคชาติไทยพัฒนา':   { bg: '#F9A825', text: '#222' },
+  'อิสระ':               { bg: '#CFD8DC', text: '#546E7A' },
+};
+
+// Mock data — 50 เขต กรุงเทพฯ (replace with API when available)
+const SK_MOCK_DATA = [
+  // พรรคประชาชน (22 ที่นั่ง)
+  { district:'จตุจักร',       no:3,  name:'สุรินทร์ มีแสง',        party:'พรรคประชาชน',      score:18420 },
+  { district:'ลาดพร้าว',      no:7,  name:'วิชัย ทองดี',           party:'พรรคประชาชน',      score:17800 },
+  { district:'ห้วยขวาง',      no:2,  name:'กัญญา สุขสวัสดิ์',      party:'พรรคประชาชน',      score:16950 },
+  { district:'บึงกุ่ม',       no:5,  name:'ธนกร อนุชิต',           party:'พรรคประชาชน',      score:16700 },
+  { district:'วังทองหลาง',    no:4,  name:'พรพิมล ไชยรักษ์',       party:'พรรคประชาชน',      score:15900 },
+  { district:'สวนหลวง',       no:6,  name:'อนุชา พงษ์วิไล',        party:'พรรคประชาชน',      score:15300 },
+  { district:'ประเวศ',        no:3,  name:'ปิยนุช วัฒนสิทธิ์',     party:'พรรคประชาชน',      score:14800 },
+  { district:'คลองเตย',       no:8,  name:'รัตนา ศรีสมบัติ',       party:'พรรคประชาชน',      score:14200 },
+  { district:'บางนา',         no:5,  name:'ชาญวิทย์ เพชรรัตน์',    party:'พรรคประชาชน',      score:13900 },
+  { district:'สาทร',          no:2,  name:'มณีรัตน์ ดวงแก้ว',      party:'พรรคประชาชน',      score:13600 },
+  { district:'ดอนเมือง',      no:4,  name:'เอกชัย บุญประเสริฐ',    party:'พรรคประชาชน',      score:13400 },
+  { district:'บางเขน',        no:6,  name:'วันเพ็ญ สิงห์คำ',       party:'พรรคประชาชน',      score:13100 },
+  { district:'หลักสี่',       no:3,  name:'ปราโมทย์ ฤกษ์งาม',      party:'พรรคประชาชน',      score:12800 },
+  { district:'ลาดกระบัง',     no:7,  name:'สิริพร มงคลชัย',        party:'พรรคประชาชน',      score:12500 },
+  { district:'มีนบุรี',       no:2,  name:'ทวีศักดิ์ จันทรมาศ',    party:'พรรคประชาชน',      score:12300 },
+  { district:'คันนายาว',      no:4,  name:'กิตติ์ธเนศ ศรีวิชัย',   party:'พรรคประชาชน',      score:12000 },
+  { district:'สะพานสูง',      no:5,  name:'พัชรินทร์ วงษ์เจริญ',   party:'พรรคประชาชน',      score:11700 },
+  { district:'บางกะปิ',       no:3,  name:'ธีรพล ทองทา',           party:'พรรคประชาชน',      score:11500 },
+  { district:'คลองสาน',       no:6,  name:'รพีพัฒน์ แก้วใส',       party:'พรรคประชาชน',      score:11200 },
+  { district:'บางซื่อ',       no:4,  name:'อรุณี สมพงษ์',          party:'พรรคประชาชน',      score:10900 },
+  { district:'ดินแดง',        no:2,  name:'วีระชัย ทองสุข',         party:'พรรคประชาชน',      score:10700 },
+  { district:'ราชเทวี',       no:5,  name:'กนกพร ดีงาม',           party:'พรรคประชาชน',      score:10400 },
+  // พรรคเพื่อไทย (14 ที่นั่ง)
+  { district:'พระนคร',        no:4,  name:'สมชาย วีระกิจ',         party:'พรรคเพื่อไทย',     score:17600 },
+  { district:'ยานนาวา',       no:3,  name:'อารีย์ พงษ์ดี',         party:'พรรคเพื่อไทย',     score:16800 },
+  { district:'บางรัก',        no:5,  name:'พินิจ สินธุวงษ์',        party:'พรรคเพื่อไทย',     score:16200 },
+  { district:'สัมพันธวงศ์',   no:2,  name:'จิรายุ ลิ้มสกุล',        party:'พรรคเพื่อไทย',     score:15500 },
+  { district:'จอมทอง',        no:6,  name:'นิภาพร คำอยู่',          party:'พรรคเพื่อไทย',     score:14800 },
+  { district:'ราษฎร์บูรณะ',   no:4,  name:'สุภาพร ทองแดง',         party:'พรรคเพื่อไทย',     score:14100 },
+  { district:'ทุ่งครุ',       no:3,  name:'ประสิทธิ์ เกษมสันต์',    party:'พรรคเพื่อไทย',     score:13400 },
+  { district:'บางขุนเทียน',   no:5,  name:'วรรณา ชัยสิทธิ์',       party:'พรรคเพื่อไทย',     score:12700 },
+  { district:'หนองแขม',       no:2,  name:'สาโรจน์ มีโชค',         party:'พรรคเพื่อไทย',     score:12100 },
+  { district:'บางแค',         no:4,  name:'ลัดดา ไทยเจริญ',         party:'พรรคเพื่อไทย',     score:11600 },
+  { district:'ภาษีเจริญ',     no:6,  name:'ศักดิ์ชัย พงษ์อำไพ',    party:'พรรคเพื่อไทย',     score:11100 },
+  { district:'ตลิ่งชัน',      no:3,  name:'สุนทร วัฒนะ',           party:'พรรคเพื่อไทย',     score:10700 },
+  { district:'บางกอกน้อย',    no:5,  name:'อิสรา แสงจันทร์',       party:'พรรคเพื่อไทย',     score:10300 },
+  { district:'ทวีวัฒนา',      no:2,  name:'ปัณฑา ชัยเจริญ',        party:'พรรคเพื่อไทย',     score: 9800 },
+  // พรรคประชาธิปัตย์ (7 ที่นั่ง)
+  { district:'ปทุมวัน',       no:3,  name:'พิสิฐ บำรุงกิจ',        party:'พรรคประชาธิปัตย์',  score:14300 },
+  { district:'พญาไท',         no:4,  name:'กุลธิดา ชัยภักดี',      party:'พรรคประชาธิปัตย์',  score:13200 },
+  { district:'บางพลัด',       no:2,  name:'วิทวัส สุขสันต์',        party:'พรรคประชาธิปัตย์',  score:12600 },
+  { district:'ดุสิต',         no:5,  name:'สุรเชษฐ์ จันทร์หอม',    party:'พรรคประชาธิปัตย์',  score:11900 },
+  { district:'ป้อมปราบ',      no:3,  name:'วิรัตน์ ทวีสุข',         party:'พรรคประชาธิปัตย์',  score:11100 },
+  { district:'บางกอกใหญ่',    no:4,  name:'นภาพร เอกอุดม',         party:'พรรคประชาธิปัตย์',  score:10400 },
+  { district:'หนองจอก',       no:6,  name:'อภิชาติ ศรีทอง',         party:'พรรคประชาธิปัตย์',  score: 9800 },
+  // พรรคพลังประชารัฐ (3 ที่นั่ง)
+  { district:'บึงกุ่ม',       no:7,  name:'วรชัย พรประสิทธิ์',     party:'พรรคพลังประชารัฐ',  score:12000 },
+  { district:'บางบอน',        no:4,  name:'สิทธิชัย ชัยโชค',        party:'พรรคพลังประชารัฐ',  score:11200 },
+  { district:'ลาดพร้าว',      no:9,  name:'ฐิติรัตน์ คงคา',         party:'พรรคพลังประชารัฐ',  score:10500 },
+  // อิสระ (4 ที่นั่ง)
+  { district:'พระโขนง',       no:5,  name:'สมบูรณ์ สุขสมบัติ',     party:'อิสระ',             score:13500 },
+  { district:'มีนบุรี',       no:8,  name:'ชลิตา ธรรมรัตน์',        party:'อิสระ',             score:12800 },
+  { district:'สะพานสูง',      no:3,  name:'วิสุทธิ์ มีชัย',          party:'อิสระ',             score:11600 },
+  { district:'บางนา',         no:7,  name:'รัชนก ปัญญาดี',          party:'อิสระ',             score:10900 },
+];
+
+let skActiveParty = null;
+
+function renderSKGrid() {
+  const grid   = document.getElementById('sk-seat-grid');
+  const legend = document.getElementById('sk-legend');
+  if (!grid || !legend) return;
+
+  // Group by party, sorted by seat count desc
+  const grouped = {};
+  SK_MOCK_DATA.forEach(c => {
+    if (!grouped[c.party]) grouped[c.party] = [];
+    grouped[c.party].push(c);
+  });
+  const sorted = Object.entries(grouped).sort((a, b) => b[1].length - a[1].length);
+
+  // Render seats (grouped, not by district)
+  let seatsHTML = '';
+  sorted.forEach(([party, cands]) => {
+    const col = PARTY_COLORS[party] || PARTY_COLORS['อิสระ'];
+    cands.forEach(c => {
+      seatsHTML += `<div class="sk-seat"
+        style="background:${col.bg}"
+        data-party="${party}"
+        data-no="${c.no}"
+        data-name="${c.name}"
+        data-district="${c.district}"
+        data-score="${c.score}"
+        title="${c.name} · เขต${c.district}"
+        role="button" tabindex="0"
+        aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district} ${party}"
+      ></div>`;
+    });
+  });
+  grid.innerHTML = seatsHTML;
+
+  // Render legend
+  let legendHTML = '';
+  sorted.forEach(([party, cands]) => {
+    const col = PARTY_COLORS[party] || PARTY_COLORS['อิสระ'];
+    legendHTML += `<div class="sk-legend-item" data-party="${party}" role="button" tabindex="0"
+      title="กดเพื่อดูรายละเอียด ${party}">
+      <div class="sk-legend-dot" style="background:${col.bg}"></div>
+      <span>${party.replace('พรรค','')}</span>
+      <span class="sk-legend-count">${cands.length} ที่นั่ง</span>
+    </div>`;
+  });
+  legend.innerHTML = legendHTML;
+
+  bindSKInteractions(sorted);
+}
+
+function bindSKInteractions(sorted) {
+  const grid    = document.getElementById('sk-seat-grid');
+  const legend  = document.getElementById('sk-legend');
+  const tooltip = document.getElementById('sk-tooltip');
+  const closeBtn = document.getElementById('skTooltipClose');
+
+  function openParty(party) {
+    skActiveParty = party;
+    // Highlight seats
+    grid.querySelectorAll('.sk-seat').forEach(el => {
+      el.classList.toggle('highlighted', el.dataset.party === party);
+      el.classList.toggle('dimmed',      el.dataset.party !== party);
+    });
+    legend.querySelectorAll('.sk-legend-item').forEach(el => {
+      el.style.fontWeight = el.dataset.party === party ? '800' : '500';
+      el.style.opacity    = el.dataset.party === party ? '1'   : '0.5';
+    });
+    showSKTooltip(party, sorted);
+  }
+
+  function closeParty() {
+    skActiveParty = null;
+    grid.querySelectorAll('.sk-seat').forEach(el => {
+      el.classList.remove('highlighted', 'dimmed');
+    });
+    legend.querySelectorAll('.sk-legend-item').forEach(el => {
+      el.style.fontWeight = '';
+      el.style.opacity    = '';
+    });
+    tooltip.classList.remove('open');
+    tooltip.setAttribute('aria-hidden', 'true');
+  }
+
+  grid.addEventListener('click', e => {
+    const seat = e.target.closest('.sk-seat');
+    if (!seat) return;
+    const party = seat.dataset.party;
+    if (skActiveParty === party) { closeParty(); return; }
+    openParty(party);
+  });
+
+  legend.addEventListener('click', e => {
+    const item = e.target.closest('.sk-legend-item');
+    if (!item) return;
+    const party = item.dataset.party;
+    if (skActiveParty === party) { closeParty(); return; }
+    openParty(party);
+  });
+
+  if (closeBtn) closeBtn.addEventListener('click', closeParty);
+  document.addEventListener('keydown', e => { if (e.key === 'Escape' && skActiveParty) closeParty(); });
+}
+
+function showSKTooltip(party, sorted) {
+  const tooltip = document.getElementById('sk-tooltip');
+  const content = document.getElementById('sk-tooltip-content');
+  if (!tooltip || !content) return;
+
+  const entry = sorted.find(([p]) => p === party);
+  if (!entry) return;
+  const [, cands] = entry;
+  const col   = PARTY_COLORS[party] || PARTY_COLORS['อิสระ'];
+  const top5  = [...cands].sort((a, b) => b.score - a.score).slice(0, 5);
+  const districts = [...new Set(cands.map(c => c.district))];
+
+  const top5HTML = top5.map(c => `
+    <div class="sk-tooltip-cand">
+      <div class="sk-tooltip-cand-no">เบอร์<br>${c.no}</div>
+      <div>
+        <div class="sk-tooltip-cand-name">${c.name}</div>
+        <div class="sk-tooltip-cand-district">เขต${c.district}</div>
+      </div>
+      <div class="sk-tooltip-cand-score">${c.score.toLocaleString()}</div>
+    </div>`).join('');
+
+  content.innerHTML = `
+    <div class="sk-tooltip-party-header">
+      <div class="sk-tooltip-party-bar" style="background:${col.bg}"></div>
+      <div>
+        <div class="sk-tooltip-party-name">${party}</div>
+        <div class="sk-tooltip-party-stats">${cands.length} ที่นั่ง · ${districts.length} เขต</div>
+      </div>
+    </div>
+    <hr class="sk-tooltip-divider">
+    <div class="sk-tooltip-top5-title">Top 5 คะแนนสูงสุด</div>
+    <div class="sk-tooltip-cand-list">${top5HTML}</div>
+    <button class="sk-tooltip-detail-btn" onclick="alert('ฟีเจอร์นี้จะเปิดหน้ารายละเอียดพรรค')">
+      ดูรายละเอียดทั้งหมด ›
+    </button>`;
+
+  tooltip.classList.add('open');
+  tooltip.setAttribute('aria-hidden', 'false');
+  tooltip.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+// Tab switching
+function initDistrictTabs() {
+  const tabs = document.querySelectorAll('.district-tab');
+  tabs.forEach(tab => {
+    tab.addEventListener('click', () => {
+      tabs.forEach(t => {
+        t.classList.remove('active');
+        t.setAttribute('aria-selected', 'false');
+      });
+      tab.classList.add('active');
+      tab.setAttribute('aria-selected', 'true');
+      const target = tab.dataset.dtab;
+      document.querySelectorAll('.district-panel').forEach(panel => {
+        if (panel.id === `dtab-${target}`) {
+          panel.classList.remove('district-panel-hidden');
+        } else {
+          panel.classList.add('district-panel-hidden');
+        }
+      });
+    });
+  });
+}
 
 // ==========================================================================
 // COUNTDOWN TIMER

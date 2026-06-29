@@ -92,6 +92,37 @@
         <div class="res-loading">กำลังโหลดข้อมูล...</div>
       </div>
 
+      <!-- ══ DISTRICT TAB SECTION ══ -->
+      <div class="district-section">
+        <div class="district-section-header">
+          <p class="district-subtitle">กรุงเทพมหานคร - 50 เขตเลือกตั้ง</p>
+          <div class="district-tabs" role="tablist">
+            <button class="district-tab active" data-dtab="sk" role="tab" aria-selected="true">ผลการเลือก ส.ก.</button>
+            <button class="district-tab" data-dtab="gov" role="tab" aria-selected="false">ผลคะแนนผู้ว่า</button>
+          </div>
+        </div>
+
+        <!-- ส.ก. Panel -->
+        <div id="dtab-sk" class="district-panel">
+          <div id="sk-seat-grid" class="sk-seat-grid" role="img" aria-label="50 ที่นั่ง ส.ก. จำแนกตามพรรค"></div>
+          <div id="sk-legend" class="sk-legend"></div>
+          <!-- Tooltip card -->
+          <div id="sk-tooltip" class="sk-tooltip" aria-hidden="true" role="dialog">
+            <button class="sk-tooltip-close" id="skTooltipClose" aria-label="ปิด">✕</button>
+            <div id="sk-tooltip-content"></div>
+          </div>
+        </div>
+
+        <!-- ผู้ว่า Panel (placeholder) -->
+        <div id="dtab-gov" class="district-panel district-panel-hidden">
+          <div class="district-placeholder">
+            <div class="district-placeholder-icon">🗺</div>
+            <p class="district-placeholder-text">อยู่ระหว่างการพัฒนา</p>
+            <p class="district-placeholder-sub">แผนที่ฮีตแมปผลคะแนนผู้ว่าฯ รายเขต</p>
+          </div>
+        </div>
+      </div>
+
       <!-- Turnout bar + popover wrapper -->
       <div class="res-turnout-wrap">
         <!-- Popover (appears above the card) — content rendered by app.js -->

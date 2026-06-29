@@ -92,21 +92,20 @@
         <div class="res-loading">กำลังโหลดข้อมูล...</div>
       </div>
 
-      <!-- Turnout bar (clickable → popup) -->
-      <button class="res-turnout" id="turnoutBarBtn" aria-haspopup="dialog">
-        <div class="res-turnout-label">
-          <span data-i18n="resCountedLabel">นับคะแนนแล้ว</span> <strong>2,201,738</strong>
-          <span class="res-turnout-pct">95%</span>
-          <span class="res-turnout-tap-hint" data-i18n="resTournoutHint">กดเพื่อดูรายละเอียด ›</span>
-        </div>
-        <div class="res-turnout-bar-wrap"><div class="res-turnout-bar" style="width:95%"></div></div>
-        <div data-i18n="resTurnoutSub" class="res-turnout-sub">ผู้มีสิทธิทั้งหมด 4,428,644 คน · ผู้มาใช้สิทธิ 49.7%</div>
-      </button>
+      <!-- Turnout bar + popover wrapper -->
+      <div class="res-turnout-wrap">
+        <!-- Popover (appears above the card) — content rendered by app.js -->
+        <div id="turnoutPopover" class="turnout-popover" aria-hidden="true"></div>
 
-      <!-- Turnout detail popup — content rendered by app.js -->
-      <div id="turnoutModal" class="turnout-modal" role="dialog" aria-modal="true" aria-hidden="true">
-        <div class="turnout-modal-backdrop"></div>
-        <div class="turnout-modal-box"></div>
+        <button class="res-turnout" id="turnoutBarBtn" aria-haspopup="true" aria-expanded="false">
+          <div class="res-turnout-label">
+            <span data-i18n="resCountedLabel">นับคะแนนแล้ว</span> <strong>2,201,738</strong>
+            <span class="res-turnout-pct">95%</span>
+            <span class="res-turnout-tap-hint" data-i18n="resTournoutHint">กดเพื่อดูรายละเอียด ›</span>
+          </div>
+          <div class="res-turnout-bar-wrap"><div class="res-turnout-bar" style="width:95%"></div></div>
+          <div data-i18n="resTurnoutSub" class="res-turnout-sub">ผู้มีสิทธิทั้งหมด 4,428,644 คน · ผู้มาใช้สิทธิ 49.7%</div>
+        </button>
       </div>
 
       <p data-i18n="resPolicyNote" class="policy-note">* ผลคะแนนอย่างไม่เป็นทางการ นับแล้ว 95% ณ วันที่ 28 มิ.ย. 2569 · ที่มา: ไทยรัฐ, Thai PBS · กกต. จะรับรองผลภายใน 30 วัน</p>

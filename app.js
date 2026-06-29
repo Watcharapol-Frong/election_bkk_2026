@@ -711,7 +711,7 @@ function renderResults(lang) {
 }
 
 function renderTurnoutModal(s) {
-  const box = document.querySelector('.turnout-modal-box');
+  const box = document.getElementById('turnoutPopover');
   if (!box || !s) return;
   const lang = currentLang;
   const pct  = s.progress;
@@ -762,7 +762,9 @@ function renderTurnoutModal(s) {
   // Re-bind close button after re-render
   const closeBtn = box.querySelector('#turnoutModalClose');
   if (closeBtn) closeBtn.addEventListener('click', () => {
-    document.getElementById('turnoutModal').classList.remove('open');
+    box.classList.remove('open');
+    const btn = document.getElementById('turnoutBarBtn');
+    if (btn) btn.setAttribute('aria-expanded', 'false');
   });
 }
 
@@ -850,17 +852,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
   loadResultsFromAPI();
 
-  // Turnout popup
-  const turnoutBtn   = document.getElementById('turnoutBarBtn');
-  const turnoutModal = document.getElementById('turnoutModal');
-  const turnoutClose = document.getElementById('turnoutModalClose');
-  const backdrop     = turnoutModal && turnoutModal.querySelector('.turnout-modal-backdrop');
+  // Turnout popover
+  const turnoutBtn     = document.getElementById('turnoutBarBtn');
+  const turnoutPopover = document.getElementById('turnoutPopover');
 
-  function openTurnout()  { turnoutModal.classList.add('open'); turnoutModal.setAttribute('aria-hidden','false'); }
-  function closeTurnout() { turnoutModal.classList.remove('open'); turnoutModal.setAttribute('aria-hidden','true'); }
+  function openTurnout() {
+    turnoutPopover.classList.add('open');
+    turnoutPopover.setAttribute('aria-hidden', 'false');
+    turnoutBtn.setAttribute('aria-expanded', 'true');
+  }
+  function closeTurnout() {
+    turnoutPopover.classList.remove('open');
+    turnoutPopover.setAttribute('aria-hidden', 'true');
+    turnoutBtn.setAttribute('aria-expanded', 'false');
+  }
 
-  if (turnoutBtn) turnoutBtn.addEventListener('click', openTurnout);
-  if (backdrop)   backdrop.addEventListener('click', closeTurnout);
+  if (turnoutBtn) turnoutBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    turnoutPopover.classList.contains('open') ? closeTurnout() : openTurnout();
+  });
+
+  document.addEventListener('click', e => {
+    if (turnoutPopover && !turnoutPopover.contains(e.target)) closeTurnout();
+  });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeTurnout(); });
 });
 

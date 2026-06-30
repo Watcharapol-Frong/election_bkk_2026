@@ -1300,7 +1300,9 @@ function _renderModalCandidates(candList, candidates, total) {
     return `
       <div class="sk-sheet-cand-card ${winnerClass}">
         <div class="sk-sheet-rank ${rankClass}">${c.rank}</div>
-        <div class="sk-sheet-avatar" style="background:${bg}20;border:1.5px solid ${bg}40"></div>
+        <div class="sk-sheet-avatar" style="background:${bg}20;border:1.5px solid ${bg}40">${
+          c.photo ? `<img src="${c.photo}" alt="${c.name}" loading="lazy" onerror="this.remove()">` : ''
+        }</div>
         <div class="sk-sheet-cand-body">
           <div class="sk-sheet-party-row">
             <div class="sk-sheet-party-dot" style="background:${bg}"></div>
@@ -1353,6 +1355,7 @@ async function showDistrictModal(winner) {
           score: _parseScore(c.score),
           pct:   parseFloat(c.score_percent) || 0,
           rank:  c.rank || 99,
+          photo: c.photo_square || '',
         }))
         .sort((a, b) => a.rank - b.rank);
       const total = _parseScore(d.total_votes) || candidates.reduce((s, c) => s + c.score, 0);

@@ -619,6 +619,16 @@ const POLICY_COMPARISON_DATA = {
 const RESULTS_API         = 'https://www-api.pptvhd36.com/%E0%B9%80%E0%B8%A5%E0%B8%B7%E0%B8%AD%E0%B8%81%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%A7%E0%B9%88%E0%B8%B2%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%AF2569/api/rank';
 const RESULTS_SUMMARY_API = 'https://www-api.pptvhd36.com/%E0%B9%80%E0%B8%A5%E0%B8%B7%E0%B8%AD%E0%B8%81%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%A7%E0%B9%88%E0%B8%B2%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%AF2569/api/summary/bkk-governor-2026';
 const RESULTS_MAP_API     = 'https://www-api.pptvhd36.com/%E0%B9%80%E0%B8%A5%E0%B8%B7%E0%B8%AD%E0%B8%81%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%A7%E0%B9%88%E0%B8%B2%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%AF2569/api/map';
+// Per-zone detail (full candidate list + ballot stats): /api/zone/{slug}
+const RESULTS_ZONE_API    = RESULTS_MAP_API.replace('/api/map', '/api/zone/');
+const _zoneDetailCache = {};
+async function fetchZoneDetail(slug) {
+  if (_zoneDetailCache[slug]) return _zoneDetailCache[slug];
+  const res = await fetch(RESULTS_ZONE_API + encodeURIComponent(slug));
+  const data = await res.json();
+  _zoneDetailCache[slug] = data;
+  return data;
+}
 
 const CAND_NAME_EN = {
   1: 'M.L. Kornkasiwat Kasemsri',
@@ -1077,7 +1087,7 @@ function _transformGovData(json) {
     const w = cands[0];
 
     data.push({
-      district: districtTh, districtEn,
+      district: districtTh, districtEn, slug: zone.zone_slug || '',
       no: w.no, name: w.name,
       group: w.name, groupKey: String(w.no),
       color: w.color, score: w.score,
@@ -1092,7 +1102,7 @@ function _transformGovData(json) {
 // Grouping key = party.
 function _buildSKData() {
   const data = SK_MOCK_DATA.map(c => ({
-    district: c.district, districtEn: '',
+    district: c.district, districtEn: '', slug: '',
     no: c.no, name: c.name,
     group: c.party, groupKey: c.party,
     color: (PARTY_COLORS[c.party] || PARTY_COLORS['อิสระ']).bg,
@@ -1113,16 +1123,15 @@ function _seatHTML(c, isMap) {
   const bg  = c.color;
   const txt = _contrastText(bg);
   const common = `data-group="${c.groupKey}" data-no="${c.no}" data-name="${c.name}" `
-    + `data-district="${c.district}" data-score="${c.score}" data-color="${bg}" `
+    + `data-district="${c.district}" data-district-en="${c.districtEn || ''}" `
+    + `data-slug="${c.slug || ''}" data-score="${c.score}" data-color="${bg}" `
     + `data-party="${c.group}" role="button" tabindex="0"`;
   if (isMap) {
     const label = currentLang === 'en' ? (c.districtEn || c.district) : c.district;
-    const shortName = label.length > 5 ? label.slice(0, 5) : label;
     return `<div class="sk-seat sk-seat--map"
       style="grid-row:${c.pos.r};grid-column:${c.pos.c};background:${bg}"
-      ${common} aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district}">
-      <span class="sk-seat-num sk-seat-num--map" style="color:${txt}">${c.no}</span>
-      <span class="sk-seat-district-label" style="color:${txt}">${shortName}</span>
+      ${common} title="${label}" aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district}">
+      <span class="sk-seat-district-label" style="color:${txt}">${label}</span>
     </div>`;
   }
   return `<div class="sk-seat" style="background:${bg}"
@@ -1204,13 +1213,15 @@ function initDViewInteractions(key) {
     const seat = e.target.closest('.sk-seat');
     if (!seat) return;
     showDistrictModal({
-      district: seat.dataset.district,
-      no:       parseInt(seat.dataset.no),
-      name:     seat.dataset.name,
-      party:    seat.dataset.party,
-      score:    parseInt(seat.dataset.score),
-      color:    seat.dataset.color,
-    }, cfg.zoneMap[seat.dataset.district]);
+      district:   seat.dataset.district,
+      districtEn: seat.dataset.districtEn,
+      slug:       seat.dataset.slug,
+      no:         parseInt(seat.dataset.no),
+      name:       seat.dataset.name,
+      party:      seat.dataset.party,
+      score:      parseInt(seat.dataset.score),
+      color:      seat.dataset.color,
+    });
   });
 
   if (legend) legend.addEventListener('click', e => {
@@ -1223,38 +1234,13 @@ function initDViewInteractions(key) {
 }
 
 // ── District popup modal ──────────────────────────────────────────────────── //
-function showDistrictModal(winner, zone) {
-  const overlay   = document.getElementById('skDistrictOverlay');
-  const nameEl    = document.getElementById('skSheetName');
-  const labelEl   = document.getElementById('skSheetLabel');
-  const totalEl   = document.getElementById('skSheetTotal');
-  const candList  = document.getElementById('skSheetCandList');
-  if (!overlay) return;
+let _modalReq = 0; // guards against out-of-order async renders
 
-  // Prefer real per-zone results when available; fall back to a mock spread
-  let candidates, total;
-  if (zone && zone.candidates.length) {
-    candidates = zone.candidates.map(c => ({ ...c }));
-    total = zone.total;
-  } else {
-    total = Math.round(winner.score / 0.42);
-    const wColor = winner.color || (PARTY_COLORS[winner.party] || PARTY_COLORS['อิสระ']).bg;
-    candidates = [
-      { rank: 1, name: winner.name,        no: winner.no,            party: winner.party, color: wColor,    score: winner.score },
-      { rank: 2, name: 'ผู้สมัครอันดับ 2', no: (winner.no % 9) + 80, party: 'อิสระ',      color: '#90A4AE', score: Math.round(winner.score * 0.70) },
-      { rank: 3, name: 'ผู้สมัครอันดับ 3', no: (winner.no % 6) + 90, party: 'อิสระ',      color: '#CFD8DC', score: Math.round(winner.score * 0.14) },
-    ];
-  }
-
-  const districtEn = (zone && zone.districtEn) || winner.district;
-  labelEl.textContent = currentLang === 'en' ? `District ${districtEn}` : `เขต${winner.district}`;
-  nameEl.textContent  = currentLang === 'en' ? districtEn : winner.district;
-  totalEl.textContent = total.toLocaleString();
-
-  const maxScore = candidates[0].score || 1;
+function _renderModalCandidates(candList, candidates, total) {
+  const maxScore = candidates[0] ? (candidates[0].score || 1) : 1;
   candList.innerHTML = candidates.map(c => {
     const bg = c.color || (PARTY_COLORS[c.party] || PARTY_COLORS['อิสระ']).bg;
-    const pct = c.pct != null ? c.pct.toFixed(2) : (c.score / total * 100).toFixed(2);
+    const pct = c.pct != null ? c.pct.toFixed(2) : (total ? (c.score / total * 100).toFixed(2) : '0.00');
     const barPct = (c.score / maxScore * 100).toFixed(1);
     const rankClass = c.rank === 1 ? 'rank-1' : c.rank === 2 ? 'rank-2' : 'rank-3';
     const winnerClass = c.rank === 1 ? 'winner' : '';
@@ -1279,10 +1265,64 @@ function showDistrictModal(winner, zone) {
         </div>
       </div>`;
   }).join('');
+}
+
+async function showDistrictModal(winner) {
+  const overlay   = document.getElementById('skDistrictOverlay');
+  const nameEl    = document.getElementById('skSheetName');
+  const labelEl   = document.getElementById('skSheetLabel');
+  const totalEl   = document.getElementById('skSheetTotal');
+  const candList  = document.getElementById('skSheetCandList');
+  if (!overlay) return;
+
+  const req = ++_modalReq;
+  const districtEn = winner.districtEn || winner.district;
+  labelEl.textContent = currentLang === 'en' ? `District ${districtEn}` : `เขต${winner.district}`;
+  nameEl.textContent  = currentLang === 'en' ? districtEn : winner.district;
+  totalEl.textContent = '…';
+  candList.innerHTML  = `<div class="sk-sheet-loading">${currentLang === 'en' ? 'Loading…' : 'กำลังโหลด…'}</div>`;
 
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
+
+  // Real per-zone results (full candidate list) when a slug is available
+  if (winner.slug) {
+    try {
+      const d = await fetchZoneDetail(winner.slug);
+      if (req !== _modalReq) return; // a newer click superseded this one
+      const candidates = (d.candidates || [])
+        .map(c => ({
+          no:    c.candidate_no,
+          name:  `${c.f_name || ''} ${c.l_name || ''}`.trim(),
+          party: c.party_name || (currentLang === 'en' ? 'Independent' : 'อิสระ'),
+          color: c.color || '#CFD8DC',
+          score: _parseScore(c.score),
+          pct:   parseFloat(c.score_percent) || 0,
+          rank:  c.rank || 99,
+        }))
+        .sort((a, b) => a.rank - b.rank);
+      const total = _parseScore(d.total_votes) || candidates.reduce((s, c) => s + c.score, 0);
+      totalEl.textContent = total.toLocaleString();
+      _renderModalCandidates(candList, candidates, total);
+    } catch {
+      if (req !== _modalReq) return;
+      totalEl.textContent = '—';
+      candList.innerHTML = `<div class="sk-sheet-loading">${currentLang === 'en' ? 'Failed to load data' : 'ไม่สามารถโหลดข้อมูลได้'}</div>`;
+    }
+    return;
+  }
+
+  // Fallback (ส.ก. — no public per-district API): mock spread
+  const total = Math.round(winner.score / 0.42);
+  const wColor = winner.color || (PARTY_COLORS[winner.party] || PARTY_COLORS['อิสระ']).bg;
+  const candidates = [
+    { rank: 1, name: winner.name,        no: winner.no,            party: winner.party, color: wColor,    score: winner.score },
+    { rank: 2, name: 'ผู้สมัครอันดับ 2', no: (winner.no % 9) + 80, party: 'อิสระ',      color: '#90A4AE', score: Math.round(winner.score * 0.70) },
+    { rank: 3, name: 'ผู้สมัครอันดับ 3', no: (winner.no % 6) + 90, party: 'อิสระ',      color: '#CFD8DC', score: Math.round(winner.score * 0.14) },
+  ];
+  totalEl.textContent = total.toLocaleString();
+  _renderModalCandidates(candList, candidates, total);
 }
 
 function closeDistrictModal() {

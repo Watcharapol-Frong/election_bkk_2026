@@ -2778,10 +2778,13 @@ a {
 
 /* ── Map mode seat ───────────────────────────────────────────────────────── */
 .sk-seat--map {
+  aspect-ratio: auto;
+  min-height: 46px;
   flex-direction: column;
-  gap: 1px;
-  border-radius: 5px;
-  min-height: unset;
+  justify-content: center;
+  gap: 0;
+  border-radius: 6px;
+  padding: 2px 2px;
 }
 
 .sk-seat--unknown {
@@ -2796,17 +2799,17 @@ a {
 }
 
 .sk-seat-district-label {
-  font-size: 0.38rem;
-  font-weight: 600;
-  color: rgba(255,255,255,0.88);
+  font-size: 0.52rem;
+  font-weight: 700;
+  color: rgba(255,255,255,0.95);
   text-shadow: none;
-  line-height: 1;
+  line-height: 1.05;
   letter-spacing: -0.01em;
+  white-space: normal;
+  word-break: break-word;
   overflow: hidden;
-  text-overflow: clip;
-  white-space: nowrap;
   max-width: 100%;
-  padding: 0 1px;
+  text-align: center;
 }
 
 .sk-seat--unknown .sk-seat-district-label { color: rgba(80,80,80,0.7); }
@@ -2903,6 +2906,11 @@ a {
 .sk-district-sheet-handle { display: none; }
 
 .sk-district-sheet-header {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: #ffffff;
+  border-radius: 20px 20px 0 0;
   padding: 18px 18px 14px;
   border-bottom: 1px solid var(--border-color);
   display: grid;
@@ -2987,6 +2995,13 @@ a {
   display: flex;
   flex-direction: column;
   gap: 10px;
+}
+
+.sk-sheet-loading {
+  padding: 40px 16px;
+  text-align: center;
+  font-size: 0.9rem;
+  color: var(--text-muted);
 }
 
 .sk-sheet-cand-card {

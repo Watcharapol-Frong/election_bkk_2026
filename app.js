@@ -618,6 +618,7 @@ const POLICY_COMPARISON_DATA = {
 // ==========================================================================
 const RESULTS_API         = 'https://www-api.pptvhd36.com/%E0%B9%80%E0%B8%A5%E0%B8%B7%E0%B8%AD%E0%B8%81%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%A7%E0%B9%88%E0%B8%B2%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%AF2569/api/rank';
 const RESULTS_SUMMARY_API = 'https://www-api.pptvhd36.com/%E0%B9%80%E0%B8%A5%E0%B8%B7%E0%B8%AD%E0%B8%81%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%A7%E0%B9%88%E0%B8%B2%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%AF2569/api/summary/bkk-governor-2026';
+const RESULTS_MAP_API     = 'https://www-api.pptvhd36.com/%E0%B9%80%E0%B8%A5%E0%B8%B7%E0%B8%AD%E0%B8%81%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%A7%E0%B9%88%E0%B8%B2%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%AF2569/api/map';
 
 const CAND_NAME_EN = {
   1: 'M.L. Kornkasiwat Kasemsri',
@@ -846,6 +847,15 @@ function applyLanguage(lang) {
   // Re-render live results in correct language
   renderResults(lang);
   renderTurnoutModal(summaryData);
+
+  // Refresh ส.ก. seat grid/map (district labels) + FAB label for the new language
+  if (typeof renderSKGrid === 'function') renderSKGrid();
+  const fabLabel = document.getElementById('skGroupFabLabel');
+  if (fabLabel) {
+    fabLabel.textContent = skViewMode === 'group'
+      ? (lang === 'en' ? 'By Party' : 'จัดกลุ่ม')
+      : (lang === 'en' ? 'By Number' : 'เรียงเบอร์');
+  }
 }
 
 // Language button event listener
@@ -858,7 +868,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   loadResultsFromAPI();
-  renderSKGrid();       // first render (also builds legend)
+  renderSKGrid();       // first render with mock fallback (also builds legend)
+  loadSKMapFromAPI();   // replace with live ส.ก. data when it arrives
   initSKInteractions(); // bind events ONCE
   initDistrictTabs();
   initDistrictModal();
@@ -984,14 +995,99 @@ const BKK_MAP_GRID = {
   'ปทุมวัน':     { r:6, c:4 }, 'บางรัก':      { r:6, c:5 }, 'ยานนาวา':     { r:6, c:6 },
   'คลองเตย':     { r:6, c:7 }, 'พระโขนง':     { r:6, c:8 }, 'บางนา':       { r:6, c:9 },
   'หนองแขม':     { r:7, c:1 }, 'จอมทอง':      { r:7, c:2 }, 'บางคอแหลม':   { r:7, c:3 },
-  'สาทร':        { r:7, c:4 },
+  'สาทร':        { r:7, c:4 }, 'วัฒนา':       { r:5, c:9 }, 'คลองสามวา':   { r:2, c:7 },
   'ราษฎร์บูรณะ': { r:8, c:2 }, 'บางบอน':      { r:9, c:1 },
   'ทุ่งครุ':     { r:9, c:2 }, 'บางขุนเทียน': { r:9, c:3 },
 };
 
+// Live ส.ก. data (from /api/map) — falls back to mock until API resolves
+let skData    = [...SK_MOCK_DATA];
+// District (TH name) → { candidates:[…], total } — full per-zone results for modal
+let skZoneMap = {};
+
+// Parse "9,517" → 9517
+function _parseScore(s) {
+  return parseInt(String(s == null ? 0 : s).replace(/[^\d]/g, ''), 10) || 0;
+}
+
+// Choose readable text color for an arbitrary background hex
+function _contrastText(hex) {
+  const h = String(hex || '').replace('#', '');
+  if (h.length < 6) return '#fff';
+  const r = parseInt(h.slice(0, 2), 16);
+  const g = parseInt(h.slice(2, 4), 16);
+  const b = parseInt(h.slice(4, 6), 16);
+  return (0.299 * r + 0.587 * g + 0.114 * b) > 150 ? '#1a1a1a' : '#fff';
+}
+
+// Resolve a Thai district name to a map-grid position (tolerant of name variants)
+function _resolvePos(thName) {
+  if (!thName) return null;
+  if (BKK_MAP_GRID[thName]) return BKK_MAP_GRID[thName];
+  const keys = Object.keys(BKK_MAP_GRID);
+  const hit = keys.find(k => thName.includes(k) || k.includes(thName));
+  return hit ? BKK_MAP_GRID[hit] : null;
+}
+
+// Transform /api/map response into our seat-grid model
+function _transformMapData(json) {
+  const data = [];
+  const zoneMap = {};
+  Object.values(json || {}).forEach(zone => {
+    if (!zone || !Array.isArray(zone.candidates) || !zone.candidates.length) return;
+    const cands = zone.candidates
+      .map(c => ({
+        no:    c.candidate_no,
+        name:  `${c.f_name || ''} ${c.l_name || ''}`.trim(),
+        party: c.party_name || 'อิสระ',
+        color: c.color || '#CFD8DC',
+        score: _parseScore(c.score),
+        pct:   parseFloat(c.score_percent) || 0,
+        rank:  c.rank || 99,
+        photo: c.photo_square || '',
+      }))
+      .sort((a, b) => a.rank - b.rank);
+
+    const districtTh = zone.zone_name_th;
+    const districtEn = zone.candidates[0].zone_name_en || '';
+    const total = cands.reduce((s, c) => s + c.score, 0);
+    const w = cands[0];
+
+    data.push({
+      district:  districtTh,
+      districtEn,
+      no:    w.no,
+      name:  w.name,
+      party: w.party,
+      color: w.color,
+      score: w.score,
+      pos:   _resolvePos(districtTh),
+    });
+    zoneMap[districtTh] = { candidates: cands, total, districtEn };
+  });
+  return { data, zoneMap };
+}
+
+async function loadSKMapFromAPI() {
+  try {
+    const res = await fetch(RESULTS_MAP_API);
+    const json = await res.json();
+    const { data, zoneMap } = _transformMapData(json);
+    if (!data.length) return; // keep mock fallback on empty response
+    skData = data;
+    skZoneMap = zoneMap;
+    skActiveParty = null;
+    const legend = document.getElementById('sk-legend');
+    if (legend) legend.innerHTML = ''; // force legend rebuild for new data
+    renderSKGrid();
+  } catch {
+    /* keep mock data already on screen */
+  }
+}
+
 function _buildSKSorted() {
   const grouped = {};
-  SK_MOCK_DATA.forEach(c => {
+  skData.forEach(c => {
     if (!grouped[c.party]) grouped[c.party] = [];
     grouped[c.party].push(c);
   });
@@ -1011,32 +1107,37 @@ function renderSKGrid(mode) {
   } else {
     // Choose seat order based on mode
     const seats = skViewMode === 'sort'
-      ? [...SK_MOCK_DATA].sort((a, b) => a.no - b.no)
+      ? [...skData].sort((a, b) => a.no - b.no)
       : sorted.flatMap(([, cands]) => cands);
 
     grid.classList.remove('sk-seat-grid--map');
     grid.innerHTML = seats.map(c => {
-      const col = PARTY_COLORS[c.party] || PARTY_COLORS['อิสระ'];
+      const bg  = c.color || (PARTY_COLORS[c.party] || PARTY_COLORS['อิสระ']).bg;
+      const txt = _contrastText(bg);
       return `<div class="sk-seat"
-        style="background:${col.bg}"
+        style="background:${bg}"
         data-party="${c.party}"
         data-no="${c.no}"
         data-name="${c.name}"
         data-district="${c.district}"
         data-score="${c.score}"
+        data-color="${bg}"
         role="button" tabindex="0"
         aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district} ${c.party}"
-      ><span class="sk-seat-num">${c.no}</span></div>`;
+      ><span class="sk-seat-num" style="color:${txt}">${c.no}</span></div>`;
     }).join('');
   }
 
   // Render legend (only once — doesn't change between modes)
   if (!legend.children.length) {
     legend.innerHTML = sorted.map(([party, cands]) => {
-      const col = PARTY_COLORS[party] || PARTY_COLORS['อิสระ'];
+      // Representative color = top-scoring member of the group
+      const rep = [...cands].sort((a, b) => b.score - a.score)[0];
+      const dot = rep.color || (PARTY_COLORS[party] || PARTY_COLORS['อิสระ']).bg;
+      const label = party === 'อิสระ' ? party : party.replace('พรรค', '');
       return `<div class="sk-legend-item" data-party="${party}" role="button" tabindex="0">
-        <div class="sk-legend-dot" style="background:${col.bg}"></div>
-        <span>${party.replace('พรรค','')}</span>
+        <div class="sk-legend-dot" style="background:${dot}"></div>
+        <span>${label}</span>
         <span class="sk-legend-count">${cands.length} ที่นั่ง</span>
       </div>`;
     }).join('');
@@ -1046,33 +1147,30 @@ function renderSKGrid(mode) {
 }
 
 function _renderSKMap(grid) {
-  // Build district → winner lookup
-  const winnerMap = {};
-  SK_MOCK_DATA.forEach(c => {
-    if (!winnerMap[c.district] || c.score > winnerMap[c.district].score) {
-      winnerMap[c.district] = c;
-    }
-  });
-
   grid.classList.add('sk-seat-grid--map');
-  grid.innerHTML = Object.entries(BKK_MAP_GRID).map(([district, pos]) => {
-    const c   = winnerMap[district];
-    const col = c ? (PARTY_COLORS[c.party] || PARTY_COLORS['อิสระ']) : { bg: '#C8C8C8', text: '#888' };
-    const bg  = col.bg;
-    const attrs = c
-      ? `data-party="${c.party}" data-no="${c.no}" data-name="${c.name}" data-district="${c.district}" data-score="${c.score}" role="button" tabindex="0" aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district}"`
-      : `aria-hidden="true"`;
-    const numHtml = c
-      ? `<span class="sk-seat-num sk-seat-num--map">${c.no}</span>`
-      : '';
-    const shortName = district.length > 4 ? district.slice(0, 4) : district;
-    return `<div class="sk-seat sk-seat--map ${c ? '' : 'sk-seat--unknown'}"
-      style="grid-row:${pos.r};grid-column:${pos.c};background:${bg}"
-      ${attrs}>
-      ${numHtml}
-      <span class="sk-seat-district-label">${shortName}</span>
-    </div>`;
-  }).join('');
+  grid.innerHTML = skData
+    .filter(c => c.pos)
+    .map(c => {
+      const bg  = c.color || (PARTY_COLORS[c.party] || PARTY_COLORS['อิสระ']).bg;
+      const txt = _contrastText(bg);
+      const labelTh = c.district || '';
+      const labelEn = c.districtEn || labelTh;
+      const label   = currentLang === 'en' ? labelEn : labelTh;
+      const shortName = label.length > 5 ? label.slice(0, 5) : label;
+      return `<div class="sk-seat sk-seat--map"
+        style="grid-row:${c.pos.r};grid-column:${c.pos.c};background:${bg}"
+        data-party="${c.party}"
+        data-no="${c.no}"
+        data-name="${c.name}"
+        data-district="${c.district}"
+        data-score="${c.score}"
+        data-color="${bg}"
+        role="button" tabindex="0"
+        aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district}">
+        <span class="sk-seat-num sk-seat-num--map" style="color:${txt}">${c.no}</span>
+        <span class="sk-seat-district-label" style="color:${txt}">${shortName}</span>
+      </div>`;
+    }).join('');
 }
 
 // Called ONCE — bind all SK interactions
@@ -1102,6 +1200,7 @@ function initSKInteractions() {
       name:     seat.dataset.name,
       party:    seat.dataset.party,
       score:    parseInt(seat.dataset.score),
+      color:    seat.dataset.color,
     });
   });
 
@@ -1174,37 +1273,41 @@ function showDistrictModal(winner) {
   const candList  = document.getElementById('skSheetCandList');
   if (!overlay) return;
 
-  // Build mock competitor list (winner + 2 runners-up)
-  const total     = Math.round(winner.score / 0.42);
-  const r1score   = Math.round(winner.score * 0.70);
-  const r2score   = Math.round(winner.score * 0.14);
-  const allParties = Object.keys(PARTY_COLORS).filter(p => p !== winner.party && p !== 'อิสระ');
-  const runnerParty = allParties[winner.no % allParties.length] || 'อิสระ';
+  // Prefer real per-zone results from the API; fall back to a mock spread
+  const zone = skZoneMap[winner.district];
+  let candidates, total;
+  if (zone && zone.candidates.length) {
+    candidates = zone.candidates.map(c => ({ ...c }));
+    total = zone.total;
+  } else {
+    total = Math.round(winner.score / 0.42);
+    const wColor = winner.color || (PARTY_COLORS[winner.party] || PARTY_COLORS['อิสระ']).bg;
+    candidates = [
+      { rank: 1, name: winner.name,        no: winner.no,            party: winner.party, color: wColor,    score: winner.score },
+      { rank: 2, name: 'ผู้สมัครอันดับ 2', no: (winner.no % 9) + 80, party: 'อิสระ',      color: '#90A4AE', score: Math.round(winner.score * 0.70) },
+      { rank: 3, name: 'ผู้สมัครอันดับ 3', no: (winner.no % 6) + 90, party: 'อิสระ',      color: '#CFD8DC', score: Math.round(winner.score * 0.14) },
+    ];
+  }
 
-  const candidates = [
-    { rank: 1, name: winner.name,        no: winner.no,         party: winner.party,  score: winner.score },
-    { rank: 2, name: 'ผู้สมัครอันดับ 2', no: (winner.no % 9) + 80, party: runnerParty,   score: r1score      },
-    { rank: 3, name: 'ผู้สมัครอันดับ 3', no: (winner.no % 6) + 90, party: 'อิสระ',       score: r2score      },
-  ];
-
-  labelEl.textContent = currentLang === 'en' ? `District ${winner.district}` : `เขต${winner.district}`;
-  nameEl.textContent  = winner.district;
+  const districtEn = (zone && zone.districtEn) || winner.district;
+  labelEl.textContent = currentLang === 'en' ? `District ${districtEn}` : `เขต${winner.district}`;
+  nameEl.textContent  = currentLang === 'en' ? districtEn : winner.district;
   totalEl.textContent = total.toLocaleString();
 
-  const maxScore = candidates[0].score;
+  const maxScore = candidates[0].score || 1;
   candList.innerHTML = candidates.map(c => {
-    const col = PARTY_COLORS[c.party] || PARTY_COLORS['อิสระ'];
-    const pct = (c.score / total * 100).toFixed(2);
+    const bg = c.color || (PARTY_COLORS[c.party] || PARTY_COLORS['อิสระ']).bg;
+    const pct = c.pct != null ? c.pct.toFixed(2) : (c.score / total * 100).toFixed(2);
     const barPct = (c.score / maxScore * 100).toFixed(1);
     const rankClass = c.rank === 1 ? 'rank-1' : c.rank === 2 ? 'rank-2' : 'rank-3';
     const winnerClass = c.rank === 1 ? 'winner' : '';
     return `
       <div class="sk-sheet-cand-card ${winnerClass}">
         <div class="sk-sheet-rank ${rankClass}">${c.rank}</div>
-        <div class="sk-sheet-avatar" style="background:${col.bg}20;border:1.5px solid ${col.bg}40"></div>
+        <div class="sk-sheet-avatar" style="background:${bg}20;border:1.5px solid ${bg}40"></div>
         <div class="sk-sheet-cand-body">
           <div class="sk-sheet-party-row">
-            <div class="sk-sheet-party-dot" style="background:${col.bg}"></div>
+            <div class="sk-sheet-party-dot" style="background:${bg}"></div>
             <span class="sk-sheet-party-name">${c.party}</span>
           </div>
           <div class="sk-sheet-cand-name">${c.name}</div>
@@ -1215,7 +1318,7 @@ function showDistrictModal(winner) {
           <div class="sk-sheet-score-pct">${pct}%</div>
         </div>
         <div class="sk-sheet-bar-wrap">
-          <div class="sk-sheet-bar" style="width:${barPct}%;background:${col.bg}"></div>
+          <div class="sk-sheet-bar" style="width:${barPct}%;background:${bg}"></div>
         </div>
       </div>`;
   }).join('');

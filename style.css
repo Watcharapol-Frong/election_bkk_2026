@@ -2293,7 +2293,6 @@ a {
   .podium-pct { font-size: 1.2rem; }
   .podium-slot.rank-1 .podium-pct { font-size: 1.5rem; }
   .res-vote-item { min-width: 80px; }
-  .sk-seat-grid { grid-template-columns: repeat(5, 1fr); gap: 4px; }
 }
 
 /* ==========================================================================

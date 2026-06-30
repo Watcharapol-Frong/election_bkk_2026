@@ -1386,9 +1386,10 @@ function initDistrictModal() {
 function updateDFabLabel(cfg) {
   const label = document.getElementById(cfg.fabLabelId);
   if (!label) return;
+  // Show the action (the mode you'll switch TO), not the current mode
   label.textContent = cfg.viewMode === 'group'
-    ? (currentLang === 'en' ? 'By Party' : 'จัดกลุ่ม')
-    : (currentLang === 'en' ? 'By District' : 'ตามเขต');
+    ? (currentLang === 'en' ? 'By District' : 'ตามเขต')
+    : (currentLang === 'en' ? 'By Party' : 'จัดกลุ่ม');
 }
 
 // Map/Grid display toggle + Group/Sort FAB for one view (called ONCE per view)

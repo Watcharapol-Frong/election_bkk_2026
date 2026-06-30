@@ -2680,7 +2680,7 @@ a {
 }
 
 /* ── Group FAB ───────────────────────────────────────────────────────────── */
-#dtab-sk { position: relative; }
+.district-panel { position: relative; }
 
 .sk-group-fab {
   position: absolute;

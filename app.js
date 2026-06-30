@@ -848,13 +848,12 @@ function applyLanguage(lang) {
   renderResults(lang);
   renderTurnoutModal(summaryData);
 
-  // Refresh ส.ก. seat grid/map (district labels) + FAB label for the new language
-  if (typeof renderSKGrid === 'function') renderSKGrid();
-  const fabLabel = document.getElementById('skGroupFabLabel');
-  if (fabLabel) {
-    fabLabel.textContent = skViewMode === 'group'
-      ? (lang === 'en' ? 'By Party' : 'จัดกลุ่ม')
-      : (lang === 'en' ? 'By Number' : 'เรียงเบอร์');
+  // Refresh both district views (labels, units) + FAB labels for the new language
+  if (typeof renderDView === 'function') {
+    ['sk', 'gov'].forEach(k => {
+      renderDView(k);
+      updateDFabLabel(DVIEWS[k]);
+    });
   }
 }
 
@@ -868,11 +867,21 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   loadResultsFromAPI();
-  renderSKGrid();       // first render with mock fallback (also builds legend)
-  loadSKMapFromAPI();   // replace with live ส.ก. data when it arrives
-  initSKInteractions(); // bind events ONCE
+  loadDistrictData();              // ส.ก. (mock) + Governor (live /api/map)
+  initDViewInteractions('sk');     // bind seat/legend events ONCE per view
+  initDViewInteractions('gov');
+  initDViewControls('sk');         // bind Map/Grid toggle + FAB ONCE per view
+  initDViewControls('gov');
   initDistrictTabs();
   initDistrictModal();
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      _clearGroupHighlight(DVIEWS.sk);
+      _clearGroupHighlight(DVIEWS.gov);
+      closeDistrictModal();
+    }
+  });
 
   // Turnout popover
   const turnoutBtn     = document.getElementById('turnoutBarBtn');
@@ -974,9 +983,28 @@ const SK_MOCK_DATA = [
   { district:'บางนา',         no:7,  name:'รัชนก ปัญญาดี',          party:'อิสระ',             score:10900 },
 ];
 
-let skActiveParty  = null;
-let skViewMode     = 'group'; // 'group' | 'sort'
-let skDisplayMode  = 'grid';  // 'grid'  | 'map'
+// Two district tabs share identical UI; only the dataset differs.
+//   sk  : ส.ก. council seats (mock — no public per-district API)
+//   gov : Governor results per district (live /api/map)
+const DVIEWS = {
+  sk: {
+    key: 'sk',
+    gridId: 'sk-seat-grid', legendId: 'sk-legend',
+    fabId: 'skGroupFab', fabLabelId: 'skGroupFabLabel',
+    data: [], zoneMap: {},
+    displayMode: 'map', viewMode: 'group', activeGroup: null,
+    countUnitTh: 'ที่นั่ง', countUnitEn: 'seats',
+  },
+  gov: {
+    key: 'gov',
+    gridId: 'gov-seat-grid', legendId: 'gov-legend',
+    fabId: 'govGroupFab', fabLabelId: 'govGroupFabLabel',
+    data: [], zoneMap: {},
+    displayMode: 'map', viewMode: 'group', activeGroup: null,
+    countUnitTh: 'เขต', countUnitEn: 'districts',
+  },
+};
+let activeDView = 'sk';
 
 // Geographic grid positions for Bangkok's 50 districts (col 1-9, row 1-9)
 const BKK_MAP_GRID = {
@@ -999,11 +1027,6 @@ const BKK_MAP_GRID = {
   'ราษฎร์บูรณะ': { r:8, c:2 }, 'บางบอน':      { r:9, c:1 },
   'ทุ่งครุ':     { r:9, c:2 }, 'บางขุนเทียน': { r:9, c:3 },
 };
-
-// Live ส.ก. data (from /api/map) — falls back to mock until API resolves
-let skData    = [...SK_MOCK_DATA];
-// District (TH name) → { candidates:[…], total } — full per-zone results for modal
-let skZoneMap = {};
 
 // Parse "9,517" → 9517
 function _parseScore(s) {
@@ -1029,8 +1052,9 @@ function _resolvePos(thName) {
   return hit ? BKK_MAP_GRID[hit] : null;
 }
 
-// Transform /api/map response into our seat-grid model
-function _transformMapData(json) {
+// Transform /api/map (Governor) response → unified seat model.
+// Grouping key = winning candidate (so districts won by the same candidate cluster).
+function _transformGovData(json) {
   const data = [];
   const zoneMap = {};
   Object.values(json || {}).forEach(zone => {
@@ -1044,7 +1068,6 @@ function _transformMapData(json) {
         score: _parseScore(c.score),
         pct:   parseFloat(c.score_percent) || 0,
         rank:  c.rank || 99,
-        photo: c.photo_square || '',
       }))
       .sort((a, b) => a.rank - b.rank);
 
@@ -1054,144 +1077,130 @@ function _transformMapData(json) {
     const w = cands[0];
 
     data.push({
-      district:  districtTh,
-      districtEn,
-      no:    w.no,
-      name:  w.name,
-      party: w.party,
-      color: w.color,
-      score: w.score,
-      pos:   _resolvePos(districtTh),
+      district: districtTh, districtEn,
+      no: w.no, name: w.name,
+      group: w.name, groupKey: String(w.no),
+      color: w.color, score: w.score,
+      pos: _resolvePos(districtTh),
     });
     zoneMap[districtTh] = { candidates: cands, total, districtEn };
   });
   return { data, zoneMap };
 }
 
-async function loadSKMapFromAPI() {
-  try {
-    const res = await fetch(RESULTS_MAP_API);
-    const json = await res.json();
-    const { data, zoneMap } = _transformMapData(json);
-    if (!data.length) return; // keep mock fallback on empty response
-    skData = data;
-    skZoneMap = zoneMap;
-    skActiveParty = null;
-    const legend = document.getElementById('sk-legend');
-    if (legend) legend.innerHTML = ''; // force legend rebuild for new data
-    renderSKGrid();
-  } catch {
-    /* keep mock data already on screen */
+// Build ส.ก. unified model from mock data (no public per-district API).
+// Grouping key = party.
+function _buildSKData() {
+  const data = SK_MOCK_DATA.map(c => ({
+    district: c.district, districtEn: '',
+    no: c.no, name: c.name,
+    group: c.party, groupKey: c.party,
+    color: (PARTY_COLORS[c.party] || PARTY_COLORS['อิสระ']).bg,
+    score: c.score,
+    pos: _resolvePos(c.district),
+  }));
+  return { data, zoneMap: {} };
+}
+
+// Group a unified dataset by groupKey, largest group first
+function _buildGroups(data) {
+  const g = {};
+  data.forEach(c => { (g[c.groupKey] = g[c.groupKey] || []).push(c); });
+  return Object.values(g).sort((a, b) => b.length - a.length);
+}
+
+function _seatHTML(c, isMap) {
+  const bg  = c.color;
+  const txt = _contrastText(bg);
+  const common = `data-group="${c.groupKey}" data-no="${c.no}" data-name="${c.name}" `
+    + `data-district="${c.district}" data-score="${c.score}" data-color="${bg}" `
+    + `data-party="${c.group}" role="button" tabindex="0"`;
+  if (isMap) {
+    const label = currentLang === 'en' ? (c.districtEn || c.district) : c.district;
+    const shortName = label.length > 5 ? label.slice(0, 5) : label;
+    return `<div class="sk-seat sk-seat--map"
+      style="grid-row:${c.pos.r};grid-column:${c.pos.c};background:${bg}"
+      ${common} aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district}">
+      <span class="sk-seat-num sk-seat-num--map" style="color:${txt}">${c.no}</span>
+      <span class="sk-seat-district-label" style="color:${txt}">${shortName}</span>
+    </div>`;
   }
+  return `<div class="sk-seat" style="background:${bg}"
+    ${common} aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district} ${c.group}">
+    <span class="sk-seat-num" style="color:${txt}">${c.no}</span>
+  </div>`;
 }
 
-function _buildSKSorted() {
-  const grouped = {};
-  skData.forEach(c => {
-    if (!grouped[c.party]) grouped[c.party] = [];
-    grouped[c.party].push(c);
+function _renderDMap(cfg, grid) {
+  // One cell per district — keep the top-scoring seat where districts repeat
+  const winners = {};
+  cfg.data.forEach(c => {
+    if (!c.pos) return;
+    if (!winners[c.district] || c.score > winners[c.district].score) winners[c.district] = c;
   });
-  return Object.entries(grouped).sort((a, b) => b[1].length - a[1].length);
+  grid.classList.add('sk-seat-grid--map');
+  grid.innerHTML = Object.values(winners).map(c => _seatHTML(c, true)).join('');
 }
 
-function renderSKGrid(mode) {
-  if (mode !== undefined) skViewMode = mode;
-  const grid   = document.getElementById('sk-seat-grid');
-  const legend = document.getElementById('sk-legend');
+function renderDView(key) {
+  const cfg = DVIEWS[key];
+  const grid   = document.getElementById(cfg.gridId);
+  const legend = document.getElementById(cfg.legendId);
   if (!grid || !legend) return;
 
-  const sorted = _buildSKSorted();
+  const groups = _buildGroups(cfg.data);
 
-  if (skDisplayMode === 'map') {
-    _renderSKMap(grid);
+  if (cfg.displayMode === 'map') {
+    _renderDMap(cfg, grid);
   } else {
-    // Choose seat order based on mode
-    const seats = skViewMode === 'sort'
-      ? [...skData].sort((a, b) => a.no - b.no)
-      : sorted.flatMap(([, cands]) => cands);
-
+    const seats = cfg.viewMode === 'sort'
+      ? [...cfg.data].sort((a, b) => a.no - b.no)
+      : groups.flat();
     grid.classList.remove('sk-seat-grid--map');
-    grid.innerHTML = seats.map(c => {
-      const bg  = c.color || (PARTY_COLORS[c.party] || PARTY_COLORS['อิสระ']).bg;
-      const txt = _contrastText(bg);
-      return `<div class="sk-seat"
-        style="background:${bg}"
-        data-party="${c.party}"
-        data-no="${c.no}"
-        data-name="${c.name}"
-        data-district="${c.district}"
-        data-score="${c.score}"
-        data-color="${bg}"
-        role="button" tabindex="0"
-        aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district} ${c.party}"
-      ><span class="sk-seat-num" style="color:${txt}">${c.no}</span></div>`;
-    }).join('');
+    grid.innerHTML = seats.map(c => _seatHTML(c, false)).join('');
   }
 
-  // Render legend (only once — doesn't change between modes)
-  if (!legend.children.length) {
-    legend.innerHTML = sorted.map(([party, cands]) => {
-      // Representative color = top-scoring member of the group
-      const rep = [...cands].sort((a, b) => b.score - a.score)[0];
-      const dot = rep.color || (PARTY_COLORS[party] || PARTY_COLORS['อิสระ']).bg;
-      const label = party === 'อิสระ' ? party : party.replace('พรรค', '');
-      return `<div class="sk-legend-item" data-party="${party}" role="button" tabindex="0">
-        <div class="sk-legend-dot" style="background:${dot}"></div>
-        <span>${label}</span>
-        <span class="sk-legend-count">${cands.length} ที่นั่ง</span>
-      </div>`;
-    }).join('');
-  }
+  const unit = currentLang === 'en' ? cfg.countUnitEn : cfg.countUnitTh;
+  legend.innerHTML = groups.map(items => {
+    const rep   = [...items].sort((a, b) => b.score - a.score)[0];
+    const label = rep.group === 'อิสระ' ? rep.group : rep.group.replace('พรรค', '');
+    return `<div class="sk-legend-item" data-group="${rep.groupKey}" role="button" tabindex="0">
+      <div class="sk-legend-dot" style="background:${rep.color}"></div>
+      <span>${label}</span>
+      <span class="sk-legend-count">${items.length} ${unit}</span>
+    </div>`;
+  }).join('');
 
-  if (skActiveParty) _applyPartyHighlight(skActiveParty);
+  if (cfg.activeGroup) _applyGroupHighlight(cfg);
 }
 
-function _renderSKMap(grid) {
-  grid.classList.add('sk-seat-grid--map');
-  grid.innerHTML = skData
-    .filter(c => c.pos)
-    .map(c => {
-      const bg  = c.color || (PARTY_COLORS[c.party] || PARTY_COLORS['อิสระ']).bg;
-      const txt = _contrastText(bg);
-      const labelTh = c.district || '';
-      const labelEn = c.districtEn || labelTh;
-      const label   = currentLang === 'en' ? labelEn : labelTh;
-      const shortName = label.length > 5 ? label.slice(0, 5) : label;
-      return `<div class="sk-seat sk-seat--map"
-        style="grid-row:${c.pos.r};grid-column:${c.pos.c};background:${bg}"
-        data-party="${c.party}"
-        data-no="${c.no}"
-        data-name="${c.name}"
-        data-district="${c.district}"
-        data-score="${c.score}"
-        data-color="${bg}"
-        role="button" tabindex="0"
-        aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district}">
-        <span class="sk-seat-num sk-seat-num--map" style="color:${txt}">${c.no}</span>
-        <span class="sk-seat-district-label" style="color:${txt}">${shortName}</span>
-      </div>`;
-    }).join('');
+function _applyGroupHighlight(cfg) {
+  const grid   = document.getElementById(cfg.gridId);
+  const legend = document.getElementById(cfg.legendId);
+  if (grid) grid.querySelectorAll('.sk-seat').forEach(el => {
+    el.classList.toggle('highlighted', el.dataset.group === cfg.activeGroup);
+    el.classList.toggle('dimmed',      el.dataset.group !== cfg.activeGroup);
+  });
+  if (legend) legend.querySelectorAll('.sk-legend-item').forEach(el => {
+    el.classList.toggle('active-legend', el.dataset.group === cfg.activeGroup);
+  });
 }
 
-// Called ONCE — bind all SK interactions
-function initSKInteractions() {
-  const grid         = document.getElementById('sk-seat-grid');
-  const legend       = document.getElementById('sk-legend');
-  const partyTooltip = document.getElementById('sk-party-tooltip');
+function _clearGroupHighlight(cfg) {
+  cfg.activeGroup = null;
+  const grid   = document.getElementById(cfg.gridId);
+  const legend = document.getElementById(cfg.legendId);
+  if (grid) grid.querySelectorAll('.sk-seat').forEach(el => el.classList.remove('highlighted', 'dimmed'));
+  if (legend) legend.querySelectorAll('.sk-legend-item').forEach(el => el.classList.remove('active-legend'));
+}
 
-  function openPartyGroup(party) {
-    skActiveParty = party;
-    _applyPartyHighlight(party);
-  }
+// Bind seat-click + legend-click for one view (called ONCE per view)
+function initDViewInteractions(key) {
+  const cfg    = DVIEWS[key];
+  const grid   = document.getElementById(cfg.gridId);
+  const legend = document.getElementById(cfg.legendId);
 
-  function closePartyGroup() {
-    skActiveParty = null;
-    document.querySelectorAll('.sk-seat').forEach(el => el.classList.remove('highlighted', 'dimmed'));
-    document.querySelectorAll('.sk-legend-item').forEach(el => el.classList.remove('active-legend'));
-  }
-
-  // Seat click → district modal
-  grid.addEventListener('click', e => {
+  if (grid) grid.addEventListener('click', e => {
     const seat = e.target.closest('.sk-seat');
     if (!seat) return;
     showDistrictModal({
@@ -1201,71 +1210,20 @@ function initSKInteractions() {
       party:    seat.dataset.party,
       score:    parseInt(seat.dataset.score),
       color:    seat.dataset.color,
-    });
+    }, cfg.zoneMap[seat.dataset.district]);
   });
 
-  // Legend click → party group highlight + detail card
-  legend.addEventListener('click', e => {
+  if (legend) legend.addEventListener('click', e => {
     const item = e.target.closest('.sk-legend-item');
     if (!item) return;
-    const party = item.dataset.party;
-    skActiveParty === party ? closePartyGroup() : openPartyGroup(party);
+    const g = item.dataset.group;
+    if (cfg.activeGroup === g) { _clearGroupHighlight(cfg); }
+    else { cfg.activeGroup = g; _applyGroupHighlight(cfg); }
   });
-
-  document.addEventListener('keydown', e => {
-    if (e.key === 'Escape') { closePartyGroup(); closeDistrictModal(); }
-  });
-}
-
-function _applyPartyHighlight(party) {
-  document.querySelectorAll('.sk-seat').forEach(el => {
-    el.classList.toggle('highlighted', el.dataset.party === party);
-    el.classList.toggle('dimmed',      el.dataset.party !== party);
-  });
-  document.querySelectorAll('.sk-legend-item').forEach(el => {
-    el.classList.toggle('active-legend', el.dataset.party === party);
-  });
-}
-
-function showPartyTooltip(party) {
-  const sorted = _buildSKSorted();
-  const tooltip = document.getElementById('sk-party-tooltip');
-  const content = document.getElementById('sk-party-tooltip-content');
-  if (!tooltip || !content) return;
-
-  const entry = sorted.find(([p]) => p === party);
-  if (!entry) return;
-  const [, cands] = entry;
-  const col      = PARTY_COLORS[party] || PARTY_COLORS['อิสระ'];
-  const top5     = [...cands].sort((a, b) => b.score - a.score).slice(0, 5);
-  const districtCount = new Set(cands.map(c => c.district)).size;
-
-  content.innerHTML = `
-    <div class="sk-party-tooltip-header">
-      <div class="sk-party-tooltip-bar" style="background:${col.bg}"></div>
-      <div>
-        <div class="sk-party-tooltip-name">${party}</div>
-        <div class="sk-party-tooltip-stats">${cands.length} ที่นั่ง · ${districtCount} เขต</div>
-      </div>
-    </div>
-    <div class="sk-party-top5-label">Top 5 คะแนนสูงสุดในพรรค</div>
-    ${top5.map(c => `
-      <div class="sk-party-cand-row">
-        <div class="sk-party-cand-no">เบอร์<br>${c.no}</div>
-        <div class="sk-party-cand-info">
-          <div class="sk-party-cand-name">${c.name}</div>
-          <div class="sk-party-cand-dist">เขต${c.district}</div>
-        </div>
-        <div class="sk-party-cand-score">${c.score.toLocaleString()}</div>
-      </div>`).join('')}`;
-
-  tooltip.classList.add('open');
-  tooltip.setAttribute('aria-hidden', 'false');
-  tooltip.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 }
 
 // ── District popup modal ──────────────────────────────────────────────────── //
-function showDistrictModal(winner) {
+function showDistrictModal(winner, zone) {
   const overlay   = document.getElementById('skDistrictOverlay');
   const nameEl    = document.getElementById('skSheetName');
   const labelEl   = document.getElementById('skSheetLabel');
@@ -1273,8 +1231,7 @@ function showDistrictModal(winner) {
   const candList  = document.getElementById('skSheetCandList');
   if (!overlay) return;
 
-  // Prefer real per-zone results from the API; fall back to a mock spread
-  const zone = skZoneMap[winner.district];
+  // Prefer real per-zone results when available; fall back to a mock spread
   let candidates, total;
   if (zone && zone.candidates.length) {
     candidates = zone.candidates.map(c => ({ ...c }));
@@ -1345,9 +1302,47 @@ function initDistrictModal() {
   });
 }
 
-// Tab switching + Group/Sort toggle
+function updateDFabLabel(cfg) {
+  const label = document.getElementById(cfg.fabLabelId);
+  if (!label) return;
+  label.textContent = cfg.viewMode === 'group'
+    ? (currentLang === 'en' ? 'By Group' : 'จัดกลุ่ม')
+    : (currentLang === 'en' ? 'By Number' : 'เรียงเบอร์');
+}
+
+// Map/Grid display toggle + Group/Sort FAB for one view (called ONCE per view)
+function initDViewControls(key) {
+  const cfg   = DVIEWS[key];
+  const panel = document.getElementById(`dtab-${key}`);
+  if (!panel) return;
+
+  const displayBtns = panel.querySelectorAll('.sk-display-btn');
+  const fab         = document.getElementById(cfg.fabId);
+
+  displayBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      displayBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      cfg.displayMode = btn.dataset.display;
+      if (fab) fab.classList.toggle('sk-group-fab--hidden', cfg.displayMode === 'map');
+      renderDView(key);
+    });
+  });
+
+  if (fab) {
+    fab.addEventListener('click', () => {
+      cfg.viewMode = cfg.viewMode === 'group' ? 'sort' : 'group';
+      updateDFabLabel(cfg);
+      renderDView(key);
+    });
+    // FAB is only relevant in Grid mode; default view is Map → hidden
+    fab.classList.toggle('sk-group-fab--hidden', cfg.displayMode === 'map');
+  }
+  updateDFabLabel(cfg);
+}
+
+// Tab switching between ส.ก. and Governor panels
 function initDistrictTabs() {
-  // Main tabs
   const tabs = document.querySelectorAll('.district-tab');
   tabs.forEach(tab => {
     tab.addEventListener('click', () => {
@@ -1355,44 +1350,36 @@ function initDistrictTabs() {
       tab.classList.add('active');
       tab.setAttribute('aria-selected', 'true');
       const target = tab.dataset.dtab;
+      activeDView = target;
       document.querySelectorAll('.district-panel').forEach(panel => {
-        panel.id === `dtab-${target}`
-          ? panel.classList.remove('district-panel-hidden')
-          : panel.classList.add('district-panel-hidden');
+        panel.classList.toggle('district-panel-hidden', panel.id !== `dtab-${target}`);
       });
+      renderDView(target);
     });
   });
+}
 
-  // Grid / Map display toggle
-  const displayBtns = document.querySelectorAll('.sk-display-btn');
-  const fab         = document.getElementById('skGroupFab');
-  displayBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      displayBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      skDisplayMode = btn.dataset.display;
-      // FAB only visible in grid mode
-      if (fab) fab.classList.toggle('sk-group-fab--hidden', skDisplayMode === 'map');
-      renderSKGrid();
-    });
-  });
+// Load both datasets: ส.ก. (mock) immediately, Governor (live) async
+function loadDistrictData() {
+  const sk = _buildSKData();
+  DVIEWS.sk.data = sk.data;
+  DVIEWS.sk.zoneMap = sk.zoneMap;
+  renderDView('sk');
+  loadGovMapFromAPI();
+}
 
-  // FAB: toggle group / sort
-  function _updateFabLabel() {
-    const label = document.getElementById('skGroupFabLabel');
-    if (!label) return;
-    if (skViewMode === 'group') {
-      label.textContent = currentLang === 'en' ? 'By Party' : 'จัดกลุ่ม';
-    } else {
-      label.textContent = currentLang === 'en' ? 'By Number' : 'เรียงเบอร์';
-    }
-  }
-  if (fab) {
-    fab.addEventListener('click', () => {
-      skViewMode = skViewMode === 'group' ? 'sort' : 'group';
-      _updateFabLabel();
-      renderSKGrid();
-    });
+async function loadGovMapFromAPI() {
+  try {
+    const res = await fetch(RESULTS_MAP_API);
+    const json = await res.json();
+    const { data, zoneMap } = _transformGovData(json);
+    if (!data.length) return;
+    DVIEWS.gov.data = data;
+    DVIEWS.gov.zoneMap = zoneMap;
+    DVIEWS.gov.activeGroup = null;
+    renderDView('gov');
+  } catch {
+    /* governor map stays empty if the API is unreachable */
   }
 }
 

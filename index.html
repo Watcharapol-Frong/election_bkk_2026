@@ -104,11 +104,11 @@
 
         <!-- ส.ก. Panel -->
         <div id="dtab-sk" class="district-panel">
-          <!-- Grid / Map display toggle -->
+          <!-- Map / Grid display toggle -->
           <div class="sk-display-toggle">
-            <button class="sk-display-btn active" data-display="grid" id="skDisplayGrid">Grid</button>
+            <button class="sk-display-btn active" data-display="map" id="skDisplayMap">Map</button>
             <span class="sk-display-sep">|</span>
-            <button class="sk-display-btn" data-display="map" id="skDisplayMap">Map</button>
+            <button class="sk-display-btn" data-display="grid" id="skDisplayGrid">Grid</button>
           </div>
           <div id="sk-seat-grid" class="sk-seat-grid" role="img" aria-label="50 ที่นั่ง ส.ก. จำแนกตามพรรค"></div>
           <div id="sk-legend" class="sk-legend"></div>
@@ -119,13 +119,21 @@
           </button>
         </div>
 
-        <!-- ผู้ว่า Panel (placeholder) -->
+        <!-- ผู้ว่า Panel — same UI, Governor dataset (live /api/map) -->
         <div id="dtab-gov" class="district-panel district-panel-hidden">
-          <div class="district-placeholder">
-            <div class="district-placeholder-icon">🗺</div>
-            <p class="district-placeholder-text" data-i18n="districtPlaceholderText">อยู่ระหว่างการพัฒนา</p>
-            <p class="district-placeholder-sub" data-i18n="districtPlaceholderSub">แผนที่ฮีตแมปผลคะแนนผู้ว่าฯ รายเขต</p>
+          <!-- Map / Grid display toggle -->
+          <div class="sk-display-toggle">
+            <button class="sk-display-btn active" data-display="map" id="govDisplayMap">Map</button>
+            <span class="sk-display-sep">|</span>
+            <button class="sk-display-btn" data-display="grid" id="govDisplayGrid">Grid</button>
           </div>
+          <div id="gov-seat-grid" class="sk-seat-grid" role="img" aria-label="ผลคะแนนผู้ว่าฯ รายเขต"></div>
+          <div id="gov-legend" class="sk-legend"></div>
+          <!-- Floating group/sort toggle (Grid mode only) -->
+          <button class="sk-group-fab" id="govGroupFab" aria-label="สลับการจัดเรียง">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="9" y2="18"/></svg>
+            <span id="govGroupFabLabel">จัดกลุ่ม</span>
+          </button>
         </div>
       </div>
 

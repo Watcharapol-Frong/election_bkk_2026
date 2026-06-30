@@ -621,12 +621,20 @@ const RESULTS_SUMMARY_API = 'https://www-api.pptvhd36.com/%E0%B9%80%E0%B8%A5%E0%
 const RESULTS_MAP_API     = 'https://www-api.pptvhd36.com/%E0%B9%80%E0%B8%A5%E0%B8%B7%E0%B8%AD%E0%B8%81%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%A7%E0%B9%88%E0%B8%B2%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%AF2569/api/map';
 // Per-zone detail (full candidate list + ballot stats): /api/zone/{slug}
 const RESULTS_ZONE_API    = RESULTS_MAP_API.replace('/api/map', '/api/zone/');
+
+// ── ส.ก. (Bangkok Metropolitan Council) endpoints — same shape as Governor ──
+const _API_ROOT           = RESULTS_MAP_API.replace('/api/map', '');
+const SK_ELECTION         = 'สมาชิกสภากรุงเทพมหานคร';
+const RESULTS_SK_MAP_API  = `${_API_ROOT}/api/map/${encodeURIComponent(SK_ELECTION)}`;
+const RESULTS_SK_ZONE_API = `${_API_ROOT}/api/zone/${encodeURIComponent(SK_ELECTION)}/`;
+
 const _zoneDetailCache = {};
-async function fetchZoneDetail(slug) {
-  if (_zoneDetailCache[slug]) return _zoneDetailCache[slug];
-  const res = await fetch(RESULTS_ZONE_API + encodeURIComponent(slug));
+async function fetchZoneDetail(slug, base = RESULTS_ZONE_API) {
+  const key = base + slug;
+  if (_zoneDetailCache[key]) return _zoneDetailCache[key];
+  const res = await fetch(base + encodeURIComponent(slug));
   const data = await res.json();
-  _zoneDetailCache[slug] = data;
+  _zoneDetailCache[key] = data;
   return data;
 }
 
@@ -1001,7 +1009,7 @@ const DVIEWS = {
     key: 'sk',
     gridId: 'sk-seat-grid', legendId: 'sk-legend',
     fabId: 'skGroupFab', fabLabelId: 'skGroupFabLabel',
-    data: [], zoneMap: {},
+    data: [], zoneMap: {}, zoneApi: RESULTS_SK_ZONE_API,
     displayMode: 'map', viewMode: 'group', activeGroup: null,
     countUnitTh: 'ที่นั่ง', countUnitEn: 'seats',
   },
@@ -1009,7 +1017,7 @@ const DVIEWS = {
     key: 'gov',
     gridId: 'gov-seat-grid', legendId: 'gov-legend',
     fabId: null, fabLabelId: null, // no group/sort FAB (Grid is fixed: by district 1→50)
-    data: [], zoneMap: {},
+    data: [], zoneMap: {}, zoneApi: RESULTS_ZONE_API,
     displayMode: 'map', viewMode: 'group', activeGroup: null,
     countUnitTh: 'เขต', countUnitEn: 'districts',
   },
@@ -1083,9 +1091,10 @@ function _resolveZoneNo(thName) {
   return key ? DISTRICT_NO[key] : 0;
 }
 
-// Transform /api/map (Governor) response → unified seat model.
-// Grouping key = winning candidate (so districts won by the same candidate cluster).
-function _transformGovData(json) {
+// Transform an /api/map response → unified seat model.
+//   mode 'gov' → group by winning candidate (districts won by same person cluster)
+//   mode 'sk'  → group by party (seats of same party cluster)
+function _transformMapData(json, mode) {
   const data = [];
   const zoneMap = {};
   Object.values(json || {}).forEach(zone => {
@@ -1106,12 +1115,14 @@ function _transformGovData(json) {
     const districtEn = zone.candidates[0].zone_name_en || '';
     const total = cands.reduce((s, c) => s + c.score, 0);
     const w = cands[0];
+    const group    = mode === 'sk' ? w.party : w.name;
+    const groupKey = mode === 'sk' ? w.party : String(w.no);
 
     data.push({
       district: districtTh, districtEn, slug: zone.zone_slug || '',
-      zoneNo: zone.candidates[0].zone_no || 0,
+      zoneNo: zone.candidates[0].zone_no || _resolveZoneNo(districtTh),
       no: w.no, name: w.name,
-      group: w.name, groupKey: String(w.no),
+      group, groupKey,
       color: w.color, score: w.score,
       pos: _resolvePos(districtTh),
     });
@@ -1262,6 +1273,7 @@ function initDViewInteractions(key) {
       party:      seat.dataset.party,
       score:      parseInt(seat.dataset.score),
       color:      seat.dataset.color,
+      zoneApi:    cfg.zoneApi,
     });
   });
 
@@ -1330,7 +1342,7 @@ async function showDistrictModal(winner) {
   // Real per-zone results (full candidate list) when a slug is available
   if (winner.slug) {
     try {
-      const d = await fetchZoneDetail(winner.slug);
+      const d = await fetchZoneDetail(winner.slug, winner.zoneApi);
       if (req !== _modalReq) return; // a newer click superseded this one
       const candidates = (d.candidates || [])
         .map(c => ({
@@ -1441,20 +1453,36 @@ function initDistrictTabs() {
   });
 }
 
-// Load both datasets: ส.ก. (mock) immediately, Governor (live) async
+// Show ส.ก. mock instantly, then replace both tabs with live API data
 function loadDistrictData() {
-  const sk = _buildSKData();
+  const sk = _buildSKData();           // instant fallback so the grid isn't empty
   DVIEWS.sk.data = sk.data;
   DVIEWS.sk.zoneMap = sk.zoneMap;
   renderDView('sk');
+  loadSKMapFromAPI();
   loadGovMapFromAPI();
+}
+
+async function loadSKMapFromAPI() {
+  try {
+    const res = await fetch(RESULTS_SK_MAP_API);
+    const json = await res.json();
+    const { data, zoneMap } = _transformMapData(json, 'sk');
+    if (!data.length) return; // keep mock fallback
+    DVIEWS.sk.data = data;
+    DVIEWS.sk.zoneMap = zoneMap;
+    DVIEWS.sk.activeGroup = null;
+    renderDView('sk');
+  } catch {
+    /* keep mock ส.ก. data on screen */
+  }
 }
 
 async function loadGovMapFromAPI() {
   try {
     const res = await fetch(RESULTS_MAP_API);
     const json = await res.json();
-    const { data, zoneMap } = _transformGovData(json);
+    const { data, zoneMap } = _transformMapData(json, 'gov');
     if (!data.length) return;
     DVIEWS.gov.data = data;
     DVIEWS.gov.zoneMap = zoneMap;

@@ -1823,7 +1823,9 @@ function setupCandidateCarousel() {
   }
 
   function getCardsPerView() {
-    return window.innerWidth <= 768 ? 1 : 4;
+    if (window.innerWidth <= 768) return 1;
+    if (window.innerWidth <= 1024) return 4;
+    return 5;
   }
 
   function updateDots() {

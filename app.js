@@ -662,9 +662,16 @@ const CAND_NAME_EN = {
 
 const PARTY_EN = {
   'อิสระ': 'Independent',
+  'Independent': 'Independent',
   'พรรคประชาชน': "People's Party",
   'พรรคประชาธิปัตย์': 'Democrat Party',
   'พรรคเศรษฐกิจ': 'Economy Party',
+  'พรรคอนาคตไทย': 'Thailand Future Party',
+  'กลุ่ม Better Bangkok': 'Better Bangkok Group',
+  'กลุ่มคนทำงาน': 'Khon Tham Ngan Group',
+  'กลุ่มเพื่อไทย Life ลงตัว': 'Pheu Thai Life Long Tua Group',
+  'กลุ่มกรุงเทพบินได้': 'Krung Thep Bin Dai Group',
+  'กลุ่มมีนบุรีพึ่งได้': 'Min Buri Pueng Dai Group',
 };
 
 let resultsData = null;
@@ -1140,24 +1147,8 @@ function _slugToEn(slug) {
     .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
-// English names for parties/groups in the data (API returns Thai only).
-// Registered parties use official English names; local BMC groups use a
-// transliteration/literal rendering (no official English name exists).
-const PARTY_EN = {
-  'พรรคประชาชน': "People's Party",
-  'พรรคประชาธิปัตย์': 'Democrat Party',
-  'พรรคอนาคตไทย': 'Thailand Future Party',
-  'พรรคเศรษฐกิจ': 'Economic Party',
-  'กลุ่ม Better Bangkok': 'Better Bangkok Group',
-  'กลุ่มคนทำงาน': 'Khon Tham Ngan Group',
-  'กลุ่มเพื่อไทย Life ลงตัว': 'Pheu Thai Life Long Tua Group',
-  'กลุ่มกรุงเทพบินได้': 'Krung Thep Bin Dai Group',
-  'กลุ่มมีนบุรีพึ่งได้': 'Min Buri Pueng Dai Group',
-  'อิสระ': 'Independent',
-  'Independent': 'Independent',
-};
-
-// Display label for a party/group. In Thai, optionally strip the "พรรค" prefix.
+// Display label for a party/group (PARTY_EN defined above). In Thai,
+// optionally strip the "พรรค" prefix.
 function _partyLabel(party, stripPrefix) {
   if (currentLang === 'en') return PARTY_EN[party] || party;
   return (stripPrefix && party !== 'อิสระ') ? party.replace('พรรค', '') : party;

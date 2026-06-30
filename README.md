@@ -82,6 +82,11 @@ Deploy ผ่าน **Vercel** (เชื่อมกับ branch `main`)
 - `vercel.json` ตั้งค่า security headers, cache policy และ `cleanUrls`
 - ทุก commit ที่ขึ้น `main` จะถูก build ใหม่อัตโนมัติ
 
+**ให้บริการใต้ subpath ของโดเมนอื่น** (เช่น `frong.me/election-bkk-2026`) ผ่าน
+Cloudflare Worker reverse-proxy → ดู [`docs/DEPLOY_SUBPATH.md`](docs/DEPLOY_SUBPATH.md)
+และสคริปต์ [`deploy/election-proxy.worker.js`](deploy/election-proxy.worker.js)
+(ทุก path ในแอปเป็น relative จึงทำงานได้ทั้งที่ root และใต้ prefix)
+
 ---
 
 ## 📊 ตั้งค่า Google Analytics (GA4)

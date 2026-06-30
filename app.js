@@ -621,7 +621,9 @@ const POLICY_COMPARISON_DATA = {
 // and holds any credentials server-side. See api/pptv.js. `p` is the upstream
 // sub-path; the proxy enforces an allowlist.
 const SK_ELECTION = 'สมาชิกสภากรุงเทพมหานคร';
-const pptvUrl = (p) => `/api/pptv?p=${encodeURIComponent(p)}`;
+// Relative URL so it works both at the site root and under a path prefix
+// (e.g. frong.me/election-bkk-2026/ behind a reverse proxy).
+const pptvUrl = (p) => `api/pptv?p=${encodeURIComponent(p)}`;
 
 const RESULTS_API         = pptvUrl('api/rank');
 const RESULTS_SUMMARY_API = pptvUrl('api/summary/bkk-governor-2026');

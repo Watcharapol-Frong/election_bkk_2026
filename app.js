@@ -1008,7 +1008,7 @@ const DVIEWS = {
   gov: {
     key: 'gov',
     gridId: 'gov-seat-grid', legendId: 'gov-legend',
-    fabId: 'govGroupFab', fabLabelId: 'govGroupFabLabel',
+    fabId: null, fabLabelId: null, // no group/sort FAB (Grid is fixed: by district 1→50)
     data: [], zoneMap: {},
     displayMode: 'map', viewMode: 'group', activeGroup: null,
     countUnitTh: 'เขต', countUnitEn: 'districts',
@@ -1088,6 +1088,7 @@ function _transformGovData(json) {
 
     data.push({
       district: districtTh, districtEn, slug: zone.zone_slug || '',
+      zoneNo: zone.candidates[0].zone_no || 0,
       no: w.no, name: w.name,
       group: w.name, groupKey: String(w.no),
       color: w.color, score: w.score,
@@ -1119,25 +1120,48 @@ function _buildGroups(data) {
   return Object.values(g).sort((a, b) => b.length - a.length);
 }
 
-function _seatHTML(c, isMap) {
-  const bg  = c.color;
-  const txt = _contrastText(bg);
-  const common = `data-group="${c.groupKey}" data-no="${c.no}" data-name="${c.name}" `
+// Shared data-* attributes for a clickable seat
+function _seatAttrs(c) {
+  return `data-group="${c.groupKey}" data-no="${c.no}" data-name="${c.name}" `
     + `data-district="${c.district}" data-district-en="${c.districtEn || ''}" `
-    + `data-slug="${c.slug || ''}" data-score="${c.score}" data-color="${bg}" `
+    + `data-slug="${c.slug || ''}" data-score="${c.score}" data-color="${c.color}" `
     + `data-party="${c.group}" role="button" tabindex="0"`;
-  if (isMap) {
-    const label = currentLang === 'en' ? (c.districtEn || c.district) : c.district;
-    return `<div class="sk-seat sk-seat--map"
-      style="grid-row:${c.pos.r};grid-column:${c.pos.c};background:${bg}"
-      ${common} title="${label}" aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district}">
-      <span class="sk-seat-district-label" style="color:${txt}">${label}</span>
-    </div>`;
-  }
-  return `<div class="sk-seat" style="background:${bg}"
-    ${common} aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district} ${c.group}">
+}
+
+// Plain colored square with the candidate number (ส.ก. grid)
+function _seatSquareHTML(c) {
+  const txt = _contrastText(c.color);
+  return `<div class="sk-seat" style="background:${c.color}"
+    ${_seatAttrs(c)} aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district} ${c.group}">
     <span class="sk-seat-num" style="color:${txt}">${c.no}</span>
   </div>`;
+}
+
+// Geographic map cell with district name
+function _seatMapHTML(c) {
+  const txt = _contrastText(c.color);
+  const label = currentLang === 'en' ? (c.districtEn || c.district) : c.district;
+  return `<div class="sk-seat sk-seat--map"
+    style="grid-row:${c.pos.r};grid-column:${c.pos.c};background:${c.color}"
+    ${_seatAttrs(c)} title="${label}" aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district}">
+    <span class="sk-seat-district-label" style="color:${txt}">${label}</span>
+  </div>`;
+}
+
+// District-ordered cell: zone number + district name (ผู้ว่า grid)
+function _seatDistrictHTML(c) {
+  const txt = _contrastText(c.color);
+  const label = currentLang === 'en' ? (c.districtEn || c.district) : c.district;
+  return `<div class="sk-seat sk-seat--district" style="background:${c.color}"
+    ${_seatAttrs(c)} title="${label}" aria-label="เขต ${c.zoneNo} ${c.district} ${c.name}">
+    <span class="sk-seat-zone-no" style="color:${txt}">${c.zoneNo}</span>
+    <span class="sk-seat-district-label" style="color:${txt}">${label}</span>
+  </div>`;
+}
+
+function _setGridLayout(grid, layout) {
+  grid.classList.toggle('sk-seat-grid--map',    layout === 'map');
+  grid.classList.toggle('sk-seat-grid--groups', layout === 'groups');
 }
 
 function _renderDMap(cfg, grid) {
@@ -1147,8 +1171,34 @@ function _renderDMap(cfg, grid) {
     if (!c.pos) return;
     if (!winners[c.district] || c.score > winners[c.district].score) winners[c.district] = c;
   });
-  grid.classList.add('sk-seat-grid--map');
-  grid.innerHTML = Object.values(winners).map(c => _seatHTML(c, true)).join('');
+  _setGridLayout(grid, 'map');
+  grid.innerHTML = Object.values(winners).map(_seatMapHTML).join('');
+}
+
+// ส.ก. grouped-by-party view with a seat-count header per group
+function _renderGroupedSeats(cfg, grid, groups) {
+  const unit = currentLang === 'en' ? cfg.countUnitEn : cfg.countUnitTh;
+  _setGridLayout(grid, 'groups');
+  grid.innerHTML = groups.map(items => {
+    const rep   = [...items].sort((a, b) => b.score - a.score)[0];
+    const label = rep.group === 'อิสระ' ? rep.group : rep.group.replace('พรรค', '');
+    const seats = [...items].sort((a, b) => a.no - b.no).map(_seatSquareHTML).join('');
+    return `<div class="sk-group" data-group="${rep.groupKey}">
+      <div class="sk-group-header">
+        <span class="sk-group-dot" style="background:${rep.color}"></span>
+        <span class="sk-group-name">${label}</span>
+        <span class="sk-group-count">${items.length} ${unit}</span>
+      </div>
+      <div class="sk-group-seats">${seats}</div>
+    </div>`;
+  }).join('');
+}
+
+// ผู้ว่า district-ordered grid (sorted by zone number 1→50)
+function _renderDistrictGrid(cfg, grid) {
+  _setGridLayout(grid, null);
+  const seats = [...cfg.data].sort((a, b) => (a.zoneNo || 0) - (b.zoneNo || 0));
+  grid.innerHTML = seats.map(_seatDistrictHTML).join('');
 }
 
 function renderDView(key) {
@@ -1161,12 +1211,13 @@ function renderDView(key) {
 
   if (cfg.displayMode === 'map') {
     _renderDMap(cfg, grid);
+  } else if (cfg.key === 'gov') {
+    _renderDistrictGrid(cfg, grid);          // ผู้ว่า: 50 ช่องเรียงเลขเขต 1→50
+  } else if (cfg.viewMode === 'group') {
+    _renderGroupedSeats(cfg, grid, groups);  // ส.ก.: จัดกลุ่ม + นับที่นั่ง
   } else {
-    const seats = cfg.viewMode === 'sort'
-      ? [...cfg.data].sort((a, b) => a.no - b.no)
-      : groups.flat();
-    grid.classList.remove('sk-seat-grid--map');
-    grid.innerHTML = seats.map(c => _seatHTML(c, false)).join('');
+    _setGridLayout(grid, null);              // ส.ก.: เรียงเบอร์ (กล่องเรียบ)
+    grid.innerHTML = [...cfg.data].sort((a, b) => a.no - b.no).map(_seatSquareHTML).join('');
   }
 
   const unit = currentLang === 'en' ? cfg.countUnitEn : cfg.countUnitTh;

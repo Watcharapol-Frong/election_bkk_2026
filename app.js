@@ -1108,6 +1108,7 @@ function _transformMapData(json, mode) {
         score: _parseScore(c.score),
         pct:   parseFloat(c.score_percent) || 0,
         rank:  c.rank || 99,
+        photo: c.photo_square || '',
       }))
       .sort((a, b) => a.rank - b.rank);
 
@@ -1274,6 +1275,7 @@ function initDViewInteractions(key) {
       score:      parseInt(seat.dataset.score),
       color:      seat.dataset.color,
       zoneApi:    cfg.zoneApi,
+      pre:        cfg.zoneMap[seat.dataset.district],
     });
   });
 
@@ -1334,14 +1336,22 @@ async function showDistrictModal(winner) {
   const districtEn = winner.districtEn || winner.district;
   labelEl.textContent = currentLang === 'en' ? `District ${districtEn}` : `เขต${winner.district}`;
   nameEl.textContent  = currentLang === 'en' ? districtEn : winner.district;
-  totalEl.textContent = '…';
-  candList.innerHTML  = `<div class="sk-sheet-loading">${currentLang === 'en' ? 'Loading…' : 'กำลังโหลด…'}</div>`;
+
+  // Instant paint: show the top candidates we already have from the map data,
+  // then quietly fill in the complete list when the zone detail arrives.
+  if (winner.pre && winner.pre.candidates && winner.pre.candidates.length) {
+    totalEl.textContent = (winner.pre.total || 0).toLocaleString();
+    _renderModalCandidates(candList, winner.pre.candidates, winner.pre.total);
+  } else {
+    totalEl.textContent = '…';
+    candList.innerHTML  = `<div class="sk-sheet-loading">${currentLang === 'en' ? 'Loading…' : 'กำลังโหลด…'}</div>`;
+  }
 
   overlay.classList.add('open');
   overlay.setAttribute('aria-hidden', 'false');
   document.body.style.overflow = 'hidden';
 
-  // Real per-zone results (full candidate list) when a slug is available
+  // Full candidate list from the zone detail endpoint
   if (winner.slug) {
     try {
       const d = await fetchZoneDetail(winner.slug, winner.zoneApi);
@@ -1363,8 +1373,11 @@ async function showDistrictModal(winner) {
       _renderModalCandidates(candList, candidates, total);
     } catch {
       if (req !== _modalReq) return;
-      totalEl.textContent = '—';
-      candList.innerHTML = `<div class="sk-sheet-loading">${currentLang === 'en' ? 'Failed to load data' : 'ไม่สามารถโหลดข้อมูลได้'}</div>`;
+      // Keep the instant top-candidates view if we already have it
+      if (!(winner.pre && winner.pre.candidates && winner.pre.candidates.length)) {
+        totalEl.textContent = '—';
+        candList.innerHTML = `<div class="sk-sheet-loading">${currentLang === 'en' ? 'Failed to load data' : 'ไม่สามารถโหลดข้อมูลได้'}</div>`;
+      }
     }
     return;
   }

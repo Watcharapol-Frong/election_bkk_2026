@@ -65,7 +65,7 @@ body {
 
 .container {
   width: 100%;
-  max-width: 960px;
+  max-width: 800px;
   margin: 0 auto;
   padding: 0 24px;
 }
@@ -101,7 +101,7 @@ a {
   align-items:center;
   justify-content: space-between;
   gap: 16px;
-  max-width: 960px;
+  max-width: 800px;
   margin: 0 auto;
   padding: 18px 28px;
 }
@@ -195,7 +195,7 @@ a {
 .tabs-container {
   display: flex;
   gap: 6px;
-  max-width: 960px;
+  max-width: 800px;
   margin: 0 auto;
   padding: 8px 24px;
   white-space: nowrap;
@@ -803,7 +803,7 @@ a {
 }
 
 #sec-howto .container {
-  max-width: 1100px;
+  max-width: 1120px;
 }
 
 .step-card {
@@ -959,11 +959,11 @@ a {
 }
 
 #sec-candidates .container {
-  max-width: 960px;
+  max-width: 800px;
 }
 
 #sec-results .container {
-  max-width: 1100px;
+  max-width: 800px;
 }
 
 .candidates-actions {

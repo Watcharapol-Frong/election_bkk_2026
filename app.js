@@ -615,27 +615,30 @@ const POLICY_COMPARISON_DATA = {
 };
 
 // ==========================================================================
-// LIVE RESULTS — PPTV API
+// LIVE RESULTS — via our own server-side proxy (/api/pptv)
 // ==========================================================================
-const RESULTS_API         = 'https://www-api.pptvhd36.com/%E0%B9%80%E0%B8%A5%E0%B8%B7%E0%B8%AD%E0%B8%81%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%A7%E0%B9%88%E0%B8%B2%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%AF2569/api/rank';
-const RESULTS_SUMMARY_API = 'https://www-api.pptvhd36.com/%E0%B9%80%E0%B8%A5%E0%B8%B7%E0%B8%AD%E0%B8%81%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%A7%E0%B9%88%E0%B8%B2%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%AF2569/api/summary/bkk-governor-2026';
-const RESULTS_MAP_API     = 'https://www-api.pptvhd36.com/%E0%B9%80%E0%B8%A5%E0%B8%B7%E0%B8%AD%E0%B8%81%E0%B8%95%E0%B8%B1%E0%B9%89%E0%B8%87%E0%B8%9C%E0%B8%B9%E0%B9%89%E0%B8%A7%E0%B9%88%E0%B8%B2%E0%B8%81%E0%B8%A3%E0%B8%B8%E0%B8%87%E0%B9%80%E0%B8%97%E0%B8%9E%E0%B8%AF2569/api/map';
-// Per-zone detail (full candidate list + ballot stats): /api/zone/{slug}
-const RESULTS_ZONE_API    = RESULTS_MAP_API.replace('/api/map', '/api/zone/');
+// The browser only calls our domain; the proxy talks to the upstream PPTV API
+// and holds any credentials server-side. See api/pptv.js. `p` is the upstream
+// sub-path; the proxy enforces an allowlist.
+const SK_ELECTION = 'สมาชิกสภากรุงเทพมหานคร';
+const pptvUrl = (p) => `/api/pptv?p=${encodeURIComponent(p)}`;
 
-// ── BMC Council endpoints — same shape as Governor ──
-const _API_ROOT           = RESULTS_MAP_API.replace('/api/map', '');
-const SK_ELECTION         = 'สมาชิกสภากรุงเทพมหานคร';
-const RESULTS_SK_MAP_API  = `${_API_ROOT}/api/map/${encodeURIComponent(SK_ELECTION)}`;
-const RESULTS_SK_ZONE_API = `${_API_ROOT}/api/zone/${encodeURIComponent(SK_ELECTION)}/`;
+const RESULTS_API         = pptvUrl('api/rank');
+const RESULTS_SUMMARY_API = pptvUrl('api/summary/bkk-governor-2026');
+const RESULTS_MAP_API     = pptvUrl('api/map');
+const RESULTS_SK_MAP_API  = pptvUrl(`api/map/${SK_ELECTION}`);
 
+// Per-zone detail (full candidate list + ballot stats). `kind` selects the
+// election: 'gov' → api/zone/{slug}; 'sk' → api/zone/{election}/{slug}.
 const _zoneDetailCache = {};
-async function fetchZoneDetail(slug, base = RESULTS_ZONE_API) {
-  const key = base + slug;
-  if (_zoneDetailCache[key]) return _zoneDetailCache[key];
-  const res = await fetch(base + encodeURIComponent(slug));
+async function fetchZoneDetail(slug, kind = 'gov') {
+  const path = kind === 'sk'
+    ? `api/zone/${SK_ELECTION}/${slug}`
+    : `api/zone/${slug}`;
+  if (_zoneDetailCache[path]) return _zoneDetailCache[path];
+  const res = await fetch(pptvUrl(path));
   const data = await res.json();
-  _zoneDetailCache[key] = data;
+  _zoneDetailCache[path] = data;
   return data;
 }
 
@@ -1057,7 +1060,7 @@ const DVIEWS = {
     key: 'sk',
     gridId: 'sk-seat-grid', legendId: 'sk-legend',
     fabId: 'skGroupFab', fabLabelId: 'skGroupFabLabel',
-    data: [], zoneMap: {}, zoneApi: RESULTS_SK_ZONE_API,
+    data: [], zoneMap: {}, zoneKind: 'sk',
     displayMode: 'map', viewMode: 'group', activeGroup: null,
     countUnitTh: 'ที่นั่ง', countUnitEn: 'seats',
   },
@@ -1065,7 +1068,7 @@ const DVIEWS = {
     key: 'gov',
     gridId: 'gov-seat-grid', legendId: 'gov-legend',
     fabId: null, fabLabelId: null, // no group/sort FAB (Grid is fixed: by district 1→50)
-    data: [], zoneMap: {}, zoneApi: RESULTS_ZONE_API,
+    data: [], zoneMap: {}, zoneKind: 'gov',
     displayMode: 'map', viewMode: 'group', activeGroup: null,
     countUnitTh: 'เขต', countUnitEn: 'districts',
   },
@@ -1338,7 +1341,7 @@ function initDViewInteractions(key) {
       party:      seat.dataset.party,
       score:      parseInt(seat.dataset.score),
       color:      seat.dataset.color,
-      zoneApi:    cfg.zoneApi,
+      zoneKind:   cfg.zoneKind,
       pre:        cfg.zoneMap[seat.dataset.district],
     });
   });
@@ -1420,7 +1423,7 @@ async function showDistrictModal(winner) {
   // Full candidate list from the zone detail endpoint
   if (winner.slug) {
     try {
-      const d = await fetchZoneDetail(winner.slug, winner.zoneApi);
+      const d = await fetchZoneDetail(winner.slug, winner.zoneKind);
       if (req !== _modalReq) return; // a newer click superseded this one
       const candidates = (d.candidates || [])
         .map(c => ({

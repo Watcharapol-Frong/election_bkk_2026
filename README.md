@@ -45,7 +45,9 @@
 ├── assets/             # โลโก้และรูปภาพของเว็บไซต์
 ├── candidates/         # รูปผู้สมัครผู้ว่าฯ (no-1.webp … no-18.webp)
 ├── api/
+│   ├── pptv.js         # Vercel serverless proxy → PPTV API (allowlist + cache)
 │   └── results.js      # Vercel serverless proxy (สำรอง) → ข้อมูล กทม.
+├── .env.example        # ตัวอย่าง env vars (ไม่มีค่าจริง)
 ├── vercel.json         # config: cleanUrls, security headers, cache policy
 ├── robots.txt
 ├── LICENSE             # CC BY-NC-SA 4.0 (เฉพาะเนื้อหาต้นฉบับ)
@@ -59,18 +61,16 @@
 
 ## 🚀 การรัน (Local Development)
 
-เป็น static site ไม่ต้อง build — เปิดด้วย static server ตัวใดก็ได้:
+หน้าเว็บเป็น static แต่ข้อมูลผลคะแนนเรียกผ่าน serverless proxy (`/api/pptv`)
+จึงควรรันด้วย **Vercel CLI** เพื่อให้ `/api/*` ทำงาน:
 
 ```bash
-# ตัวอย่าง
-npx serve .
-# หรือ
-python3 -m http.server 8000
+npm i -g vercel
+vercel dev          # เสิร์ฟ static + serverless ที่ http://localhost:3000
 ```
 
-แล้วเปิด `http://localhost:8000`
-
-> หมายเหตุ: ข้อมูลผลคะแนนดึงจาก PPTV API โดยตรงจากฝั่ง client จึงต้องต่ออินเทอร์เน็ต
+> ถ้าเปิดด้วย static server ธรรมดา (`npx serve .`) หน้าเว็บจะแสดงได้
+> แต่ส่วนผลคะแนนจะโหลดไม่ได้เพราะ `/api/pptv` ไม่ถูกรัน
 > ดูรายละเอียด endpoint ทั้งหมดได้ที่ [`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md)
 
 ---
@@ -107,6 +107,21 @@ Deploy ผ่าน **Vercel** (เชื่อมกับ branch `main`)
 - กดปุ่ม `EN/ไทย` เรียก `applyLanguage(lang)` แปลทั้งหน้า + re-render ส่วน dynamic
 - ชื่อเขต ส.ก. ไม่มีในภาษาอังกฤษจาก API → สร้างจาก slug (`_slugToEn`)
 - ชื่อพรรค/กลุ่มแปลผ่าน `PARTY_EN` (พรรคจดทะเบียน = ชื่อทางการ, กลุ่มท้องถิ่น = ทับศัพท์)
+
+---
+
+## 🔒 ความปลอดภัย & การจัดการ Secret
+
+- **ไม่มี API key/secret ในโค้ดฝั่ง client เลย** — endpoint ของ PPTV ปัจจุบันเป็น public
+- การเรียกข้อมูลทั้งหมดผ่าน **server-side proxy** ที่ `/api/pptv` (`api/pptv.js`):
+  - เบราว์เซอร์คุยกับโดเมนเราเท่านั้น (ไม่ยิง API ภายในของ PPTV ตรงๆ)
+  - มี **allowlist** ป้องกัน open-proxy / SSRF + cache ที่ edge
+  - ถ้า upstream ต้องใช้ credential วันหน้า → ใส่ใน env `PPTV_API_KEY`
+    (ส่งเป็น header `x-api-key` จากเซิร์ฟเวอร์) **ไม่หลุดไปฝั่ง browser**
+- ตั้งค่า env ผ่าน Vercel หรือไฟล์ `.env` (ดู [`.env.example`](.env.example)) — `.env` ถูก gitignore
+- Security headers (X-Frame-Options, nosniff, Referrer-Policy ฯลฯ) ตั้งใน `vercel.json`
+
+> อย่า commit ค่าจริงของ secret ลง repo เด็ดขาด — ใช้ env variable เท่านั้น
 
 ---
 

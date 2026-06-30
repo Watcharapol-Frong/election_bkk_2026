@@ -1,26 +1,37 @@
 # Data Sources & API
 
-ข้อมูลผลคะแนนดึงจาก **PPTV HD36 API** โดยตรงจากฝั่ง client (`app.js`)
-ทุก endpoint อยู่ใต้ host เดียวกัน:
+ข้อมูลผลคะแนนมาจาก **PPTV HD36 API** แต่ฝั่ง client **ไม่เรียก PPTV ตรงๆ** —
+เรียกผ่าน **server-side proxy ของเราเอง** ที่ `/api/pptv` (ดู `api/pptv.js`)
 
 ```
-https://www-api.pptvhd36.com/<เลือกตั้งผู้ว่ากรุงเทพฯ2569 (URL-encoded)>
+Browser  →  /api/pptv?p=<upstream-subpath>  →  PPTV API (server-side)
 ```
 
-ค่าคงที่ทั้งหมดประกาศไว้ต้นไฟล์ `app.js` (ส่วน `LIVE RESULTS — PPTV API`)
+**ทำไมต้อง proxy:**
+- เบราว์เซอร์คุยกับโดเมนเราเท่านั้น ไม่ยิง API ภายในของ PPTV จากหน้าเว็บ
+- ถ้าวันหน้า upstream ต้องใช้ credential → เก็บใน env var (`PPTV_API_KEY`) ฝั่งเซิร์ฟเวอร์ ไม่หลุดไป client
+- มี **allowlist** กัน open-proxy/SSRF + cache ที่ edge (30s)
+
+upstream host/base/key ตั้งผ่าน env (`PPTV_HOST`, `PPTV_BASE_PATH`, `PPTV_API_KEY`)
+ดู `.env.example` · ค่าคงที่ฝั่ง client ประกาศไว้ต้น `app.js` (ส่วน `LIVE RESULTS`)
+
+> **client ไม่มี API key ใดๆ** — endpoint ของ PPTV ปัจจุบันเป็น public ไม่ต้องใช้คีย์
+> proxy เตรียมรองรับไว้เผื่ออนาคตเท่านั้น
 
 ---
 
 ## Endpoints ที่ใช้
 
-| ค่าคงที่ใน `app.js` | Path | ใช้ทำอะไร |
+ตารางด้านล่าง `p` คือค่าที่ส่งให้ proxy: `/api/pptv?p=<upstream-subpath>`
+
+| ค่าคงที่ใน `app.js` | `p` (upstream sub-path) | ใช้ทำอะไร |
 |---|---|---|
-| `RESULTS_API` | `/api/rank` | อันดับผู้สมัครผู้ว่าฯ รวมทั้ง กทม. (โพเดียม + รายชื่อ) |
-| `RESULTS_SUMMARY_API` | `/api/summary/bkk-governor-2026` | สถิติบัตร: total/good/bad/no votes, `progress` (% นับ), `updated_at`, eligible, turnout |
-| `RESULTS_MAP_API` | `/api/map` | ผู้ว่าฯ รายเขต (50 เขต, **top‑2 ต่อเขต**) |
-| `RESULTS_ZONE_API` | `/api/zone/{slug}` | ผู้ว่าฯ รายเขตแบบเต็ม (ผู้สมัครครบ + สถิติบัตรของเขต) |
-| `RESULTS_SK_MAP_API` | `/api/map/สมาชิกสภากรุงเทพมหานคร` | ส.ก. รายเขต (50 เขต, **top‑2 ต่อเขต**) |
-| `RESULTS_SK_ZONE_API` | `/api/zone/สมาชิกสภากรุงเทพมหานคร/{slug}` | ส.ก. รายเขตแบบเต็ม (ผู้สมัครครบ + สถิติบัตร) |
+| `RESULTS_API` | `api/rank` | อันดับผู้สมัครผู้ว่าฯ รวมทั้ง กทม. (โพเดียม + รายชื่อ) |
+| `RESULTS_SUMMARY_API` | `api/summary/bkk-governor-2026` | สถิติบัตร: total/good/bad/no votes, `progress` (% นับ), `updated_at`, eligible, turnout |
+| `RESULTS_MAP_API` | `api/map` | ผู้ว่าฯ รายเขต (50 เขต, **top‑2 ต่อเขต**) |
+| `RESULTS_SK_MAP_API` | `api/map/สมาชิกสภากรุงเทพมหานคร` | ส.ก. รายเขต (50 เขต, **top‑2 ต่อเขต**) |
+| `fetchZoneDetail(slug,'gov')` | `api/zone/{slug}` | ผู้ว่าฯ รายเขตแบบเต็ม (ผู้สมัครครบ + สถิติบัตร) |
+| `fetchZoneDetail(slug,'sk')` | `api/zone/สมาชิกสภากรุงเทพมหานคร/{slug}` | ส.ก. รายเขตแบบเต็ม (ผู้สมัครครบ + สถิติบัตร) |
 
 > `/api/map` ให้แค่ 2 อันดับแรกต่อเขต — Popup จึงเรียก `/api/zone/{slug}` เพิ่ม
 > เพื่อให้ได้ผู้สมัครครบทุกคน (ดูพฤติกรรม "instant paint แล้วเติมเต็ม" ใน `showDistrictModal`)

@@ -2853,13 +2853,14 @@ a {
 
 /* ── District-ordered cell (zone no + name) — Governor & Council Grid ──────────── */
 .sk-seat--district {
-  aspect-ratio: auto;
-  min-height: 52px;
+  aspect-ratio: 1;
+  min-height: unset;
   flex-direction: column;
   justify-content: center;
   gap: 1px;
   border-radius: 6px;
-  padding: 3px 2px;
+  padding: 2px;
+  overflow: hidden;
 }
 
 .sk-seat-zone-no {

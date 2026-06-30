@@ -623,7 +623,7 @@ const RESULTS_MAP_API     = 'https://www-api.pptvhd36.com/%E0%B9%80%E0%B8%A5%E0%
 // Per-zone detail (full candidate list + ballot stats): /api/zone/{slug}
 const RESULTS_ZONE_API    = RESULTS_MAP_API.replace('/api/map', '/api/zone/');
 
-// ── ส.ก. (Bangkok Metropolitan Council) endpoints — same shape as Governor ──
+// ── BMC Council endpoints — same shape as Governor ──
 const _API_ROOT           = RESULTS_MAP_API.replace('/api/map', '');
 const SK_ELECTION         = 'สมาชิกสภากรุงเทพมหานคร';
 const RESULTS_SK_MAP_API  = `${_API_ROOT}/api/map/${encodeURIComponent(SK_ELECTION)}`;
@@ -829,7 +829,7 @@ async function loadResultsFromAPI() {
   }
 }
 
-// Format "2026-06-28 22:35:32" → { date, time } in TH (พ.ศ.) or EN
+// Format "2026-06-28 22:35:32" → { date, time } in Thai (Buddhist era) or English
 const _TH_MONTHS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
 const _EN_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 function _formatUpdated(raw, lang) {
@@ -977,7 +977,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
 // ==========================================================================
-// DISTRICT TAB — ส.ก. SEAT GRID
+// DISTRICT TAB — BMC COUNCIL SEAT GRID
 // ==========================================================================
 
 const PARTY_COLORS = {
@@ -990,9 +990,9 @@ const PARTY_COLORS = {
   'อิสระ':               { bg: '#CFD8DC', text: '#546E7A' },
 };
 
-// Mock data — 50 เขต กรุงเทพฯ (replace with API when available)
+// Mock data — 50 Bangkok districts (instant fallback before the live API resolves)
 const SK_MOCK_DATA = [
-  // พรรคประชาชน (22 ที่นั่ง)
+  // People's Party (22 seats)
   { district:'จตุจักร',       no:3,  name:'สุรินทร์ มีแสง',        party:'พรรคประชาชน',      score:18420 },
   { district:'ลาดพร้าว',      no:7,  name:'วิชัย ทองดี',           party:'พรรคประชาชน',      score:17800 },
   { district:'ห้วยขวาง',      no:2,  name:'กัญญา สุขสวัสดิ์',      party:'พรรคประชาชน',      score:16950 },
@@ -1015,7 +1015,7 @@ const SK_MOCK_DATA = [
   { district:'บางซื่อ',       no:4,  name:'อรุณี สมพงษ์',          party:'พรรคประชาชน',      score:10900 },
   { district:'ดินแดง',        no:2,  name:'วีระชัย ทองสุข',         party:'พรรคประชาชน',      score:10700 },
   { district:'ราชเทวี',       no:5,  name:'กนกพร ดีงาม',           party:'พรรคประชาชน',      score:10400 },
-  // พรรคเพื่อไทย (14 ที่นั่ง)
+  // Pheu Thai Party (14 seats)
   { district:'พระนคร',        no:4,  name:'สมชาย วีระกิจ',         party:'พรรคเพื่อไทย',     score:17600 },
   { district:'ยานนาวา',       no:3,  name:'อารีย์ พงษ์ดี',         party:'พรรคเพื่อไทย',     score:16800 },
   { district:'บางรัก',        no:5,  name:'พินิจ สินธุวงษ์',        party:'พรรคเพื่อไทย',     score:16200 },
@@ -1030,7 +1030,7 @@ const SK_MOCK_DATA = [
   { district:'ตลิ่งชัน',      no:3,  name:'สุนทร วัฒนะ',           party:'พรรคเพื่อไทย',     score:10700 },
   { district:'บางกอกน้อย',    no:5,  name:'อิสรา แสงจันทร์',       party:'พรรคเพื่อไทย',     score:10300 },
   { district:'ทวีวัฒนา',      no:2,  name:'ปัณฑา ชัยเจริญ',        party:'พรรคเพื่อไทย',     score: 9800 },
-  // พรรคประชาธิปัตย์ (7 ที่นั่ง)
+  // Democrat Party (7 seats)
   { district:'ปทุมวัน',       no:3,  name:'พิสิฐ บำรุงกิจ',        party:'พรรคประชาธิปัตย์',  score:14300 },
   { district:'พญาไท',         no:4,  name:'กุลธิดา ชัยภักดี',      party:'พรรคประชาธิปัตย์',  score:13200 },
   { district:'บางพลัด',       no:2,  name:'วิทวัส สุขสันต์',        party:'พรรคประชาธิปัตย์',  score:12600 },
@@ -1038,11 +1038,11 @@ const SK_MOCK_DATA = [
   { district:'ป้อมปราบ',      no:3,  name:'วิรัตน์ ทวีสุข',         party:'พรรคประชาธิปัตย์',  score:11100 },
   { district:'บางกอกใหญ่',    no:4,  name:'นภาพร เอกอุดม',         party:'พรรคประชาธิปัตย์',  score:10400 },
   { district:'หนองจอก',       no:6,  name:'อภิชาติ ศรีทอง',         party:'พรรคประชาธิปัตย์',  score: 9800 },
-  // พรรคพลังประชารัฐ (3 ที่นั่ง)
+  // Palang Pracharath Party (3 seats)
   { district:'บึงกุ่ม',       no:7,  name:'วรชัย พรประสิทธิ์',     party:'พรรคพลังประชารัฐ',  score:12000 },
   { district:'บางบอน',        no:4,  name:'สิทธิชัย ชัยโชค',        party:'พรรคพลังประชารัฐ',  score:11200 },
   { district:'ลาดพร้าว',      no:9,  name:'ฐิติรัตน์ คงคา',         party:'พรรคพลังประชารัฐ',  score:10500 },
-  // อิสระ (4 ที่นั่ง)
+  // Independent (4 seats)
   { district:'พระโขนง',       no:5,  name:'สมบูรณ์ สุขสมบัติ',     party:'อิสระ',             score:13500 },
   { district:'มีนบุรี',       no:8,  name:'ชลิตา ธรรมรัตน์',        party:'อิสระ',             score:12800 },
   { district:'สะพานสูง',      no:3,  name:'วิสุทธิ์ มีชัย',          party:'อิสระ',             score:11600 },
@@ -1050,7 +1050,7 @@ const SK_MOCK_DATA = [
 ];
 
 // Two district tabs share identical UI; only the dataset differs.
-//   sk  : ส.ก. council seats (mock — no public per-district API)
+//   sk  : BMC council seats (live /api/map)
 //   gov : Governor results per district (live /api/map)
 const DVIEWS = {
   sk: {
@@ -1140,7 +1140,7 @@ function _resolveZoneNo(thName) {
 }
 
 // Derive an English district name from the zone slug (e.g. "phra-nakhon" → "Phra Nakhon").
-// Used as a fallback because the ส.ก. API doesn't return zone_name_en.
+// Used as a fallback because the council API doesn't return zone_name_en.
 function _slugToEn(slug) {
   if (!slug) return '';
   return String(slug).split('-').filter(Boolean)
@@ -1148,7 +1148,7 @@ function _slugToEn(slug) {
 }
 
 // Display label for a party/group (PARTY_EN defined above). In Thai,
-// optionally strip the "พรรค" prefix.
+// optionally strip the leading "พรรค" (Party) word.
 function _partyLabel(party, stripPrefix) {
   if (currentLang === 'en') return PARTY_EN[party] || party;
   return (stripPrefix && party !== 'อิสระ') ? party.replace('พรรค', '') : party;
@@ -1195,7 +1195,7 @@ function _transformMapData(json, mode) {
   return { data, zoneMap };
 }
 
-// Build ส.ก. unified model from mock data (no public per-district API).
+// Build the BMC council seat model from mock data (instant fallback).
 // Grouping key = party.
 function _buildSKData() {
   const data = SK_MOCK_DATA.map(c => ({
@@ -1236,7 +1236,7 @@ function _seatMapHTML(c) {
   </div>`;
 }
 
-// District-ordered cell: zone number + district name (ผู้ว่า grid)
+// District-ordered cell: zone number + district name (Governor grid)
 function _seatDistrictHTML(c) {
   const txt = _contrastText(c.color);
   const label = currentLang === 'en' ? (c.districtEn || c.district) : c.district;
@@ -1277,7 +1277,7 @@ function renderDView(key) {
   } else {
     // Same uniform district-cell grid for both tabs; only the order changes.
     //   Governor / Sort  → ordered by district number 1→50
-    //   ส.ก. Group        → seats reordered so same-party seats cluster together
+    //   Council Group   → seats reordered so same-party seats cluster together
     _setGridLayout(grid, null);
     const seats = (cfg.key === 'sk' && cfg.viewMode === 'group')
       ? groups.flatMap(items => [...items].sort(byZone))
@@ -1288,7 +1288,7 @@ function renderDView(key) {
   const unit = currentLang === 'en' ? cfg.countUnitEn : cfg.countUnitTh;
   legend.innerHTML = groups.map(items => {
     const rep   = [...items].sort((a, b) => b.score - a.score)[0];
-    // Governor groups by candidate name (no party EN); ส.ก. groups by party
+    // Governor groups by candidate name (no party EN); council groups by party
     const label = cfg.key === 'sk' ? _partyLabel(rep.group, true) : rep.group;
     return `<div class="sk-legend-item" data-group="${rep.groupKey}" role="button" tabindex="0">
       <div class="sk-legend-dot" style="background:${rep.color}"></div>
@@ -1455,7 +1455,7 @@ async function showDistrictModal(winner) {
     return;
   }
 
-  // Fallback (ส.ก. — no public per-district API): mock spread
+  // Fallback (council seats without a slug): mock spread
   const total = Math.round(winner.score / 0.42);
   const wColor = winner.color || (PARTY_COLORS[winner.party] || PARTY_COLORS['อิสระ']).bg;
   const candidates = [
@@ -1524,7 +1524,7 @@ function initDViewControls(key) {
   updateDFabLabel(cfg);
 }
 
-// Tab switching between ส.ก. and Governor panels
+// Tab switching between Council and Governor panels
 function initDistrictTabs() {
   const tabs = document.querySelectorAll('.district-tab');
   tabs.forEach(tab => {
@@ -1542,7 +1542,7 @@ function initDistrictTabs() {
   });
 }
 
-// Show ส.ก. mock instantly, then replace both tabs with live API data
+// Show council mock instantly, then replace both tabs with live API data
 function loadDistrictData() {
   const sk = _buildSKData();           // instant fallback so the grid isn't empty
   DVIEWS.sk.data = sk.data;
@@ -1563,7 +1563,7 @@ async function loadSKMapFromAPI() {
     DVIEWS.sk.activeGroup = null;
     renderDView('sk');
   } catch {
-    /* keep mock ส.ก. data on screen */
+    /* keep mock council data on screen */
   }
 }
 

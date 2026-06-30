@@ -48,6 +48,8 @@
 │   └── results.js      # Vercel serverless proxy (สำรอง) → ข้อมูล กทม.
 ├── vercel.json         # config: cleanUrls, security headers, cache policy
 ├── robots.txt
+├── LICENSE             # CC BY-NC-SA 4.0 (เฉพาะเนื้อหาต้นฉบับ)
+├── .editorconfig       # มาตรฐานการจัดรูปแบบโค้ด
 └── docs/               # เอกสารเพิ่มเติม
     ├── ARCHITECTURE.md # โครงสร้างโค้ดใน app.js
     └── DATA_SOURCES.md # รายละเอียด API และโครงสร้างข้อมูล

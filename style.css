@@ -405,6 +405,8 @@ a {
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   max-width: 560px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
 .stat-card {
@@ -685,11 +687,18 @@ a {
   font-family: var(--font-heading);
   font-weight: 700;
   font-size: 14px;
+  line-height: 1.5;
   letter-spacing: 0.02em;
   box-shadow: var(--shadow-sm);
   transition: var(--transition-smooth);
   cursor: pointer;
   border: 1.5px solid var(--text-dark);
+}
+
+.btn-sub {
+  font-weight: 400;
+  font-size: 12px;
+  opacity: 0.8;
 }
 
 .btn-check-portal:hover {
@@ -801,7 +810,7 @@ a {
   gap: 16px;
   margin-bottom: 40px;
   overflow-x: auto;
-  padding: 4px 2px 8px;
+  padding: 8px 4px 12px;
 }
 
 #sec-howto .container {
@@ -2770,6 +2779,7 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
 }
 
 .sk-seat:hover {

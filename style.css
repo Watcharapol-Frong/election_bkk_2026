@@ -3009,10 +3009,14 @@ a {
 
 /* ── Candidate rows inside sheet ─────────────────────────────────────────── */
 .sk-sheet-cand-list {
-  padding: 14px 16px 24px;
+  padding: 14px 16px 16px;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  /* Show ~4 cards, scroll for the rest */
+  max-height: 392px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .sk-sheet-loading {

@@ -541,10 +541,10 @@ a {
 }
 
 .timeline-item.current {
-  transform: scale(1.08);
-  transform-origin: left center;
+  /* No scale transform — it overflowed the viewport at narrow widths.
+     The current step is already emphasized via colors, larger fonts and the
+     pulsing dot below. */
   z-index: 10;
-  transition: transform var(--transition-smooth);
 }
 
 .timeline-item.current .timeline-time {

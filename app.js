@@ -184,10 +184,10 @@ const TRANSLATIONS_EN = {
   cdSecondsLabel: 'Seconds',
   footBrand: 'BKK Governor Election · 28 June 2026',
   footAbout: 'An independent website for following the Bangkok Governor and BKK Metropolitan Council (ส.ก.) elections in 2026, built for educational purposes and public convenience.',
-  footLicense: 'Published under Creative Commons license',
+  footLicense: 'Original site content only (third-party data/images belong to their owners)',
   footSourcesTitle: 'Data Sources',
   footLegalTitle: 'Terms & Policy',
-  footDisc: 'Educational website & demonstration. Candidate profiles and policies are compiled from media reports and official campaign channels. Details may vary; please refer to the official EC guidelines.',
+  footDisc: 'Educational website, not affiliated with the EC or PPTV. Real-time results, candidate photos and party data are the property of their respective owners (PPTV HD36 and sources), shown for reference only. Details may vary; please refer to the official EC results.',
   footPrivacy: '🔒 This website does not collect any personal data from visitors.',
   footCopy: '© 2026 Bangkok Vote · For Educational Use · Not an official ECT website'
 };
@@ -814,9 +814,42 @@ async function loadResultsFromAPI() {
     const pctEl     = document.querySelector('.res-turnout-pct');
     if (countedEl) countedEl.textContent = summary.total_votes;
     if (pctEl)     pctEl.textContent     = summary.progress + '%';
+
+    renderResultsMeta(); // date / time / counted% from API
   } catch {
     if (wrap) wrap.innerHTML = '<p class="res-error">ไม่สามารถโหลดข้อมูลได้ กรุณาลองใหม่อีกครั้ง</p>';
   }
+}
+
+// Format "2026-06-28 22:35:32" → { date, time } in TH (พ.ศ.) or EN
+const _TH_MONTHS = ['ม.ค.','ก.พ.','มี.ค.','เม.ย.','พ.ค.','มิ.ย.','ก.ค.','ส.ค.','ก.ย.','ต.ค.','พ.ย.','ธ.ค.'];
+const _EN_MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+function _formatUpdated(raw, lang) {
+  const m = String(raw || '').match(/(\d{4})-(\d{2})-(\d{2})[ T](\d{2}):(\d{2})/);
+  if (!m) return null;
+  const [, y, mo, d, hh, mm] = m;
+  const month = parseInt(mo, 10) - 1;
+  const day = parseInt(d, 10);
+  if (lang === 'en') return { date: `${day} ${_EN_MONTHS[month]} ${y}`, time: `${hh}:${mm}` };
+  return { date: `${day} ${_TH_MONTHS[month]} ${parseInt(y, 10) + 543}`, time: `${hh}:${mm}` };
+}
+
+// Render the date/time/counted% lines from live summary data (both languages)
+function renderResultsMeta() {
+  const lead = document.getElementById('resSectionLead');
+  const note = document.getElementById('resPolicyNote');
+  const pct  = summaryData ? summaryData.progress : '95';
+  const t    = summaryData ? _formatUpdated(summaryData.updated_at, currentLang) : null;
+  const dt   = t ? t : { date: currentLang === 'en' ? '28 Jun 2026' : '28 มิ.ย. 2569', time: '22:35' };
+  const en   = currentLang === 'en';
+
+  if (lead) lead.textContent = en
+    ? `Unofficial vote count (${pct}% counted) · ${dt.date}, ${dt.time}`
+    : `ผลการนับคะแนนอย่างไม่เป็นทางการ (นับแล้ว ${pct}%) · ${dt.date} เวลา ${dt.time} น.`;
+
+  if (note) note.textContent = en
+    ? `* Unofficial results, ${pct}% counted · updated ${dt.date}, ${dt.time} · Source: PPTV HD36 · EC to certify within 30 days`
+    : `* ผลคะแนนอย่างไม่เป็นทางการ นับแล้ว ${pct}% · อัปเดต ${dt.date} ${dt.time} น. · ที่มา: PPTV HD36 · กกต. จะรับรองผลภายใน 30 วัน`;
 }
 
 let currentLang = 'th';
@@ -865,6 +898,7 @@ function applyLanguage(lang) {
   // Re-render live results in correct language
   renderResults(lang);
   renderTurnoutModal(summaryData);
+  renderResultsMeta();
 
   // Refresh both district views (labels, units) + FAB labels for the new language
   if (typeof renderDView === 'function') {
@@ -1371,6 +1405,13 @@ async function showDistrictModal(winner) {
       const total = _parseScore(d.total_votes) || candidates.reduce((s, c) => s + c.score, 0);
       totalEl.textContent = total.toLocaleString();
       _renderModalCandidates(candList, candidates, total);
+
+      // Update "last updated" line from the zone's timestamp
+      const tsEl = document.getElementById('skSheetTimestamp');
+      const t = _formatUpdated(d.updated_at, currentLang);
+      if (tsEl && t) tsEl.textContent = currentLang === 'en'
+        ? `Last updated ${t.date}, ${t.time}`
+        : `อัปเดตล่าสุด ณ วันที่ ${t.date} ${t.time} น.`;
     } catch {
       if (req !== _modalReq) return;
       // Keep the instant top-candidates view if we already have it

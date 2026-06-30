@@ -85,7 +85,7 @@
         <span class="section-num text-red">01</span>
         <h2 data-i18n="s05title" class="section-title">ผลการเลือกตั้ง & การนับคะแนน</h2>
       </div>
-      <p data-i18n="s05para" class="section-lead">ผลการนับคะแนนอย่างไม่เป็นทางการ (นับแล้ว 95%) · 28 มิถุนายน 2569 เวลา 22:35 น.</p>
+      <p id="resSectionLead" class="section-lead">ผลการนับคะแนนอย่างไม่เป็นทางการ (นับแล้ว 95%) · 28 มิถุนายน 2569 เวลา 22:35 น.</p>
 
       <!-- Dynamic results rendered by app.js from PPTV API -->
       <div id="res-dynamic-wrap">
@@ -153,7 +153,7 @@
         </button>
       </div>
 
-      <p data-i18n="resPolicyNote" class="policy-note">* ผลคะแนนอย่างไม่เป็นทางการ นับแล้ว 95% ณ วันที่ 28 มิ.ย. 2569 · ที่มา: ไทยรัฐ, Thai PBS · กกต. จะรับรองผลภายใน 30 วัน</p>
+      <p id="resPolicyNote" class="policy-note">* ผลคะแนนอย่างไม่เป็นทางการ นับแล้ว 95% ณ วันที่ 28 มิ.ย. 2569 · ที่มา: PPTV HD36 · กกต. จะรับรองผลภายใน 30 วัน</p>
     </div>
   </section>
 
@@ -476,7 +476,7 @@
         <p class="footer-about" data-i18n="footAbout">เว็บไซต์อิสระสำหรับติดตามการเลือกตั้งผู้ว่าราชการกรุงเทพมหานคร และสมาชิกสภากรุงเทพมหานคร (ส.ก.) ปี 2569 จัดทำขึ้นเพื่อการศึกษาและอำนวยความสะดวกให้ประชาชนเข้าถึงข้อมูลได้รวดเร็ว</p>
         <div class="footer-license">
           <span class="license-badge">CC BY-NC-SA 4.0</span>
-          <span class="footer-muted" data-i18n="footLicense">เผยแพร่ภายใต้สัญญาอนุญาต Creative Commons</span>
+          <span class="footer-muted" data-i18n="footLicense">เฉพาะเนื้อหาต้นฉบับของเว็บไซต์ (ข้อมูล/ภาพจากแหล่งอื่นเป็นของเจ้าของเดิม)</span>
         </div>
       </div>
 
@@ -484,6 +484,7 @@
       <div class="footer-col">
         <h4 class="footer-col-title" data-i18n="footSourcesTitle">ที่มาของข้อมูล</h4>
         <ul class="footer-links">
+          <li><a href="https://www.pptvhd36.com" target="_blank" rel="noopener" class="footer-link">ผลนับคะแนนสด · PPTV HD36</a></li>
           <li><a href="https://www.ect.go.th" target="_blank" rel="noopener" class="footer-link">สำนักงาน กกต.</a></li>
           <li><a href="https://xn--69-lqia3ab9gta7d4br0h8b9dwa2jl0n.com/?page_id=1890" target="_blank" rel="noopener" class="footer-link">ผู้สมัคร ส.ก. (ทางการ)</a></li>
           <li><a href="https://boraservices.bora.dopa.go.th/election/enqelection-local/" target="_blank" rel="noopener" class="footer-link">ตรวจสอบสิทธิ กรมการปกครอง</a></li>
@@ -493,7 +494,7 @@
       <!-- Col 3: Legal -->
       <div class="footer-col">
         <h4 class="footer-col-title" data-i18n="footLegalTitle">ข้อกำหนดและนโยบาย</h4>
-        <p class="footer-muted" data-i18n="footDisc">เว็บไซต์นี้จัดทำขึ้นเพื่อการศึกษาและนำเสนอข้อมูลเชิงสร้างสรรค์ ข้อมูลผู้สมัครและนโยบายรวบรวมจากสื่อมวลชนและแหล่งหาเสียงทางการ รายละเอียดนโยบายอาจมีการเปลี่ยนแปลงได้ โปรดยึดข้อมูลประกาศทางการจาก กกต. เป็นสำคัญ</p>
+        <p class="footer-muted" data-i18n="footDisc">เว็บไซต์นี้จัดทำขึ้นเพื่อการศึกษาและนำเสนอข้อมูลเชิงสร้างสรรค์ ไม่มีส่วนเกี่ยวข้องกับ กกต. หรือ PPTV ผลคะแนนแบบเรียลไทม์ ภาพผู้สมัคร และข้อมูลพรรค เป็นลิขสิทธิ์ของเจ้าของแต่ละราย (PPTV HD36 และแหล่งที่มา) นำมาแสดงเพื่ออ้างอิงเท่านั้น รายละเอียดอาจเปลี่ยนแปลงได้ โปรดยึดประกาศผลทางการจาก กกต. เป็นสำคัญ</p>
       </div>
 
     </div>
@@ -521,7 +522,7 @@
         <button class="sk-sheet-close" id="skSheetClose" aria-label="ปิด">✕</button>
       </div>
       <div class="sk-sheet-timestamp">
-        <span>🕐</span><span>อัปเดตล่าสุด ณ วันที่ 29 มิ.ย. 2569 18:25 น.</span>
+        <span>🕐</span><span id="skSheetTimestamp">อัปเดตล่าสุด ณ วันที่ 29 มิ.ย. 2569 18:25 น.</span>
       </div>
       <div class="sk-sheet-cand-list" id="skSheetCandList"></div>
     </div>

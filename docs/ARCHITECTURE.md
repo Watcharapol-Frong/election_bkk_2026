@@ -2,6 +2,10 @@
 
 ทั้งเว็บเป็น static site ตรรกะอยู่ใน `app.js` ไฟล์เดียว แบ่งตามหน้าที่ดังนี้
 
+> **Data flow:** ทุกการเรียกข้อมูลไปที่ proxy ของเราเอง `/api/pptv?p=...`
+> (`api/pptv.js`) ไม่เรียก PPTV โดยตรง — helper `pptvUrl(p)` สร้าง URL ให้
+> ดูรายละเอียดที่ [`DATA_SOURCES.md`](DATA_SOURCES.md)
+
 ---
 
 ## 1. i18n (สองภาษา)
@@ -50,7 +54,8 @@ id ของ grid/legend/FAB, ชุดข้อมูล, โหมดแสด
 ### Popup รายเขต
 - `showDistrictModal(winner)` — เปิด modal:
   1. วาดผู้สมัคร top‑2 ที่มีอยู่ทันที (instant paint)
-  2. `fetchZoneDetail(slug, base)` ดึงรายชื่อครบ แล้วแทนที่ (cache ตาม `base+slug`)
+  2. `fetchZoneDetail(slug, kind)` (`kind` = `'gov'` | `'sk'`) ดึงรายชื่อครบ
+     ผ่าน proxy `/api/pptv` แล้วแทนที่ (cache ตาม upstream path)
   3. แสดง ≤ 4 cards แล้วเลื่อนดูได้ · รูปจาก `photo_square` (fallback กล่องสี)
 - `_renderModalCandidates()` — การ์ดผู้สมัครแต่ละคน
 - รองรับสลับภาษาขณะเปิด (`_lastModalWinner`)

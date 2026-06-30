@@ -1062,6 +1062,27 @@ function _resolvePos(thName) {
   return hit ? BKK_MAP_GRID[hit] : null;
 }
 
+// Canonical Bangkok district numbering (matches Governor zone_no 1–50)
+const DISTRICT_NO = {
+  'พระนคร':1, 'ดุสิต':2, 'หนองจอก':3, 'บางรัก':4, 'บางเขน':5,
+  'บางกะปิ':6, 'ปทุมวัน':7, 'ป้อมปราบศัตรูพ่าย':8, 'พระโขนง':9, 'มีนบุรี':10,
+  'ลาดกระบัง':11, 'ยานนาวา':12, 'สัมพันธวงศ์':13, 'พญาไท':14, 'ธนบุรี':15,
+  'บางกอกใหญ่':16, 'ห้วยขวาง':17, 'คลองสาน':18, 'ตลิ่งชัน':19, 'บางกอกน้อย':20,
+  'บางขุนเทียน':21, 'ภาษีเจริญ':22, 'หนองแขม':23, 'ราษฎร์บูรณะ':24, 'บางพลัด':25,
+  'ดินแดง':26, 'บึงกุ่ม':27, 'สาทร':28, 'บางซื่อ':29, 'จตุจักร':30,
+  'บางคอแหลม':31, 'ประเวศ':32, 'คลองเตย':33, 'สวนหลวง':34, 'จอมทอง':35,
+  'ดอนเมือง':36, 'ราชเทวี':37, 'ลาดพร้าว':38, 'วัฒนา':39, 'บางแค':40,
+  'หลักสี่':41, 'สายไหม':42, 'คันนายาว':43, 'สะพานสูง':44, 'วังทองหลาง':45,
+  'คลองสามวา':46, 'บางนา':47, 'ทวีวัฒนา':48, 'ทุ่งครุ':49, 'บางบอน':50,
+};
+
+function _resolveZoneNo(thName) {
+  if (!thName) return 0;
+  if (DISTRICT_NO[thName]) return DISTRICT_NO[thName];
+  const key = Object.keys(DISTRICT_NO).find(k => thName.includes(k) || k.includes(thName));
+  return key ? DISTRICT_NO[key] : 0;
+}
+
 // Transform /api/map (Governor) response → unified seat model.
 // Grouping key = winning candidate (so districts won by the same candidate cluster).
 function _transformGovData(json) {
@@ -1104,6 +1125,7 @@ function _transformGovData(json) {
 function _buildSKData() {
   const data = SK_MOCK_DATA.map(c => ({
     district: c.district, districtEn: '', slug: '',
+    zoneNo: _resolveZoneNo(c.district),
     no: c.no, name: c.name,
     group: c.party, groupKey: c.party,
     color: (PARTY_COLORS[c.party] || PARTY_COLORS['อิสระ']).bg,
@@ -1126,15 +1148,6 @@ function _seatAttrs(c) {
     + `data-district="${c.district}" data-district-en="${c.districtEn || ''}" `
     + `data-slug="${c.slug || ''}" data-score="${c.score}" data-color="${c.color}" `
     + `data-party="${c.group}" role="button" tabindex="0"`;
-}
-
-// Plain colored square with the candidate number (ส.ก. grid)
-function _seatSquareHTML(c) {
-  const txt = _contrastText(c.color);
-  return `<div class="sk-seat" style="background:${c.color}"
-    ${_seatAttrs(c)} aria-label="เบอร์ ${c.no} ${c.name} เขต${c.district} ${c.group}">
-    <span class="sk-seat-num" style="color:${txt}">${c.no}</span>
-  </div>`;
 }
 
 // Geographic map cell with district name
@@ -1175,32 +1188,6 @@ function _renderDMap(cfg, grid) {
   grid.innerHTML = Object.values(winners).map(_seatMapHTML).join('');
 }
 
-// ส.ก. grouped-by-party view with a seat-count header per group
-function _renderGroupedSeats(cfg, grid, groups) {
-  const unit = currentLang === 'en' ? cfg.countUnitEn : cfg.countUnitTh;
-  _setGridLayout(grid, 'groups');
-  grid.innerHTML = groups.map(items => {
-    const rep   = [...items].sort((a, b) => b.score - a.score)[0];
-    const label = rep.group === 'อิสระ' ? rep.group : rep.group.replace('พรรค', '');
-    const seats = [...items].sort((a, b) => a.no - b.no).map(_seatSquareHTML).join('');
-    return `<div class="sk-group" data-group="${rep.groupKey}">
-      <div class="sk-group-header">
-        <span class="sk-group-dot" style="background:${rep.color}"></span>
-        <span class="sk-group-name">${label}</span>
-        <span class="sk-group-count">${items.length} ${unit}</span>
-      </div>
-      <div class="sk-group-seats">${seats}</div>
-    </div>`;
-  }).join('');
-}
-
-// ผู้ว่า district-ordered grid (sorted by zone number 1→50)
-function _renderDistrictGrid(cfg, grid) {
-  _setGridLayout(grid, null);
-  const seats = [...cfg.data].sort((a, b) => (a.zoneNo || 0) - (b.zoneNo || 0));
-  grid.innerHTML = seats.map(_seatDistrictHTML).join('');
-}
-
 function renderDView(key) {
   const cfg = DVIEWS[key];
   const grid   = document.getElementById(cfg.gridId);
@@ -1208,16 +1195,19 @@ function renderDView(key) {
   if (!grid || !legend) return;
 
   const groups = _buildGroups(cfg.data);
+  const byZone = (a, b) => (a.zoneNo || 0) - (b.zoneNo || 0);
 
   if (cfg.displayMode === 'map') {
     _renderDMap(cfg, grid);
-  } else if (cfg.key === 'gov') {
-    _renderDistrictGrid(cfg, grid);          // ผู้ว่า: 50 ช่องเรียงเลขเขต 1→50
-  } else if (cfg.viewMode === 'group') {
-    _renderGroupedSeats(cfg, grid, groups);  // ส.ก.: จัดกลุ่ม + นับที่นั่ง
   } else {
-    _setGridLayout(grid, null);              // ส.ก.: เรียงเบอร์ (กล่องเรียบ)
-    grid.innerHTML = [...cfg.data].sort((a, b) => a.no - b.no).map(_seatSquareHTML).join('');
+    // Same uniform district-cell grid for both tabs; only the order changes.
+    //   Governor / Sort  → ordered by district number 1→50
+    //   ส.ก. Group        → seats reordered so same-party seats cluster together
+    _setGridLayout(grid, null);
+    const seats = (cfg.key === 'sk' && cfg.viewMode === 'group')
+      ? groups.flatMap(items => [...items].sort(byZone))
+      : [...cfg.data].sort(byZone);
+    grid.innerHTML = seats.map(_seatDistrictHTML).join('');
   }
 
   const unit = currentLang === 'en' ? cfg.countUnitEn : cfg.countUnitTh;
@@ -1397,8 +1387,8 @@ function updateDFabLabel(cfg) {
   const label = document.getElementById(cfg.fabLabelId);
   if (!label) return;
   label.textContent = cfg.viewMode === 'group'
-    ? (currentLang === 'en' ? 'By Group' : 'จัดกลุ่ม')
-    : (currentLang === 'en' ? 'By Number' : 'เรียงเบอร์');
+    ? (currentLang === 'en' ? 'By Party' : 'จัดกลุ่ม')
+    : (currentLang === 'en' ? 'By District' : 'ตามเขต');
 }
 
 // Map/Grid display toggle + Group/Sort FAB for one view (called ONCE per view)

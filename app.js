@@ -187,8 +187,9 @@ const TRANSLATIONS_EN = {
   footLicense: 'Original site content only (third-party data/images belong to their owners)',
   footSourcesTitle: 'Data Sources',
   footLegalTitle: 'Terms & Policy',
+  footAboutLink: 'About & Data Sources + Privacy →',
   footDisc: 'Educational website, not affiliated with the EC or PPTV. Real-time results, candidate photos and party data are the property of their respective owners (PPTV HD36 and sources), shown for reference only. Details may vary; please refer to the official EC results.',
-  footPrivacy: '🔒 This website does not collect any personal data from visitors.',
+  footPrivacy: '🔒 No personal data is collected directly. Anonymous traffic stats via Google Analytics 4 (IP anonymized).',
   footCopy: '© 2026 Bangkok Vote · For Educational Use · Not an official ECT website'
 };
 

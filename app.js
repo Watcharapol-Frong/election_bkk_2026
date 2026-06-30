@@ -1140,6 +1140,29 @@ function _slugToEn(slug) {
     .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
 }
 
+// English names for parties/groups in the data (API returns Thai only).
+// Registered parties use official English names; local BMC groups use a
+// transliteration/literal rendering (no official English name exists).
+const PARTY_EN = {
+  'พรรคประชาชน': "People's Party",
+  'พรรคประชาธิปัตย์': 'Democrat Party',
+  'พรรคอนาคตไทย': 'Thailand Future Party',
+  'พรรคเศรษฐกิจ': 'Economic Party',
+  'กลุ่ม Better Bangkok': 'Better Bangkok Group',
+  'กลุ่มคนทำงาน': 'Khon Tham Ngan Group',
+  'กลุ่มเพื่อไทย Life ลงตัว': 'Pheu Thai Life Long Tua Group',
+  'กลุ่มกรุงเทพบินได้': 'Krung Thep Bin Dai Group',
+  'กลุ่มมีนบุรีพึ่งได้': 'Min Buri Pueng Dai Group',
+  'อิสระ': 'Independent',
+  'Independent': 'Independent',
+};
+
+// Display label for a party/group. In Thai, optionally strip the "พรรค" prefix.
+function _partyLabel(party, stripPrefix) {
+  if (currentLang === 'en') return PARTY_EN[party] || party;
+  return (stripPrefix && party !== 'อิสระ') ? party.replace('พรรค', '') : party;
+}
+
 // Transform an /api/map response → unified seat model.
 //   mode 'gov' → group by winning candidate (districts won by same person cluster)
 //   mode 'sk'  → group by party (seats of same party cluster)
@@ -1274,7 +1297,8 @@ function renderDView(key) {
   const unit = currentLang === 'en' ? cfg.countUnitEn : cfg.countUnitTh;
   legend.innerHTML = groups.map(items => {
     const rep   = [...items].sort((a, b) => b.score - a.score)[0];
-    const label = rep.group === 'อิสระ' ? rep.group : rep.group.replace('พรรค', '');
+    // Governor groups by candidate name (no party EN); ส.ก. groups by party
+    const label = cfg.key === 'sk' ? _partyLabel(rep.group, true) : rep.group;
     return `<div class="sk-legend-item" data-group="${rep.groupKey}" role="button" tabindex="0">
       <div class="sk-legend-dot" style="background:${rep.color}"></div>
       <span>${label}</span>
@@ -1357,7 +1381,7 @@ function _renderModalCandidates(candList, candidates, total) {
         <div class="sk-sheet-cand-body">
           <div class="sk-sheet-party-row">
             <div class="sk-sheet-party-dot" style="background:${bg}"></div>
-            <span class="sk-sheet-party-name">${c.party}</span>
+            <span class="sk-sheet-party-name">${_partyLabel(c.party, false)}</span>
           </div>
           <div class="sk-sheet-cand-name">${c.name}</div>
           <span class="sk-sheet-cand-no">${currentLang === 'en' ? 'No.' : 'เบอร์'} ${c.no}</span>
@@ -1411,7 +1435,7 @@ async function showDistrictModal(winner) {
         .map(c => ({
           no:    c.candidate_no,
           name:  `${c.f_name || ''} ${c.l_name || ''}`.trim(),
-          party: c.party_name || (currentLang === 'en' ? 'Independent' : 'อิสระ'),
+          party: c.party_name || 'อิสระ',
           color: c.color || '#CFD8DC',
           score: _parseScore(c.score),
           pct:   parseFloat(c.score_percent) || 0,

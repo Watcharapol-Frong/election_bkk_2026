@@ -2293,6 +2293,7 @@ a {
   .podium-pct { font-size: 1.2rem; }
   .podium-slot.rank-1 .podium-pct { font-size: 1.5rem; }
   .res-vote-item { min-width: 80px; }
+  .sk-seat-grid { grid-template-columns: repeat(5, 1fr); gap: 4px; }
 }
 
 /* ==========================================================================
@@ -2758,8 +2759,8 @@ a {
 /* ── Seat Grid ───────────────────────────────────────────────────────────── */
 .sk-seat-grid {
   display: grid;
-  grid-template-columns: repeat(6, 1fr);
-  gap: 6px;
+  grid-template-columns: repeat(10, 1fr);
+  gap: 4px;
   margin-bottom: 14px;
 }
 
@@ -2865,7 +2866,7 @@ a {
 
 .sk-seat-zone-no {
   font-family: var(--font-numeric);
-  font-size: 0.88rem;
+  font-size: 0.72rem;
   font-weight: 800;
   line-height: 1;
 }

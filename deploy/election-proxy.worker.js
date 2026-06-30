@@ -17,7 +17,7 @@
  */
 
 const PREFIX = '/election-bkk-2026';
-const ORIGIN = 'https://YOUR-PROJECT.vercel.app'; // <-- change me
+const ORIGIN = 'https://election-bkk-2026.vercel.app';
 
 export default {
   async fetch(request) {

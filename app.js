@@ -908,6 +908,12 @@ function applyLanguage(lang) {
       updateDFabLabel(DVIEWS[k]);
     });
   }
+
+  // If the district popup is open, re-render it in the new language
+  const dOverlay = document.getElementById('skDistrictOverlay');
+  if (dOverlay && dOverlay.classList.contains('open') && _lastModalWinner) {
+    showDistrictModal(_lastModalWinner);
+  }
 }
 
 // Language button event listener
@@ -1126,6 +1132,14 @@ function _resolveZoneNo(thName) {
   return key ? DISTRICT_NO[key] : 0;
 }
 
+// Derive an English district name from the zone slug (e.g. "phra-nakhon" → "Phra Nakhon").
+// Used as a fallback because the ส.ก. API doesn't return zone_name_en.
+function _slugToEn(slug) {
+  if (!slug) return '';
+  return String(slug).split('-').filter(Boolean)
+    .map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
+}
+
 // Transform an /api/map response → unified seat model.
 //   mode 'gov' → group by winning candidate (districts won by same person cluster)
 //   mode 'sk'  → group by party (seats of same party cluster)
@@ -1148,7 +1162,7 @@ function _transformMapData(json, mode) {
       .sort((a, b) => a.rank - b.rank);
 
     const districtTh = zone.zone_name_th;
-    const districtEn = zone.candidates[0].zone_name_en || '';
+    const districtEn = zone.candidates[0].zone_name_en || _slugToEn(zone.zone_slug);
     const total = cands.reduce((s, c) => s + c.score, 0);
     const w = cands[0];
     const group    = mode === 'sk' ? w.party : w.name;
@@ -1359,7 +1373,9 @@ function _renderModalCandidates(candList, candidates, total) {
   }).join('');
 }
 
+let _lastModalWinner = null;
 async function showDistrictModal(winner) {
+  _lastModalWinner = winner;
   const overlay   = document.getElementById('skDistrictOverlay');
   const nameEl    = document.getElementById('skSheetName');
   const labelEl   = document.getElementById('skSheetLabel');

@@ -124,6 +124,13 @@ a {
   font-weight: 700;
 }
 
+/* Image logo variant — drop the drawn border, let the artwork fill the box */
+.brand-logo {
+  border: none;
+  object-fit: contain;
+  background: transparent;
+}
+
 .brand-text {
   font-family: var(--font-heading);
   font-weight: 700;

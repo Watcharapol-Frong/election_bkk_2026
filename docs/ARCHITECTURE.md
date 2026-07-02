@@ -1,90 +1,90 @@
 # Architecture — `app.js`
 
-ทั้งเว็บเป็น static site ตรรกะอยู่ใน `app.js` ไฟล์เดียว แบ่งตามหน้าที่ดังนี้
+The whole site is a static app; all logic lives in a single `app.js` file, organized as follows.
 
-> **Data flow:** ทุกการเรียกข้อมูลไปที่ proxy ของเราเอง `/api/pptv?p=...`
-> (`api/pptv.js`) ไม่เรียก PPTV โดยตรง — helper `pptvUrl(p)` สร้าง URL ให้
-> ดูรายละเอียดที่ [`DATA_SOURCES.md`](DATA_SOURCES.md)
-
----
-
-## 1. i18n (สองภาษา)
-
-- `TRANSLATIONS_EN` — dictionary คีย์ → ข้อความอังกฤษ
-- องค์ประกอบที่แปลได้ติด attribute `data-i18n="key"` ใน HTML
-- `applyLanguage(lang)` — แทนข้อความทุก `[data-i18n]`, อัปเดตปุ่มภาษา,
-  แล้ว re-render ส่วน dynamic (ผลคะแนน, แผนที่/ตาราง ส.ก./ผู้ว่า, popup ที่เปิดอยู่)
-- `currentLang` — สถานะภาษาปัจจุบัน (`'th'` | `'en'`)
+> **Data flow:** every data fetch goes through our own proxy `/api/pptv?p=...`
+> (`api/pptv.js`) — never PPTV directly. The `pptvUrl(p)` helper builds the URL.
+> See [`DATA_SOURCES.md`](DATA_SOURCES.md) for details.
 
 ---
 
-## 2. ผลคะแนนผู้ว่าฯ (Results section)
+## 1. i18n (Bilingual)
 
-- `loadResultsFromAPI()` — ดึง `/api/rank` + `/api/summary` พร้อมกัน
-- `renderResults(lang)` — โพเดียม + รายชื่อผู้สมัคร
-- `renderTurnoutModal()` — popover สถิติบัตร
-- `renderResultsMeta()` — บรรทัดวันที่/เวลา/`% นับ` จาก `summary` (สองภาษา)
-- `_formatUpdated(raw, lang)` — แปลง `"YYYY-MM-DD HH:mm:ss"` → วันที่ พ.ศ./EN
-- `CAND_NAME_EN`, `PARTY_EN`, `_candName()`, `_partyName()` — ชื่อผู้สมัคร/พรรค EN
+- `TRANSLATIONS_EN` — dictionary of key → English text
+- Translatable elements carry `data-i18n="key"` in the HTML
+- `applyLanguage(lang)` — replaces text on every `[data-i18n]`, updates the language button,
+  then re-renders dynamic sections (results, BMC/Governor map/grid, any open popup)
+- `currentLang` — current language state (`'th'` | `'en'`)
 
 ---
 
-## 3. แท็บรายเขต (ส.ก. & ผู้ว่า) — ระบบเดียว 2 ชุดข้อมูล
+## 2. Governor Results (Results section)
 
-หัวใจคือ registry **`DVIEWS`** ที่เก็บ state แยกของแต่ละแท็บ (`sk`, `gov`):
-id ของ grid/legend/FAB, ชุดข้อมูล, โหมดแสดงผล, โหมดเรียง, กลุ่มที่ active, zone API ฯลฯ
+- `loadResultsFromAPI()` — fetches `/api/rank` + `/api/summary` concurrently
+- `renderResults(lang)` — podium + candidate list
+- `renderTurnoutModal()` — ballot stats popover
+- `renderResultsMeta()` — date/time/`% counted` line from `summary` (bilingual)
+- `_formatUpdated(raw, lang)` — converts `"YYYY-MM-DD HH:mm:ss"` → B.E./EN date
+- `CAND_NAME_EN`, `PARTY_EN`, `_candName()`, `_partyName()` — candidate/party names in English
 
-### โหลด & แปลงข้อมูล
-- `loadDistrictData()` — เรนเดอร์ ส.ก. จาก mock ทันที แล้วยิง API ทั้งสองแท็บ
-- `loadSKMapFromAPI()` / `loadGovMapFromAPI()` — ดึง `/api/map(/ส.ก.)`
-- `_transformMapData(json, mode)` — แปลงเป็น unified seat model
-  - `mode 'gov'` → group ตามผู้ชนะ (candidate) · `mode 'sk'` → group ตามพรรค
-  - ใส่ `color`, `zoneNo`, `slug`, `districtEn` (fallback `_slugToEn`)
+---
 
-### เรนเดอร์
-- `renderDView(key)` — ตัวกลางเลือกโหมด:
-  - `displayMode 'map'` → `_renderDMap()` (วางตามพิกัด `BKK_MAP_GRID`)
-  - `gov` Grid → เรียงตาม `zoneNo` 1→50
-  - `sk` Grid → `viewMode 'group'` รวมตามพรรค / `'sort'` เรียงตามเขต
-  - สร้าง legend (นับที่นั่ง/เขต ต่อกลุ่ม) เสมอ
-- `_seatMapHTML()` / `_seatDistrictHTML()` — markup ของช่องแต่ละแบบ
-- `_buildGroups(data)` — จัดกลุ่มตาม `groupKey`
-- ไฮไลต์: `_applyGroupHighlight()` / `_clearGroupHighlight()` (คลิก legend)
+## 3. District Tabs (BMC & Governor) — one system, two datasets
 
-### Popup รายเขต
-- `showDistrictModal(winner)` — เปิด modal:
-  1. วาดผู้สมัคร top‑2 ที่มีอยู่ทันที (instant paint)
-  2. `fetchZoneDetail(slug, kind)` (`kind` = `'gov'` | `'sk'`) ดึงรายชื่อครบ
-     ผ่าน proxy `/api/pptv` แล้วแทนที่ (cache ตาม upstream path)
-  3. แสดง ≤ 4 cards แล้วเลื่อนดูได้ · รูปจาก `photo_square` (fallback กล่องสี)
-- `_renderModalCandidates()` — การ์ดผู้สมัครแต่ละคน
-- รองรับสลับภาษาขณะเปิด (`_lastModalWinner`)
+The core is the **`DVIEWS`** registry, which holds separate state for each tab (`sk`, `gov`):
+grid/legend/FAB ids, dataset, display mode, sort mode, active group, zone API, etc.
+
+### Loading & transforming data
+- `loadDistrictData()` — renders BMC from mock data immediately, then fetches both tabs' APIs
+- `loadSKMapFromAPI()` / `loadGovMapFromAPI()` — fetch `/api/map(/สมาชิกสภากรุงเทพมหานคร)`
+- `_transformMapData(json, mode)` — converts to a unified seat model
+  - `mode 'gov'` → group by winning candidate · `mode 'sk'` → group by party
+  - adds `color`, `zoneNo`, `slug`, `districtEn` (falls back to `_slugToEn`)
+
+### Rendering
+- `renderDView(key)` — mode dispatcher:
+  - `displayMode 'map'` → `_renderDMap()` (placed by coordinates in `BKK_MAP_GRID`)
+  - `gov` Grid → sorted by `zoneNo` 1→50
+  - `sk` Grid → `viewMode 'group'` grouped by party / `'sort'` sorted by district
+  - always builds a legend (seat/district count per group)
+- `_seatMapHTML()` / `_seatDistrictHTML()` — markup for each cell type
+- `_buildGroups(data)` — groups by `groupKey`
+- Highlighting: `_applyGroupHighlight()` / `_clearGroupHighlight()` (on legend click)
+
+### District Popup
+- `showDistrictModal(winner)` — opens the modal:
+  1. Paints the top-2 candidates already available instantly (instant paint)
+  2. `fetchZoneDetail(slug, kind)` (`kind` = `'gov'` | `'sk'`) fetches the full candidate list
+     via the `/api/pptv` proxy, then replaces the content (cached per upstream path)
+  3. Shows ≤ 4 cards with scroll · photos from `photo_square` (falls back to a colored box)
+- `_renderModalCandidates()` — each candidate's card
+- Supports switching language while open (`_lastModalWinner`)
 
 ### Interaction & UI
-- `initDViewInteractions(key)` — bind คลิก seat → popup, คลิก legend → ไฮไลต์
-- `initDViewControls(key)` — ปุ่ม Map/Grid + FAB (เฉพาะ ส.ก.)
-- `initDistrictTabs()` — สลับแท็บ ส.ก./ผู้ว่า
-- `updateDFabLabel()` — ป้าย FAB แสดง "โหมดที่จะสลับไป"
+- `initDViewInteractions(key)` — binds seat clicks → popup, legend clicks → highlight
+- `initDViewControls(key)` — Map/Grid buttons + FAB (BMC only)
+- `initDistrictTabs()` — switches between BMC/Governor tabs
+- `updateDFabLabel()` — FAB label shows "the mode it will switch to"
 
 ---
 
-## 4. ตารางอ้างอิง (constants)
+## 4. Reference Tables (constants)
 
-| ชื่อ | ใช้ทำอะไร |
+| Name | Purpose |
 |---|---|
-| `BKK_MAP_GRID` | พิกัด row/col ของ 50 เขตบนแผนที่ (โหมด Map) |
-| `DISTRICT_NO` | ชื่อเขต(ไทย) → เลขเขต 1–50 |
-| `PARTY_COLORS` | สี fallback ตามพรรค (กรณีไม่มี `color` จาก API) |
-| `PARTY_EN` | ชื่อพรรค/กลุ่ม ไทย → อังกฤษ |
+| `BKK_MAP_GRID` | row/col coordinates of the 50 districts on the map (Map mode) |
+| `DISTRICT_NO` | Thai district name → district number 1–50 |
+| `PARTY_COLORS` | fallback color by party (when `color` isn't provided by the API) |
+| `PARTY_EN` | party/group name, Thai → English |
 
 ### Helpers
-`_parseScore` (string→int) · `_contrastText` (เลือกสีตัวอักษรตามพื้นหลัง) ·
-`_resolvePos` (ชื่อเขต→พิกัด, fuzzy) · `_resolveZoneNo` (ชื่อเขต→เลข, fuzzy) ·
-`_slugToEn` (slug→ชื่ออังกฤษ) · `_partyLabel` (ป้ายชื่อพรรคตามภาษา)
+`_parseScore` (string→int) · `_contrastText` (picks text color based on background) ·
+`_resolvePos` (district name → coordinates, fuzzy) · `_resolveZoneNo` (district name → number, fuzzy) ·
+`_slugToEn` (slug → English name) · `_partyLabel` (party label per language)
 
 ---
 
-## 5. อื่น ๆ
+## 5. Misc
 
-- `updateCountdown()` — นับถอยหลังถึงวันเลือกตั้ง
-- ส่วน DOMContentLoaded ปลายไฟล์ — เรียก init ทั้งหมด, bind ปุ่มภาษา, popover
+- `updateCountdown()` — countdown to election day
+- The `DOMContentLoaded` block at the end of the file — runs all init functions, binds language buttons, popovers

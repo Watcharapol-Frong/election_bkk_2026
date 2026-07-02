@@ -1,100 +1,102 @@
-# Bangkok Vote · เลือกตั้งผู้ว่าฯ กทม. 2569
+# Bangkok Vote · Bangkok Governor Election 2026
 
-> **English version:** [`README.en.md`](README.en.md)
+An independent website for tracking the results of the **Bangkok Governor**
+election and the **Bangkok Metropolitan Council (BMC / ส.ก.)** election, 2026
+(2569 B.E.) — live vote counts by district, candidates, policies, and how to
+vote, in a clean, bilingual (Thai/English) format.
 
-เว็บไซต์อิสระสำหรับติดตามผลการเลือกตั้ง **ผู้ว่าราชการกรุงเทพมหานคร** และ
-**สมาชิกสภากรุงเทพมหานคร (ส.ก.)** ประจำปี 2569 (2026) — แสดงผลคะแนนแบบเรียลไทม์
-รายเขต ผู้สมัคร นโยบาย และวิธีลงคะแนน ในรูปแบบที่อ่านง่ายและรองรับสองภาษา (ไทย/English)
-
-> เว็บไซต์นี้จัดทำขึ้น**เพื่อการศึกษา** ไม่ใช่เว็บทางการของ กกต. และไม่มีส่วนเกี่ยวข้องกับ
-> กกต. / กรุงเทพมหานคร / PPTV หรือพรรคการเมืองใด
-
----
-
-## ✨ คุณสมบัติหลัก (Features)
-
-- **ผลนับคะแนนผู้ว่าฯ แบบสด** — โพเดียมอันดับ 1–3 + รายชื่อผู้สมัครทั้งหมด ดึงจาก API
-- **Turnout Bar + Popover** — สถิติบัตรดี/เสีย/ไม่ประสงค์ลงคะแนน และผู้มาใช้สิทธิ
-- **แท็บรายเขต 2 ชุดข้อมูล** ใช้ UI เดียวกัน
-  - **ผลการเลือก ส.ก.** — 50 เขต จัดกลุ่ม/นับที่นั่งตามพรรค
-  - **ผลคะแนนผู้ว่า** — 50 เขต เรียงตามเลขเขต
-- **สองมุมมองต่อแท็บ:** `Map` (แผนที่ กทม. ตามตำแหน่งภูมิศาสตร์) · `Grid` (ตาราง)
-  - ส.ก. มีปุ่ม FAB สลับ *จัดกลุ่มตามพรรค* / *เรียงตามเขต*
-- **Popup รายเขต** — กดที่ช่องเพื่อดูผู้สมัครครบทุกคน คะแนน เปอร์เซ็นต์ รูป และยอดนับคะแนน
-- **i18n ไทย/English** — สลับภาษาทั้งหน้า รวมถึงชื่อเขต (โรมัน) และชื่อพรรค (อังกฤษ)
-- **วันที่/เวลา/% นับคะแนน** ดึงจาก API อัตโนมัติ
-- **Static site** — ไม่มี build step, โหลดเร็ว, รองรับมือถือ
+> This website was built **for educational purposes**. It is not an official
+> Election Commission (ECT) site and is not affiliated with the ECT,
+> the Bangkok Metropolitan Administration, PPTV, or any political party.
 
 ---
 
-## 🧱 เทคโนโลยี (Tech Stack)
+## ✨ Features
 
-- **Vanilla HTML + CSS + JavaScript** (ไม่มี framework / build tool)
-- **Vercel** สำหรับ hosting + serverless proxy (`/api`)
-- **Google Analytics 4** (สถิติแบบไม่ระบุตัวตน, เปิด IP anonymization)
-- ฟอนต์: Anuphan, IBM Plex Sans Thai, Outfit (Google Fonts)
+- **Live Governor results** — top-3 podium + full candidate list, pulled from the API
+- **Turnout bar + popover** — valid/invalid/no-vote ballot stats and voter turnout
+- **Two district tabs sharing one UI**
+  - **BMC (ส.ก.) results** — 50 districts, grouped/seat-counted by party
+  - **Governor results** — 50 districts, sorted by district number
+- **Two views per tab:** `Map` (geographic Bangkok map) · `Grid` (table)
+  - BMC tab has a FAB toggle for *group by party* / *sort by district*
+- **District popup** — tap a cell to see every candidate, votes, percentage, photo, and vote count
+- **Thai/English i18n** — switches the whole page, including romanized district names and party names
+- **Date/time/% counted** — pulled automatically from the API
+- **Static site** — no build step, fast load, mobile-friendly
 
 ---
 
-## 📁 โครงสร้างโปรเจกต์
+## 🧱 Tech Stack
+
+- **Vanilla HTML + CSS + JavaScript** (no framework / build tool)
+- **Vercel** for hosting + serverless proxy (`/api`)
+- **Google Analytics 4** (anonymized, IP anonymization enabled)
+- Fonts: Anuphan, IBM Plex Sans Thai, Outfit (Google Fonts)
+
+---
+
+## 📁 Project Structure
 
 ```
 .
-├── index.html          # หน้าหลัก
-├── about.html          # เกี่ยวกับ & ที่มาข้อมูล + Disclaimer + Privacy
-├── app.js              # ตรรกะทั้งหมด (i18n, ดึง API, เรนเดอร์ผล/แผนที่/popup)
-├── style.css           # สไตล์ทั้งหมด + design tokens (:root variables)
-├── assets/             # โลโก้และรูปภาพของเว็บไซต์
-├── candidates/         # รูปผู้สมัครผู้ว่าฯ (no-1.webp … no-18.webp)
+├── index.html          # Main page
+├── about.html          # About & data sources + Disclaimer + Privacy
+├── app.js              # All logic (i18n, API fetching, results/map/popup rendering)
+├── style.css            # All styles + design tokens (:root variables)
+├── assets/              # Site logos and images
+├── candidates/          # Governor candidate photos (no-1.webp … no-18.webp)
 ├── api/
-│   ├── pptv.js         # Vercel serverless proxy → PPTV API (allowlist + cache)
-│   └── results.js      # Vercel serverless proxy (สำรอง) → ข้อมูล กทม.
-├── .env.example        # ตัวอย่าง env vars (ไม่มีค่าจริง)
-├── vercel.json         # config: cleanUrls, security headers, cache policy
+│   ├── pptv.js           # Vercel serverless proxy → PPTV API (allowlist + cache)
+│   └── results.js        # Vercel serverless proxy (fallback) → Bangkok data
+├── .env.example          # Example env vars (no real values)
+├── vercel.json           # Config: cleanUrls, security headers, cache policy
 ├── robots.txt
-├── LICENSE             # CC BY-NC-SA 4.0 (เฉพาะเนื้อหาต้นฉบับ)
-├── .editorconfig       # มาตรฐานการจัดรูปแบบโค้ด
-└── docs/               # เอกสารเพิ่มเติม
-    ├── ARCHITECTURE.md # โครงสร้างโค้ดใน app.js
-    └── DATA_SOURCES.md # รายละเอียด API และโครงสร้างข้อมูล
+├── LICENSE                # CC BY-NC-SA 4.0 (original content only)
+├── .editorconfig          # Code formatting standard
+└── docs/                  # Additional documentation
+    ├── ARCHITECTURE.md    # Code structure of app.js
+    ├── DATA_SOURCES.md    # API details and data structures
+    └── DEPLOY_SUBPATH.md  # Subpath deploy guide
 ```
 
 ---
 
-## 🚀 การรัน (Local Development)
+## 🚀 Local Development
 
-หน้าเว็บเป็น static แต่ข้อมูลผลคะแนนเรียกผ่าน serverless proxy (`/api/pptv`)
-จึงควรรันด้วย **Vercel CLI** เพื่อให้ `/api/*` ทำงาน:
+The site is static, but live results are fetched through a serverless proxy
+(`/api/pptv`), so run it with the **Vercel CLI** so `/api/*` works:
 
 ```bash
 npm i -g vercel
-vercel dev          # เสิร์ฟ static + serverless ที่ http://localhost:3000
+vercel dev          # serves static + serverless at http://localhost:3000
 ```
 
-> ถ้าเปิดด้วย static server ธรรมดา (`npx serve .`) หน้าเว็บจะแสดงได้
-> แต่ส่วนผลคะแนนจะโหลดไม่ได้เพราะ `/api/pptv` ไม่ถูกรัน
-> ดูรายละเอียด endpoint ทั้งหมดได้ที่ [`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md)
+> Opening it with a plain static server (`npx serve .`) will render the page,
+> but the results section won't load since `/api/pptv` won't be running.
+> See all endpoints in [`docs/DATA_SOURCES.md`](docs/DATA_SOURCES.md)
 
 ---
 
-## ☁️ การ Deploy
+## ☁️ Deployment
 
-Deploy ผ่าน **Vercel** (เชื่อมกับ branch `main`)
+Deployed via **Vercel** (connected to the `main` branch)
 
-- `vercel.json` ตั้งค่า security headers, cache policy และ `cleanUrls`
-- ทุก commit ที่ขึ้น `main` จะถูก build ใหม่อัตโนมัติ
+- `vercel.json` configures security headers, cache policy, and `cleanUrls`
+- Every commit to `main` triggers an automatic rebuild
 
-**ให้บริการใต้ subpath ของโดเมนอื่น** (เช่น `frong.me/election-bkk-2026`) ผ่าน
-Cloudflare Worker reverse-proxy → ดู [`docs/DEPLOY_SUBPATH.md`](docs/DEPLOY_SUBPATH.md)
-และสคริปต์ [`deploy/election-proxy.worker.js`](deploy/election-proxy.worker.js)
-(ทุก path ในแอปเป็น relative จึงทำงานได้ทั้งที่ root และใต้ prefix)
+**Served under a subpath of another domain** (e.g. `frong.me/election-bkk-2026`)
+via a Cloudflare Worker reverse proxy — see
+[`docs/DEPLOY_SUBPATH.md`](docs/DEPLOY_SUBPATH.md) and
+[`deploy/election-proxy.worker.js`](deploy/election-proxy.worker.js)
+(every path in the app is relative, so it works both at the root and under a prefix)
 
 ---
 
-## 📊 ตั้งค่า Google Analytics (GA4)
+## 📊 Google Analytics (GA4) Setup
 
-ในไฟล์ `index.html` และ `about.html` มี snippet GA4 ตั้งค่าไว้แล้วด้วย
-Measurement ID `G-EL7HS25NP4`
+`index.html` and `about.html` already include the GA4 snippet configured with
+Measurement ID `G-EL7HS25NP4`:
 
 ```html
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-EL7HS25NP4"></script>
@@ -108,42 +110,42 @@ Measurement ID `G-EL7HS25NP4`
 
 ---
 
-## 🌐 i18n (สองภาษา)
+## 🌐 i18n (Bilingual)
 
-- ข้อความคงที่ใช้ attribute `data-i18n="key"` + dictionary `TRANSLATIONS_EN` ใน `app.js`
-- กดปุ่ม `EN/ไทย` เรียก `applyLanguage(lang)` แปลทั้งหน้า + re-render ส่วน dynamic
-- ชื่อเขต ส.ก. ไม่มีในภาษาอังกฤษจาก API → สร้างจาก slug (`_slugToEn`)
-- ชื่อพรรค/กลุ่มแปลผ่าน `PARTY_EN` (พรรคจดทะเบียน = ชื่อทางการ, กลุ่มท้องถิ่น = ทับศัพท์)
-
----
-
-## 🔒 ความปลอดภัย & การจัดการ Secret
-
-- **ไม่มี API key/secret ในโค้ดฝั่ง client เลย** — endpoint ของ PPTV ปัจจุบันเป็น public
-- การเรียกข้อมูลทั้งหมดผ่าน **server-side proxy** ที่ `/api/pptv` (`api/pptv.js`):
-  - เบราว์เซอร์คุยกับโดเมนเราเท่านั้น (ไม่ยิง API ภายในของ PPTV ตรงๆ)
-  - มี **allowlist** ป้องกัน open-proxy / SSRF + cache ที่ edge
-  - ถ้า upstream ต้องใช้ credential วันหน้า → ใส่ใน env `PPTV_API_KEY`
-    (ส่งเป็น header `x-api-key` จากเซิร์ฟเวอร์) **ไม่หลุดไปฝั่ง browser**
-- ตั้งค่า env ผ่าน Vercel หรือไฟล์ `.env` (ดู [`.env.example`](.env.example)) — `.env` ถูก gitignore
-- Security headers (X-Frame-Options, nosniff, Referrer-Policy ฯลฯ) ตั้งใน `vercel.json`
-
-> อย่า commit ค่าจริงของ secret ลง repo เด็ดขาด — ใช้ env variable เท่านั้น
+- Static text uses the `data-i18n="key"` attribute + the `TRANSLATIONS_EN` dictionary in `app.js`
+- Clicking `EN/ไทย` calls `applyLanguage(lang)`, translating the whole page + re-rendering dynamic sections
+- BMC district names aren't provided in English by the API → generated from the slug (`_slugToEn`)
+- Party/group names are translated via `PARTY_EN` (registered parties = official name, local groups = transliterated)
 
 ---
 
-## ⚖️ ลิขสิทธิ์และการใช้งาน
+## 🔒 Security & Secrets
 
-- **เนื้อหาต้นฉบับของเว็บไซต์** (โค้ด ดีไซน์ ข้อความที่จัดทำเอง) เผยแพร่ภายใต้
+- **No API keys/secrets in client-side code** — the current PPTV endpoint is public
+- All data requests go through a **server-side proxy** at `/api/pptv` (`api/pptv.js`):
+  - The browser only talks to our own domain (never calls PPTV's internal API directly)
+  - **Allowlist** protects against open-proxy/SSRF + edge caching
+  - If the upstream ever requires credentials → set env var `PPTV_API_KEY`
+    (sent as an `x-api-key` header from the server) **never exposed to the browser**
+- Configure env vars via Vercel or a `.env` file (see [`.env.example`](.env.example)) — `.env` is gitignored
+- Security headers (X-Frame-Options, nosniff, Referrer-Policy, etc.) are set in `vercel.json`
+
+> Never commit real secret values to the repo — env variables only.
+
+---
+
+## ⚖️ License & Usage
+
+- **Original site content** (code, design, self-authored text) is released under
   **[CC BY-NC-SA 4.0](https://creativecommons.org/licenses/by-nc-sa/4.0/)**
-- **ผลคะแนน รูปผู้สมัคร โลโก้พรรค และข้อมูลจากแหล่งภายนอก ไม่อยู่ภายใต้สัญญานี้** —
-  เป็นลิขสิทธิ์ของเจ้าของเดิม (PPTV HD36 และแหล่งที่มา) นำมาแสดงเพื่ออ้างอิง/ศึกษาเท่านั้น
-- ดูรายละเอียดและที่มาข้อมูลทั้งหมดได้ที่หน้า [`about.html`](about.html)
+- **Vote results, candidate photos, party logos, and third-party data are NOT covered by this license** —
+  they remain the property of their original owners (PPTV HD36 and sources), shown here for reference/education only
+- See full details and data sources on the [`about.html`](about.html) page
 
 ---
 
-## 🙏 เครดิต
+## 🙏 Credits
 
-- ผลนับคะแนน: **PPTV HD36**
-- ข้อมูลทางการ: สำนักงานคณะกรรมการการเลือกตั้ง (กกต.)
-- พัฒนาโดย [frong.me](https://frong.me)
+- Vote counting data: **PPTV HD36**
+- Official data: Election Commission of Thailand (ECT)
+- Developed by [frong.me](https://frong.me)

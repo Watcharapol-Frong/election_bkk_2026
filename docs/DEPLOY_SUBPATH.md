@@ -37,7 +37,7 @@ Browser → frong.me/* (อื่นๆ)            → Hostinger (เว็บ�
 ## Google Analytics
 เมื่ออยู่ใต้ `frong.me` แล้ว = โดเมนเดียวกับ frong.me → **ใช้ GA property/Measurement
 ID เดียวกับ frong.me ได้** (GA4 จะรายงาน page path เป็น `/election-bkk-2026/…`
-แยกดูได้ด้วย path) แทนค่า `G-XXXXXXXXXX` ใน `index.html` + `about.html`
+แยกดูได้ด้วย path) — ตั้งค่าไว้แล้วด้วย `G-EL7HS25NP4` ใน `index.html` + `about.html`
 
 ## ข้อควรรู้
 - ถ้าหน้า frong.me หลัก (Hostinger) มี Cloudflare cache แรง ให้ยกเว้น path

@@ -1,5 +1,7 @@
 # Bangkok Vote · เลือกตั้งผู้ว่าฯ กทม. 2569
 
+> **English version:** [`README.en.md`](README.en.md)
+
 เว็บไซต์อิสระสำหรับติดตามผลการเลือกตั้ง **ผู้ว่าราชการกรุงเทพมหานคร** และ
 **สมาชิกสภากรุงเทพมหานคร (ส.ก.)** ประจำปี 2569 (2026) — แสดงผลคะแนนแบบเรียลไทม์
 รายเขต ผู้สมัคร นโยบาย และวิธีลงคะแนน ในรูปแบบที่อ่านง่ายและรองรับสองภาษา (ไทย/English)
@@ -91,16 +93,16 @@ Cloudflare Worker reverse-proxy → ดู [`docs/DEPLOY_SUBPATH.md`](docs/DEPLO
 
 ## 📊 ตั้งค่า Google Analytics (GA4)
 
-ในไฟล์ `index.html` และ `about.html` มี snippet GA4 พร้อม placeholder
-**ต้องแก้ `G-XXXXXXXXXX` เป็น Measurement ID จริงก่อนใช้งานจริง**
+ในไฟล์ `index.html` และ `about.html` มี snippet GA4 ตั้งค่าไว้แล้วด้วย
+Measurement ID `G-EL7HS25NP4`
 
 ```html
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-EL7HS25NP4"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-  gtag('config', 'G-XXXXXXXXXX', { anonymize_ip: true });
+  gtag('config', 'G-EL7HS25NP4', { anonymize_ip: true });
 </script>
 ```
 
